@@ -94,6 +94,7 @@
     "faucet": "^0.0.3",
     "ispy": "^0.1.2",
     "karma": "6.4.1",
+    "karma-chrome-launcher": "^3.2.0",
     "karma-coverage": "2.2.0",
     "karma-firefox-launcher": "^2.1.2",
     "karma-rollup-preprocessor": "7.0.7",

@@ -147,6 +147,7 @@ test('can insert a changing array of nodes', t => {
   current = insert(container, [span3], marker, current);
   t.equal(container.innerHTML, '<span>3</span>');
 
+  // eslint-disable-next-line no-unused-vars
   current = insert(container, [div2], marker, current);
   t.equal(container.innerHTML, '<div>2</div>');
   t.end();

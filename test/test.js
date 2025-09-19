@@ -1,5 +1,6 @@
 import './_polyfills.js';
 import './h/add-node.js';
+import './h/attributes.js';
 import './h/hyperscript.js';
 import './h/svg.js';
 import './h/insert.js';

@@ -252,12 +252,14 @@ export const h = (...args) => {
       // Detect onMount
       if (arg && typeof arg.onMount === 'function') {
         onMountFn = arg.onMount;
+        // eslint-disable-next-line no-unused-vars
         const { onMount, ...rest } = arg;
         api.property(el, rest, null, api.s);
       }
       // Detect onUnmount
       if (arg && typeof arg.onUnmount === 'function') {
         onUnmountFn = arg.onUnmount;
+        // eslint-disable-next-line no-unused-vars
         const { onUnmount, ...rest } = arg;
         api.property(el, rest, null, api.s);
       }

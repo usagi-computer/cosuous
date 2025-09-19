@@ -11,7 +11,7 @@ var coverage = String(process.env.COVERAGE) === 'true';
 
 module.exports = function(config) {
   config.set({
-    browsers: ['FirefoxHeadless'],
+    browsers: ['ChromeHeadless'],
 
     // browserLogOptions: { terminal: true },
     // browserConsoleLogOptions: { terminal: true },
