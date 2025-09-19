@@ -108,13 +108,7 @@ export const insert = (el, value, endMark, current, startNode) => {
     current = value;
   } else if (typeof value === 'function') {
     api.subscribe(() => {
-      current = api.insert(
-        el,
-        value.call({ el, endMark }),
-        endMark,
-        current,
-        startNode
-      );
+      current = api.insert(el, value.call({ el, endMark }), endMark, current, startNode);
     });
   } else {
     // Block for nodes, fragments, Arrays, non-stringables and node -> stringable.
@@ -123,9 +117,7 @@ export const insert = (el, value, endMark, current, startNode) => {
       if (current) {
         if (!startNode) {
           // Support fragments
-          startNode =
-            (current._startMark && current._startMark.nextSibling) ||
-            endMark.previousSibling;
+          startNode = (current._startMark && current._startMark.nextSibling) || endMark.previousSibling;
         }
         api.rm(el, startNode, endMark);
       }
@@ -188,9 +180,11 @@ export const property = (el, value, name, isAttr, isCss) => {
   } else if (isCss) {
     el.style.setProperty(name, value);
   } else if (
+    // isAttr wont be true for 'for' but it needs to be an attribute
     isAttr ||
     name.slice(0, 5) === 'data-' ||
-    name.slice(0, 5) === 'aria-'
+    name.slice(0, 5) === 'aria-' ||
+    name === 'for'
   ) {
     el.setAttribute(name, value);
   } else if (name === 'style') {
@@ -230,6 +224,9 @@ export const removeNodes = (parent, startNode, endMark) => {
 
 export const h = (...args) => {
   let el;
+  let onMountFn = null;
+  let onUnmountFn = null;
+
   const item = (/** @type {*} */ arg) => {
     // @ts-ignore Allow empty if
     // eslint-disable-next-line eqeqeq
@@ -238,9 +235,7 @@ export const h = (...args) => {
       if (el) {
         api.add(el, arg);
       } else {
-        el = api.s
-          ? document.createElementNS('http://www.w3.org/2000/svg', arg)
-          : document.createElement(arg);
+        el = api.s ? document.createElementNS('http://www.w3.org/2000/svg', arg) : document.createElement(arg);
       }
     } else if (Array.isArray(arg)) {
       // Support Fragments
@@ -254,8 +249,22 @@ export const h = (...args) => {
         el = arg;
       }
     } else if (typeof arg === 'object') {
-      // @ts-ignore 0 | 1 is a boolean but can't type cast; they don't overlap
-      api.property(el, arg, null, api.s);
+      // Detect onMount
+      if (arg && typeof arg.onMount === 'function') {
+        onMountFn = arg.onMount;
+        const { onMount, ...rest } = arg;
+        api.property(el, rest, null, api.s);
+      }
+      // Detect onUnmount
+      if (arg && typeof arg.onUnmount === 'function') {
+        onUnmountFn = arg.onUnmount;
+        const { onUnmount, ...rest } = arg;
+        api.property(el, rest, null, api.s);
+      }
+      if (!('onMount' in arg) && !('onUnmount' in arg)) {
+        // @ts-ignore 0 | 1 is a boolean but can't type cast; they don't overlap
+        api.property(el, arg, null, api.s);
+      }
     } else if (typeof arg === 'function') {
       if (el) {
         // See note in add.js#frag() - This is a Text('') node
@@ -271,9 +280,43 @@ export const h = (...args) => {
     }
   };
   args.forEach(item);
+
+  // Call onMount if present
+  if (onMountFn && el && el instanceof Element) {
+    // Use requestAnimationFrame to ensure it's mounted
+    requestAnimationFrame(() => {
+      if (el.isConnected) onMountFn(el);
+    });
+  }
+
+  // Set up onUnmount if present
+  if (onUnmountFn && el && el instanceof Element) {
+    // detect removal and call onUnmount
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.removedNodes.forEach((node) => {
+          if (node === el) {
+            onUnmountFn(el);
+            observer.disconnect();
+          }
+        });
+      });
+    });
+    if (el.parentNode) {
+      observer.observe(el.parentNode, { childList: true });
+    } else {
+      // If not mounted yet, observe when it gets a parent
+      const parentCheck = setInterval(() => {
+        if (el.parentNode) {
+          observer.observe(el.parentNode, { childList: true });
+          clearInterval(parentCheck);
+        }
+      }, 20);
+    }
+  }
+
   return el;
 };
-
 
 api.h = h;
 api.insert = insert;
