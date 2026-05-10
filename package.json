@@ -83,6 +83,7 @@
   },
   "homepage": "https://github.com/luwes/sinuous#readme",
   "devDependencies": {
+    "@babel/core": "^7.25.0",
     "@rollup/plugin-alias": "^4.0.3",
     "@rollup/plugin-commonjs": "^24.0.1",
     "@rollup/plugin-node-resolve": "^15.0.1",

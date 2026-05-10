@@ -1,8 +1,14 @@
 import fs from 'fs';
 import path from 'path';
 import test from 'tape';
+import { fileURLToPath } from 'url';
+
 import { transform } from '@babel/core';
+
 import htmBabelPlugin from '../../src/babel-plugin-htm.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const options = {
   babelrc: false,
