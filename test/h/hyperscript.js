@@ -1,5 +1,5 @@
 import { test, expect, vi } from "vitest";
-import { signal as o, h, hs } from "cosuous";
+import { signal, h, hs } from "cosuous";
 
 test("simple", () => {
   expect(h("h1").outerHTML).toBe("<h1></h1>");
@@ -62,11 +62,11 @@ test("(un)registers an event handler", () => {
   btn.parentNode.removeChild(btn);
 });
 
-test("(un)registers an observable event handler", () => {
+test("(un)registers a signal event handler", () => {
   // don't try the focus event, valid tests fail in IE11
 
   let click = vi.fn();
-  let onclick = o(click);
+  let onclick = signal(click);
   let btn = h("button", { onclick }, "something");
   document.body.appendChild(btn);
 

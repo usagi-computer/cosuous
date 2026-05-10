@@ -17,7 +17,7 @@ import {
   startBatch,
   trigger,
   untracked,
-} from "./observable.js";
+} from "./signal.js";
 
 api.effect = effect;
 api.scope = effectScope;
@@ -27,10 +27,10 @@ api.isSignal = isSignal;
 api.isComputed = isComputed;
 
 api.hs = (...args) => {
-  const prevIsSvg = api.s;
-  api.s = true;
+  const prevIsSvg = api.isSvg;
+  api.isSvg = true;
   const el = h(...args);
-  api.s = prevIsSvg;
+  api.isSvg = prevIsSvg;
   return el;
 };
 

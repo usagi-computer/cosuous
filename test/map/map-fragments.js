@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { effectScope, signal } from "cosuous/observable";
+import { effectScope, signal } from "cosuous/signal";
 import { h } from "cosuous";
 import { map } from "cosuous/map";
 

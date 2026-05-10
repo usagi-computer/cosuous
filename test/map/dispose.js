@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { effectScope, signal } from "cosuous/observable";
+import { effectScope, signal } from "cosuous/signal";
 import { h } from "cosuous";
 import { map } from "cosuous/map";
 
@@ -122,7 +122,7 @@ test("swap forward -> disposes correct index", () => {
   expect(el.innerHTML).toBe(lis("22,33,44,55"));
 });
 
-test("removing one observable diposes correct index", () => {
+test("removing one signal disposes correct index", () => {
   let two = signal(2);
   let four = signal(4);
   let six = signal(6);
@@ -147,7 +147,7 @@ test("removing one observable diposes correct index", () => {
   expect(el.innerHTML).toBe(lis("1,2,3,66,7"));
 });
 
-test("explicit dispose works and disposes observables", () => {
+test("explicit dispose works and disposes signals", () => {
   let four = signal(4);
   const list = signal([1, 2, 3, four]);
   let el;
@@ -174,7 +174,7 @@ test("explicit dispose works and disposes observables", () => {
   expect(el.innerHTML).toBe(lis("1,2,44,3"));
 });
 
-test("emptying list disposes observables", () => {
+test("emptying list disposes signals", () => {
   let four = signal(4);
   const list = signal([1, 2, 3, four]);
 

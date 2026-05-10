@@ -1,4 +1,4 @@
-import { html, signal as observable } from "cosuous";
+import { html, signal } from "cosuous";
 import { _, d, dhtml, hydrate } from "cosuous/hydrate";
 import { expect, test, vi } from "vitest";
 
@@ -116,7 +116,7 @@ test("add insert into empty node feature", () => {
 test("hydrate conditional root element", () => {
   document.body.innerHTML = `<player-x></player-x>`;
 
-  const showing = observable(true);
+  const showing = signal(true);
 
   var player = hydrate(dhtml`
     ${() => (player = showing() ? dhtml`<player-x autoplay />` : "")}
@@ -137,7 +137,7 @@ test("hydrate conditional root element", () => {
 test("hydrate conditional root element w/ explicit selector", () => {
   document.body.innerHTML = `<player-x></player-x>`;
 
-  const showing = observable(true);
+  const showing = signal(true);
 
   var player = hydrate(
     dhtml`
@@ -161,7 +161,7 @@ test("hydrate conditional root element w/ explicit selector", () => {
 test("hydrate conditional root element w/ children bug", () => {
   document.body.innerHTML = `<player-x><div></div></player-x>`;
 
-  const showing = observable(true);
+  const showing = signal(true);
 
   var player = hydrate(dhtml`
     ${() =>
@@ -186,7 +186,7 @@ test("hydrate conditional root element w/ children bug", () => {
   expect(document.body.innerHTML).toBe("<player-x><div></div></player-x>");
 });
 
-test("hydrate w/ observables bug", () => {
+test("hydrate w/ signals bug", () => {
   document.body.innerHTML = `
     <div class="box level">
       <div class="level-item">
@@ -201,7 +201,7 @@ test("hydrate w/ observables bug", () => {
     </div>
   `;
 
-  const count = observable(0);
+  const count = signal(0);
   const down = vi.fn();
   down.mockImplementation(() => count(count() - 1));
   const up = vi.fn();
@@ -282,7 +282,7 @@ test("hydrate works with nested children and patches text", () => {
   div.parentNode.removeChild(div);
 });
 
-test("hydrate can add observables", () => {
+test("hydrate can add signals", () => {
   document.body.innerHTML = `
     <div>
       0
@@ -291,8 +291,8 @@ test("hydrate can add observables", () => {
     </div>
   `;
 
-  const count = observable(0);
-  const toggle = observable("off");
+  const count = signal(0);
+  const toggle = signal("off");
   const delta = d("div", [count, d("button", { class: "toggle" }, toggle), count]);
   const div = hydrate(delta, document.querySelector("div"));
   count(1);
@@ -307,7 +307,7 @@ test("hydrate can add observables", () => {
   div.parentNode.removeChild(div);
 });
 
-test("hydrate can add conditional observables in tags", () => {
+test("hydrate can add conditional signals in tags", () => {
   document.body.innerHTML = `
     <div class="hamburger">
       <span>Pickle</span>
@@ -317,7 +317,7 @@ test("hydrate can add conditional observables in tags", () => {
     </div>
   `;
 
-  const sauce = observable("");
+  const sauce = signal("");
   const delta = dhtml`
     <div class="hamburger">
       <span>Pickle</span>
@@ -394,7 +394,7 @@ test("hydrate can add a node from function", () => {
     </div>
   `;
 
-  const fruit = observable("Pear");
+  const fruit = signal("Pear");
   const delta = dhtml`
     <div>
       ${() => dhtml`<span>${fruit}</span>`}
@@ -424,8 +424,8 @@ test("hydrate can add a fragment from function", () => {
     </div>
   `;
 
-  const fruit = observable("Pear");
-  const veggie = observable("Tomato");
+  const fruit = signal("Pear");
+  const veggie = signal("Tomato");
   const delta = dhtml`
     <div>
       ${() => dhtml`
@@ -460,8 +460,8 @@ test("hydrates adjacent text nodes", () => {
     <div>Hi John Snow<span>!</span></div>
   `;
 
-  const greeting = observable("Hi");
-  const name = observable("John Snow");
+  const greeting = signal("Hi");
+  const name = signal("John Snow");
   const delta = dhtml`
     <div>${greeting} ${name}<span>!</span></div>
   `;
@@ -476,12 +476,12 @@ test("hydrates adjacent text nodes", () => {
   div.parentNode.removeChild(div);
 });
 
-test("hydrate can add conditional observables in content", () => {
+test("hydrate can add conditional signals in content", () => {
   document.body.innerHTML = `
     <div class="hamburger">Pickle Ketchup Cheese Ham</div>
   `;
 
-  const sauce = observable("");
+  const sauce = signal("");
   const delta = dhtml`
     <div class="hamburger">
       Pickle ${() => (sauce() === "mayo" ? "Mayo" : "Ketchup")} Cheese Ham
@@ -498,7 +498,7 @@ test("hydrate can add conditional observables in content", () => {
   div.parentNode.removeChild(div);
 });
 
-test("hydrate can add conditional observables in content w/ newlines", () => {
+test("hydrate can add conditional signals in content w/ newlines", () => {
   document.body.innerHTML = `
     <div class="hamburger">
       Pickle
@@ -508,7 +508,7 @@ test("hydrate can add conditional observables in content w/ newlines", () => {
     </div>
   `;
 
-  const sauce = observable("");
+  const sauce = signal("");
   const delta = dhtml`
     <div class="hamburger">
       Pickle
@@ -545,7 +545,7 @@ test("hydrate can create dom after hydration", () => {
     </button>
   `;
 
-  const avatar = observable("W");
+  const avatar = signal("W");
 
   const button = hydrate(
     dhtml`
@@ -575,7 +575,7 @@ test("hydrate components", () => {
     </div>
   `;
 
-  const name = observable("Wes");
+  const name = signal("Wes");
 
   const Name = (props) => {
     return dhtml`
@@ -606,7 +606,7 @@ test("hydrate root component", () => {
     </div>
   `;
 
-  const name = observable("Wes");
+  const name = signal("Wes");
 
   const Name = (props) => {
     return dhtml`

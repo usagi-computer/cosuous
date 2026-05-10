@@ -1,4 +1,4 @@
-import { Signal } from "./observable";
+import { Signal } from "./signal";
 
 type ElementChild =
   | Node

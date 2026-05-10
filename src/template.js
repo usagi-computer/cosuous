@@ -1,13 +1,13 @@
-import { api } from "./index.js";
+import { api } from './index.js';
 
 let recordedActions;
 
 /**
- * Observed template tag.
+ * Signal template tag.
  * @param  {string} key
  * @return {Function}
  */
-export function o(key) {
+export function s(key) {
   return t(key, true);
 }
 
@@ -55,7 +55,7 @@ export function t(key, observed, bind) {
 
   // Tiny indicator that this is a template tag.
   // Used in cosuous/h/src/property.js
-  tag.$o = 2;
+  tag.$s = 2;
 
   return tag;
 }

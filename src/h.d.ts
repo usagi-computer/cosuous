@@ -30,19 +30,19 @@ export interface HyperscriptApi {
   h: typeof _h.h;
 
   // Internal API
-  s: Boolean;
+  isSvg: Boolean;
   insert<T>(el: Node, value: T, endMark?: Node, current?: T | Frag, startNode?: Node): T | Frag;
   property(el: Node, value: unknown, name: string, isAttr?: boolean, isCss?: boolean): void;
   add(parent: Node, value: Value | Value[], endMark?: Node): Node | Frag;
   rm(parent: Node, startNode: Node, endMark: Node): void;
 
-  // Reactive primitives (provided by index.js wiring observable.js)
+  // Reactive primitives (provided by index.js wiring signal.js)
   effect(fn: () => void): () => void;
   scope(fn: () => void): () => void;
   untracked<T>(fn: () => T): T;
   onCleanup<T extends () => unknown>(fn: T): T;
-  isSignal(fn: () => void): boolean;
-  isComputed(fn: () => void): boolean;
+  isSignal(value: unknown): boolean;
+  isComputed(value: unknown): boolean;
 }
 
 export const api: HyperscriptApi;

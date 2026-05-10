@@ -1,5 +1,5 @@
 export function t(key: string): () => string;
-export function o(key: string): () => string;
+export function s(key: string): () => string;
 
 interface CloneFunction {
   (props: Record<string, any>): Node;

@@ -5,11 +5,11 @@ Cosuous Hydrate is a small add-on for Cosuous that provides fast hydration of st
 # Example
 
 ```js
-import { observable } from "cosuous";
+import { signal } from "cosuous";
 import { hydrate, d } from "cosuous/hydrate";
 import { openLogin } from "./auth.js";
 
-const isActive = observable("");
+const isActive = signal("");
 
 hydrate(
   dhtml`

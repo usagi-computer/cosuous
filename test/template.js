@@ -1,11 +1,11 @@
 import { test, expect, vi } from "vitest";
 import { h, html } from "cosuous";
-import { template, o, t } from "cosuous/template";
+import { template, s, t } from "cosuous/template";
 import { map } from "cosuous/map";
 import { normalizeAttributes } from "./_utils.js";
 
 test("tags return functions", () => {
-  expect(typeof o() === "function").toBeTruthy();
+  expect(typeof s() === "function").toBeTruthy();
   expect(typeof t() === "function").toBeTruthy();
 });
 
@@ -26,7 +26,7 @@ test("template result fills tags", () => {
 test("template works w/ event listeners", () => {
   const buttonClick = vi.fn();
   const obj = { buttonClick };
-  const btn = template(() => h("button", { onclick: o("buttonClick") }, "Click me"))(
+  const btn = template(() => h("button", { onclick: s("buttonClick") }, "Click me"))(
     obj,
   ).firstChild;
 
@@ -40,10 +40,10 @@ test("template works w/ event listeners", () => {
   expect(buttonClick.mock.calls.length).toBe(1);
 });
 
-test("template result fills observable tags", () => {
+test("template result fills signal tags", () => {
   const obj = { title: "Apple", class: "juice" };
   const tmpl = template(() =>
-    h("h1", h("span", { class: o("class") }, "Pear"), h("span", o("title"))),
+    h("h1", h("span", { class: s("class") }, "Pear"), h("span", s("title"))),
   )(obj);
 
   expect(tmpl.firstChild.children[0].outerHTML).toBe('<span class="juice">Pear</span>');
@@ -63,9 +63,9 @@ test("template result fills tags w/ same value", () => {
   expect(title({ title: "Test" }).firstChild.outerHTML).toBe("<h1>Test</h1>");
 });
 
-test("template result fills multiple observable tags w/ same key", () => {
+test("template result fills multiple signal tags w/ same key", () => {
   const title = template(() =>
-    h("h1", { class: o("title") }, h("b", o("title")), h("i", o("title"))),
+    h("h1", { class: s("title") }, h("b", s("title")), h("i", s("title"))),
   );
   const obj = {
     title: "",
@@ -80,9 +80,9 @@ test("template result fills multiple observable tags w/ same key", () => {
 test("template works with map", () => {
   const Row = template(
     () => html`
-      <tr class=${o("selected")}>
+      <tr class=${s("selected")}>
         <td class="col-md-1">${t("id")}</td>
-        <td class="col-md-4"><a>${o("label")}</a></td>
+        <td class="col-md-4"><a>${s("label")}</a></td>
         <td class="col-md-1">
           <a>
             <span class="glyphicon glyphicon-remove remove" aria-hidden="true" />

@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { signal as o, h, html } from "cosuous";
+import { signal, h, html } from "cosuous";
 import { insert } from "../../src/h.js";
 
 const insertValue = (val) => {
@@ -12,11 +12,11 @@ const insertValue = (val) => {
 // <div>before<!-- insert -->after</div>
 const container = document.createElement("div");
 
-test("inserts observable into simple text", () => {
+test("inserts signal into simple text", () => {
   let scratch = h("div");
   h(document.body, scratch);
 
-  const counter = o(0);
+  const counter = signal(0);
   scratch.appendChild(html`Here's a list of items: Count: ${counter}`);
   expect(scratch.innerHTML).toBe(`Here's a list of items: Count: 0`);
 
@@ -25,7 +25,7 @@ test("inserts observable into simple text", () => {
 });
 
 test("inserts fragments", () => {
-  const frag = o(html`
+  const frag = signal(html`
     <h1>Hello world</h1>
     <p>Bye bye</p>
   `);
@@ -53,7 +53,7 @@ test("inserts fragments", () => {
 });
 
 test("inserts long fragments", () => {
-  const frag = o(html`
+  const frag = signal(html`
     <h1>Hello world</h1>
     <p>Bye bye</p>
     <p>Hello again</p>
@@ -238,12 +238,12 @@ test("can update content with text with marker", () => {
   expect(parent.innerHTML).toBe("⛄️");
 });
 
-test("can update content with text and observable with marker", () => {
+test("can update content with text and signal with marker", () => {
   const parent = container.cloneNode(true);
   const marker = parent.appendChild(document.createTextNode(""));
 
-  const reactive = o("reactive");
-  const dynamic = o(99);
+  const reactive = signal("reactive");
+  const dynamic = signal(99);
 
   insert(parent, h("h1", reactive, "⛄️", dynamic), marker);
   expect(parent.innerHTML).toBe("<h1>reactive⛄️99</h1>");

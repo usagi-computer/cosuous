@@ -14,12 +14,12 @@ A light, fast, reactive UI library. A fork of [Sinuous](https://github.com/luwes
 
 ### Add-ons
 
-| Size | Name                                        | Description                             |
-| ---- | ------------------------------------------- | --------------------------------------- |
-| -    | [`cosuous/observable`](./src/observable.md) | Tiny observable _(included by default)_ |
-| -    | [`cosuous/map`](./src/map.js)               | Fast list renderer                      |
-| -    | [`cosuous/hydrate`](./src/hydrate.md)       | Hydrate static HTML                     |
-| -    | [`cosuous/template`](./src/template.md)     | Pre-rendered Template                   |
+| Size | Name                                    | Description                         |
+| ---- | --------------------------------------- | ----------------------------------- |
+| -    | [`cosuous/signal`](./src/signal.md)     | Signals _(included by default)_     |
+| -    | [`cosuous/map`](./src/map.js)           | Fast list renderer                  |
+| -    | [`cosuous/hydrate`](./src/hydrate.md)   | Hydrate static HTML                 |
+| -    | [`cosuous/template`](./src/template.md) | Pre-rendered Template               |
 
 ### Community
 
@@ -64,9 +64,9 @@ at build time with [`cosuous/babel-plugin-htm`](./src/babel-plugin-htm.js).
 #### Tagged template (recommended)
 
 ```js
-import { observable, html } from "cosuous";
+import { signal, html } from "cosuous";
 
-const counter = observable(0);
+const counter = signal(0);
 const view = () => html` <div>Counter ${counter}</div> `;
 
 document.body.append(view());
@@ -76,9 +76,9 @@ setInterval(() => counter(counter() + 1), 1000);
 #### JSX
 
 ```jsx
-import { h, observable } from "cosuous";
+import { h, signal } from "cosuous";
 
-const counter = observable(0);
+const counter = signal(0);
 const view = () => <div>Counter {counter}</div>;
 
 document.body.append(view());
@@ -88,9 +88,9 @@ setInterval(() => counter(counter() + 1), 1000);
 #### Hyperscript
 
 ```js
-import { h, observable } from "cosuous";
+import { h, signal } from "cosuous";
 
-const counter = observable(0);
+const counter = signal(0);
 const view = () => h("div", "Counter ", counter);
 
 document.body.append(view());
@@ -99,24 +99,23 @@ setInterval(() => counter(counter() + 1), 1000);
 
 ## Reactivity
 
-The Cosuous [`observable`](./src/observable.md) module provides a mechanism to store and update the application state in a reactive way. If you're familiar with [S.js](https://github.com/adamhaile/S) or [Mobx](https://mobx.js.org) some functions will look very familiar, in under `1kB` Cosuous observable is not as extensive but offers a distilled version of the same functionality. It works under this philosophy:
+The Cosuous [`signal`](./src/signal.md) module provides a mechanism to store and update the application state in a reactive way. It is backed by [alien-signals](https://github.com/stackblitz/alien-signals).
 
 _Anything that can be derived from the application state, should be derived. Automatically._
 
 ```js
-import { observable, computed, subscribe } from "cosuous/observable";
+import { signal, computed, effect } from "cosuous/signal";
 
-const length = observable(0);
+const length = signal(0);
 const squared = computed(() => Math.pow(length(), 2));
 
-subscribe(() => console.log(squared()));
+effect(() => console.log(squared()));
 length(4); // => logs 16
 ```
 
 #### Use a custom reactive library
 
-Cosuous can work with different observable libraries; S.js, MobX, hyperactiv.
-See the upstream [Sinuous wiki](https://github.com/luwes/sinuous/wiki/Choose-your-own-reactive-library) for more info.
+Cosuous can work with different signal/reactive libraries; S.js, MobX, hyperactiv. To swap in a different library, override the reactive primitives on the internal `api`: `effect`, `scope`, `untracked`, `onCleanup`, `isSignal`, and `isComputed`. See the upstream [Sinuous wiki](https://github.com/luwes/sinuous/wiki/Choose-your-own-reactive-library) for more info.
 
 ## Hydration
 
@@ -127,10 +126,10 @@ In terms of performance nothing beats statically generated HTML, both in serving
 You could say using hydrate is a bit like using [jQuery](https://jquery.com/), you'll definitely write less JavaScript and do more. Additional benefits with Cosuous is that the syntax will be more _declarative_ and _reactivity_ is built-in.
 
 ```js
-import { observable } from "cosuous";
+import { signal } from "cosuous";
 import { hydrate, dhtml } from "cosuous/hydrate";
 
-const isActive = observable("");
+const isActive = signal("");
 
 hydrate(
   dhtml`<a class="navbar-burger burger${isActive}"
@@ -144,8 +143,6 @@ hydrate(dhtml`<a class="navbar-menu${isActive}" />`);
 
 Cosuous exposes an internal API which can be overridden for fun and profit.
 For example [sinuous-context](https://github.com/theSherwood/sinuous-context) uses it to implement a React like context API.
-
-As of `0.27.4` (Sinuous) the internal API should be used to make Cosuous work with a 3rd party reactive library like [Mobx](https://mobx.js.org). This can be done by overriding `subscribe`, `root`, `sample` and `cleanup`.
 
 ### Example
 
@@ -163,18 +160,20 @@ api.h = (...args) => {
 
 These are defined in [cosuous/src](./src/index.js) and [cosuous/h](./src/h.js).
 
-- `h(type: string, props: object, ...children)`
-- `hs(type: string, props: object, ...children)`
-- `insert<T>(el: Node, value: T, endMark?: Node, current?: T | Frag, startNode?: Node): T | Frag;`
-- `property(el: Node, value: unknown, name: string, isAttr?: boolean, isCss?: boolean): void;`
-- `add(parent: Node, value: Value | Value[], endMark?: Node): Node | Frag;`
-- `rm(parent: Node, startNode: Node, endMark: Node): void;`
-- `subscribe<T>(observer: () => T): () => void;`
-- `root<T>(fn: () => T): T;`
-- `sample<T>(fn: () => T): T;`
-- `cleanup<T extends () => unknown>(fn: T): T;`
+- `h(type: string, props: object | null, ...children: ElementChildren[]): HTMLElement | SVGElement`
+- `hs(type: string, props: object | null, ...children: ElementChildren[]): SVGElement`
+- `insert<T>(el: Node, value: T, endMark?: Node, current?: T | Frag, startNode?: Node): T | Frag`
+- `property(el: Node, value: unknown, name: string, isAttr?: boolean, isCss?: boolean): void`
+- `add(parent: Node, value: Value | Value[], endMark?: Node): Node | Frag`
+- `rm(parent: Node, startNode: Node, endMark: Node): void`
+- `effect(fn: () => void): () => void`
+- `scope(fn: () => void): () => void`
+- `untracked<T>(fn: () => T): T`
+- `onCleanup<T extends () => unknown>(fn: T): T`
+- `isSignal(value: unknown): boolean`
+- `isComputed(value: unknown): boolean`
 
-Note that _some_ observable methods are imported into the internal API from the bundled observable module because they're used in Cosuous' core. To access all observable methods, import from `cosuous/observable` directly.
+Note that _some_ signal methods are imported into the internal API from the bundled signal module because they're used in Cosuous' core. To access all signal methods, import from `cosuous/signal` directly.
 
 ## Concept
 

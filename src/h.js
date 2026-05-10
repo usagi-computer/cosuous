@@ -7,7 +7,7 @@
  * @typedef {boolean} hSVG Determines if `h` will build HTML or SVG elements
  * @type {{
  *   h:         hTag,
- *   s:         hSVG,
+ *   isSvg:     hSVG,
  *   insert:    hInsert,
  *   property:  hProperty,
  *   add:       hAdd,
@@ -171,7 +171,7 @@ export const property = (el, value, name, isAttr, isCss) => {
     name[1] === "n" &&
     !api.isSignal(value) &&
     !api.isComputed(value) &&
-    !value.$o
+    !value.$s
   ) {
     // Functions added as event handlers are not executed on render unless
     // they are reactive (signal/computed) or carry a template-tag marker.
@@ -238,7 +238,7 @@ export const h = (...args) => {
       if (el) {
         api.add(el, arg);
       } else {
-        el = api.s
+        el = api.isSvg
           ? document.createElementNS("http://www.w3.org/2000/svg", arg)
           : document.createElement(arg);
       }
@@ -259,18 +259,18 @@ export const h = (...args) => {
         onMountFn = arg.onMount;
         // eslint-disable-next-line no-unused-vars
         const { onMount, ...rest } = arg;
-        api.property(el, rest, null, api.s);
+        api.property(el, rest, null, api.isSvg);
       }
       // Detect onUnmount
       if (arg && typeof arg.onUnmount === "function") {
         onUnmountFn = arg.onUnmount;
         // eslint-disable-next-line no-unused-vars
         const { onUnmount, ...rest } = arg;
-        api.property(el, rest, null, api.s);
+        api.property(el, rest, null, api.isSvg);
       }
       if (!("onMount" in arg) && !("onUnmount" in arg)) {
         // @ts-ignore 0 | 1 is a boolean but can't type cast; they don't overlap
-        api.property(el, arg, null, api.s);
+        api.property(el, arg, null, api.isSvg);
       }
     } else if (typeof arg === "function") {
       if (el) {

@@ -1,12 +1,12 @@
 import { test, expect } from "vitest";
-import { signal as o, h, html } from "cosuous";
+import { signal, h, html } from "cosuous";
 import { insert } from "../../src/h.js";
 
 test("empty fragment clear bug", () => {
   let scratch = h("div");
   h(document.body, scratch);
 
-  const value = o(99);
+  const value = signal(99);
   const props = { val: value };
   const comp = ({ val }) => html`
     <h1>Hello world</h1>
@@ -18,7 +18,7 @@ test("empty fragment clear bug", () => {
     <p>Hello hello ${val}</p>
   `;
 
-  let active = o(comp);
+  let active = signal(comp);
   const res = html`
     <h3>Dynamic Components</h3>
     <hr />
@@ -51,7 +51,7 @@ test("insert 9", () => {
   let scratch = h("div");
   h(document.body, scratch);
 
-  let active = o(1);
+  let active = signal(1);
 
   const Comp = (title) => html`<div>
     9

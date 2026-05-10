@@ -4,7 +4,7 @@ export as namespace cosuous;
 import { JSXInternal } from "./jsx";
 import { HyperscriptApi } from "./h";
 import * as _shared from "./shared";
-import * as _o from "./observable";
+import * as _s from "./signal";
 
 import FunctionComponent = _shared.FunctionComponent;
 import ElementChildren = _shared.ElementChildren;
@@ -22,17 +22,17 @@ declare module "cosuous/jsx" {
 declare namespace cosuous {
   export import JSX = JSXInternal;
 
-  export import signal = _o.signal;
-  export import computed = _o.computed;
-  export import effect = _o.effect;
-  export import effectScope = _o.effectScope;
-  export import untracked = _o.untracked;
-  export import onCleanup = _o.onCleanup;
-  export import startBatch = _o.startBatch;
-  export import endBatch = _o.endBatch;
-  export import trigger = _o.trigger;
-  export import isSignal = _o.isSignal;
-  export import isComputed = _o.isComputed;
+  export import signal = _s.signal;
+  export import computed = _s.computed;
+  export import effect = _s.effect;
+  export import effectScope = _s.effectScope;
+  export import untracked = _s.untracked;
+  export import onCleanup = _s.onCleanup;
+  export import startBatch = _s.startBatch;
+  export import endBatch = _s.endBatch;
+  export import trigger = _s.trigger;
+  export import isSignal = _s.isSignal;
+  export import isComputed = _s.isComputed;
 
   const html: (
     strings: TemplateStringsArray,

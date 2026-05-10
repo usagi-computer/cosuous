@@ -37,8 +37,8 @@
     "./map": {
       "import": "./src/map.js"
     },
-    "./observable": {
-      "import": "./src/observable.js"
+    "./signal": {
+      "import": "./src/signal.js"
     },
     "./template": {
       "import": "./src/template.js"

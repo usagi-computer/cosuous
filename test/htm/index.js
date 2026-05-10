@@ -104,15 +104,15 @@ test("prop with multiple static and dynamic values get concatenated as strings",
   expect(html`<a href=/before/${"foo"}/>`).toEqual({ tag: "a", props: { href: "/before/foo" }, children: [] });
 });
 
-test("prop with multiple static and observables", () => {
-  const observableMock = () => "foo";
+test("prop with multiple static and signals", () => {
+  const signalMock = () => "foo";
 
-  expect(html`<a href="before${observableMock}after" />`.props.href()).toBe("beforefooafter");
-  expect(html`<a href="${observableMock}after" />`.props.href()).toBe("fooafter");
+  expect(html`<a href="before${signalMock}after" />`.props.href()).toBe("beforefooafter");
+  expect(html`<a href="${signalMock}after" />`.props.href()).toBe("fooafter");
   expect(html`<a href="${function () { return "foo"; }}${1}" />`.props.href()).toBe("foo1");
-  expect(html`<a href="${1}between${observableMock}" />`.props.href()).toBe("1betweenfoo");
+  expect(html`<a href="${1}between${signalMock}" />`.props.href()).toBe("1betweenfoo");
   expect(html`<a href=/before/${() => "foo"}/after />`.props.href()).toBe("/before/foo/after");
-  expect(html`<a href=/before/${observableMock}/>`.props.href()).toBe("/before/foo");
+  expect(html`<a href=/before/${signalMock}/>`.props.href()).toBe("/before/foo");
 });
 
 test("spread props", () => {

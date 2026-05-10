@@ -20,7 +20,6 @@ module
 /bench/yarn.lock
 /bench/trace.json
 
-/src/observable/test/perf/perf.txt
 .idea
 
 # Local Netlify folder

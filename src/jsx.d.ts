@@ -1,8 +1,9 @@
-import { Observable } from "./observable";
+import { Signal } from "./signal";
 
 export namespace JSXInternal {
-  type OrObservable<T> = T | Observable<T>;
-  type AllowObservable<Props> = { [K in keyof Props]: OrObservable<Props[K]> };
+  type OrSignal<T> = T | Signal<T>;
+  type AllowSignal<Props> = { [K in keyof Props]: OrSignal<Props[K]> };
+
 
   type Element = HTMLElement | SVGElement | Node;
 
@@ -14,7 +15,7 @@ export namespace JSXInternal {
     children: any;
   }
 
-  type SVGAttributes<Target extends EventTarget = SVGElement> = AllowObservable<
+  type SVGAttributes<Target extends EventTarget = SVGElement> = AllowSignal<
     _SVGAttributes<Target>
   >;
 
@@ -523,7 +524,7 @@ export namespace JSXInternal {
     onTransitionEndCapture?: TransitionEventHandler<Target>;
   }
 
-  type HTMLAttributes<RefType extends EventTarget = EventTarget> = AllowObservable<
+  type HTMLAttributes<RefType extends EventTarget = EventTarget> = AllowSignal<
     _HTMLAttributes<RefType>
   >;
 
@@ -654,7 +655,7 @@ export namespace JSXInternal {
     srcSet?: string;
     start?: number;
     step?: number | string;
-    style?: string | { [key: string]: OrObservable<string | number> };
+    style?: string | { [key: string]: OrSignal<string | number> };
     summary?: string;
     tabIndex?: number;
     target?: string;

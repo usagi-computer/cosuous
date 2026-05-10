@@ -1,4 +1,4 @@
-import { Signal } from "./observable";
+import { Signal } from "./signal";
 
 export function map<T>(
   items: ((...args: unknown[]) => T[]) | Signal<T[]>,

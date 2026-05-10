@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { dhtml, hydrate } from "cosuous/hydrate";
-import { signal as observable } from "cosuous";
+import { signal } from "cosuous";
 
 test("hydrate selects root node via id selector", () => {
   document.body.innerHTML = `
@@ -61,7 +61,7 @@ test("hydrate selects root node via partial class selector", () => {
     </div>
   `;
 
-  const isActive = observable("");
+  const isActive = signal("");
   const div = hydrate(dhtml`
     <div class="root pure${isActive}">
       <button

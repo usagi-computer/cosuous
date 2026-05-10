@@ -10,7 +10,7 @@ const src = (file) => path.resolve(__dirname, "src", file);
 const cosuousAlias = [
   { find: "cosuous/h", replacement: src("h.js") },
   { find: "cosuous/htm", replacement: src("htm.js") },
-  { find: "cosuous/observable", replacement: src("observable.js") },
+  { find: "cosuous/signal", replacement: src("signal.js") },
   { find: "cosuous/template", replacement: src("template.js") },
   { find: "cosuous/hydrate", replacement: src("hydrate.js") },
   { find: "cosuous/map", replacement: src("map.js") },

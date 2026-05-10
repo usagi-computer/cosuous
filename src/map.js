@@ -9,7 +9,7 @@ export const BACKWARD = "previousSibling";
 /**
  * Map over a list of items that create DOM nodes.
  *
- * @param  {Function} items - Function or observable that creates a list.
+ * @param  {Function} items - Function or signal that creates a list.
  * @param  {Function} expr
  * @param {boolean} [cleaning]
  * @return {DocumentFragment}

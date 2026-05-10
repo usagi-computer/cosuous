@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
-import { signal as o, html } from "cosuous";
-import { effect as subscribe } from "cosuous/observable";
+import { signal, html } from "cosuous";
+import { effect } from "cosuous/signal";
 import { map } from "cosuous/map";
 import { fragInnerHTML } from "./_utils.js";
 
@@ -30,8 +30,8 @@ test("returns a document fragment", () => {
   expect(frag.childNodes[1].outerHTML).toBe("<div>Apple</div>");
 });
 
-test("returns a simple observable string", () => {
-  const title = o("Banana");
+test("returns a simple signal string", () => {
+  const title = signal("Banana");
   const frag = html`${title}`;
   expect(frag instanceof DocumentFragment).toBeTruthy();
   expect(frag.childNodes[0] instanceof Text).toBeTruthy();
@@ -60,17 +60,17 @@ test("component children order", () => {
 });
 
 test("conditional lists without root", () => {
-  const choice = o(1);
-  const filler = o(0);
+  const choice = signal(1);
+  const filler = signal(0);
 
   const Spinner = () => html`<div class="spinner" />`;
 
   const Story = (index) => {
     const n1 = `a${index}`;
     const n2 = `b${index}`;
-    const list = o();
+    const list = signal();
 
-    subscribe(() => {
+    effect(() => {
       if (filler() === index) list([n1, n2]);
     });
 
@@ -114,14 +114,14 @@ test("conditional lists without root", () => {
 });
 
 test("nested fragments without root", () => {
-  const choice = o(0);
-  const show = o(true);
-  const show2 = o(true);
+  const choice = signal(0);
+  const show = signal(true);
+  const show2 = signal(true);
 
   const Story = (index) => {
     const n1 = `a${index}`;
     const n2 = `b${index}`;
-    const list = o([n1, n2]);
+    const list = signal([n1, n2]);
     return html`${() => (show() ? map(list, (item) => html`<i>${item}</i>`) : "")}`;
   };
 

@@ -19,6 +19,6 @@ export function startBatch(): void;
 export function endBatch(): void;
 export function trigger(fn: () => void): void;
 
-export function isSignal(fn: () => void): boolean;
-export function isComputed(fn: () => void): boolean;
+export function isSignal(value: unknown): boolean;
+export function isComputed(value: unknown): boolean;
 export function setActiveSub(sub?: unknown): unknown;

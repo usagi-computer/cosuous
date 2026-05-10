@@ -10,7 +10,7 @@ import {
   signal,
   startBatch,
   untracked,
-} from "cosuous/observable";
+} from "cosuous/signal";
 
 test("signal initial value", () => {
   const s = signal("Groovy!");
