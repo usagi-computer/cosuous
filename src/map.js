@@ -97,17 +97,17 @@ export function reconcile(a, b, beforeNode, afterNode, createFn, onClear, onRemo
   // When parent was a DocumentFragment, then items got appended to the DOM.
   const parent = afterNode.parentNode;
 
-  let length = b.length;
+  let bLen = b.length;
   let i;
 
-  if (length === 0) {
+  if (bLen === 0) {
     clearList(parent, beforeNode, afterNode, onClear);
     return [];
   }
 
   // Fast path for create
   if (a.length === 0) {
-    for (i = 0; i < length; i++) {
+    for (i = 0; i < bLen; i++) {
       createFn(parent, b[i], i, b, afterNode);
     }
     return b.slice();
@@ -116,30 +116,26 @@ export function reconcile(a, b, beforeNode, afterNode, createFn, onClear, onRemo
   let aStart = 0;
   let bStart = 0;
   let aEnd = a.length - 1;
-  let bEnd = length - 1;
+  let bEnd = bLen - 1;
   let tmp;
   let aStartNode = beforeNode.nextSibling;
   let aEndNode = afterNode.previousSibling;
   let bAfterNode = afterNode;
   let mark;
 
-  fixes: while (true) {
-    // Skip prefix
-    while (a[aStart] === b[bStart]) {
-      bStart++;
-      aStartNode = step(aStartNode, FORWARD);
-      if (aEnd < ++aStart || bEnd < bStart) break fixes;
-    }
+  // Skip prefix
+  while (aStart <= aEnd && bStart <= bEnd && a[aStart] === b[bStart]) {
+    aStartNode = step(aStartNode, FORWARD);
+    aStart++;
+    bStart++;
+  }
 
-    // Skip suffix
-    while (a[aEnd] === b[bEnd]) {
-      bEnd--;
-      bAfterNode = step(aEndNode, BACKWARD, true);
-      aEndNode = bAfterNode.previousSibling;
-      if (--aEnd < aStart || bEnd < bStart) break fixes;
-    }
-
-    break;
+  // Skip suffix
+  while (aStart <= aEnd && bStart <= bEnd && a[aEnd] === b[bEnd]) {
+    bAfterNode = step(aEndNode, BACKWARD, true);
+    aEndNode = bAfterNode.previousSibling;
+    aEnd--;
+    bEnd--;
   }
 
   // Fast path for shrink
@@ -171,24 +167,23 @@ export function reconcile(a, b, beforeNode, afterNode, createFn, onClear, onRemo
     I.set(b[i], i);
   }
 
-  // Re-using `length` variable for reusing nodes count.
-  length = 0;
+  let reuseCount = 0;
   let toRemove = [];
   for (i = aStart; i <= aEnd; i++) {
-    tmp = I.get(a[i]);
     // I maps b's items to their indices; when a reused item lands at index 0
-    // (the typical case after no prefix matches), `tmp` is 0 which is falsy.
-    // Compare to undefined explicitly so the index-0 case is treated as a hit.
-    if (tmp === undefined) {
+    // (the typical case after no prefix matches), the lookup returns 0 which
+    // is falsy. Compare to undefined so the index-0 case is treated as a hit.
+    const bIdx = I.get(a[i]);
+    if (bIdx === undefined) {
       toRemove.push(i);
     } else {
-      P[tmp] = i;
-      length++;
+      P[bIdx] = i;
+      reuseCount++;
     }
   }
 
   // Fast path for full replace
-  if (length === 0) {
+  if (reuseCount === 0) {
     return reconcile(
       reconcile(a, [], beforeNode, afterNode, createFn, onClear),
       b,
@@ -214,13 +209,12 @@ export function reconcile(a, b, beforeNode, afterNode, createFn, onClear, onRemo
   }
 
   const longestSeq = longestPositiveIncreasingSubsequence(P, bStart);
-  // Re-use `length` for longest sequence length.
-  length = longestSeq.length - 1;
+  let seqIdx = longestSeq.length - 1;
 
   for (i = bEnd; i >= bStart; i--) {
-    if (longestSeq[length] === i) {
-      bAfterNode = nodes[P[longestSeq[length]]];
-      length--;
+    if (longestSeq[seqIdx] === i) {
+      bAfterNode = nodes[P[longestSeq[seqIdx]]];
+      seqIdx--;
     } else {
       if (P[i] === -1) {
         tmp = createFn(parent, b[i], i, b, bAfterNode);
