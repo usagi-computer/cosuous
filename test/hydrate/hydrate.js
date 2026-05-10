@@ -1,6 +1,6 @@
-import { test, expect, vi } from "vitest";
-import { d, dhtml, hydrate, _ } from "cosuous/hydrate";
-import { observable, html } from "cosuous";
+import { html, observable } from "cosuous";
+import { _, d, dhtml, hydrate } from "cosuous/hydrate";
+import { expect, test, vi } from "vitest";
 
 test("hydrate component w/ children", () => {
   document.body.innerHTML = `
@@ -45,7 +45,7 @@ test("hydrate component w/ children", () => {
 
 test("hydrates div with children", () => {
   const delta = dhtml`<div>${[dhtml`<b />`]}</div>`;
-  delete delta._children[0]._parent; // eslint-disable-line
+  delete delta._children[0]._parent;
 
   expect(delta).toEqual({ type: "div", _children: [{ type: "b", _children: [] }] });
 });

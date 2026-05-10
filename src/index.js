@@ -3,17 +3,9 @@
  * Really ties all the packages together.
  */
 
-import { api } from './h.js';
-import htm from './htm.js';
-import {
-  cleanup,
-  computed,
-  o,
-  observable,
-  root,
-  sample,
-  subscribe,
-} from './observable.js';
+import { api } from "./h.js";
+import htm from "./htm.js";
+import { cleanup, computed, o, observable, root, sample, subscribe } from "./observable.js";
 
 // Minified this is actually smaller than Object.assign(api, { ... })
 api.subscribe = subscribe;
