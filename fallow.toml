@@ -1,0 +1,3 @@
+[duplicates]
+ignoreDefaults = true
+ignore = ["test/**"]

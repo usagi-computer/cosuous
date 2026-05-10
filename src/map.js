@@ -69,6 +69,21 @@ export function map(items, expr, cleaning) {
   return parent;
 }
 
+// Wipe out the list when b is empty. Reuses parent.textContent for speed when
+// no other content surrounds the markers.
+function clearList(parent, beforeNode, afterNode, onClear) {
+  const startMark = beforeNode.previousSibling;
+  if ((startMark && startMark.previousSibling) || afterNode.nextSibling) {
+    removeNodes(parent, beforeNode.nextSibling, afterNode);
+  } else {
+    parent.textContent = "";
+    startMark && parent.appendChild(startMark);
+    parent.appendChild(beforeNode);
+    parent.appendChild(afterNode);
+  }
+  onClear && onClear();
+}
+
 // This is almost straightforward implementation of reconcillation algorithm
 // based on ivi documentation:
 // https://github.com/localvoid/ivi/blob/2c81ead934b9128e092cc2a5ef2d3cabc73cb5dd/packages/ivi/src/vdom/implementation.ts#L1366
@@ -84,21 +99,8 @@ export function reconcile(a, b, beforeNode, afterNode, createFn, onClear, onRemo
   let length = b.length;
   let i;
 
-  // Fast path for clear
   if (length === 0) {
-    let startMark = beforeNode.previousSibling;
-    if ((startMark && startMark.previousSibling) || afterNode.nextSibling) {
-      removeNodes(parent, beforeNode.nextSibling, afterNode);
-    } else {
-      parent.textContent = "";
-      if (startMark) {
-        parent.appendChild(startMark);
-      }
-      parent.appendChild(beforeNode);
-      parent.appendChild(afterNode);
-    }
-
-    onClear && onClear();
+    clearList(parent, beforeNode, afterNode, onClear);
     return [];
   }
 

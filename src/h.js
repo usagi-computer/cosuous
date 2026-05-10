@@ -67,6 +67,35 @@ export const add = (parent, value, endMark) => {
   return fragOrNode;
 };
 
+const insertString = (el, value, endMark, current) => {
+  if (current == null || !el.firstChild) {
+    // Using textContent is a lot faster than append -> createTextNode.
+    if (endMark) api.add(el, value, endMark);
+    else el.textContent = /** @type {string} */ (value);
+  } else if (endMark) {
+    (endMark.previousSibling || el.lastChild).data = value;
+  } else {
+    el.firstChild.data = value;
+  }
+};
+
+const insertNode = (el, value, endMark, current, startNode) => {
+  if (endMark) {
+    // `current` can't be `0`, it's coerced to a string in insert.
+    if (current) {
+      // Support fragments; startNode may have shifted before clearing.
+      if (!startNode) {
+        startNode =
+          (current._startMark && current._startMark.nextSibling) || endMark.previousSibling;
+      }
+      api.rm(el, startNode, endMark);
+    }
+  } else {
+    el.textContent = "";
+  }
+  return value && value !== true ? api.add(el, value, endMark) : null;
+};
+
 /**
  * @typedef {(el: Node, value: *, endMark: Node?, current: (Node | Frag)?,
  * startNode: Node?) => Node | Frag } hInsert
@@ -80,58 +109,25 @@ export const insert = (el, value, endMark, current, startNode) => {
   // accurate if content gets pulled before clearing.
   startNode = startNode || (current instanceof Node && current);
 
-  // @ts-ignore Allow empty if statement
-  if (value === current);
-  else if (
+  if (value === current) return current;
+
+  if (
     (!current || typeof current === "string") &&
     // @ts-ignore Doesn't like `value += ''`
-
     (typeof value === "string" || (typeof value === "number" && (value += "")))
   ) {
-    // Block optimized for string insertion.
+    insertString(el, value, endMark, current);
+    return value;
+  }
 
-    if (current == null || !el.firstChild) {
-      if (endMark) {
-        api.add(el, value, endMark);
-      } else {
-        // Using textContent is a lot faster than append -> createTextNode.
-        el.textContent = /** @type {string} See `value += '' */ (value);
-      }
-    } else {
-      if (endMark) {
-        (endMark.previousSibling || el.lastChild).data = value;
-      } else {
-        el.firstChild.data = value;
-      }
-    }
-    current = value;
-  } else if (typeof value === "function") {
+  if (typeof value === "function") {
     api.subscribe(() => {
       current = api.insert(el, value.call({ el, endMark }), endMark, current, startNode);
     });
-  } else {
-    // Block for nodes, fragments, Arrays, non-stringables and node -> stringable.
-    if (endMark) {
-      // `current` can't be `0`, it's coerced to a string in insert.
-      if (current) {
-        if (!startNode) {
-          // Support fragments
-          startNode =
-            (current._startMark && current._startMark.nextSibling) || endMark.previousSibling;
-        }
-        api.rm(el, startNode, endMark);
-      }
-    } else {
-      el.textContent = "";
-    }
-    current = null;
-
-    if (value && value !== true) {
-      current = api.add(el, value, endMark);
-    }
+    return current;
   }
 
-  return current;
+  return insertNode(el, value, endMark, current, startNode);
 };
 
 /**
@@ -293,31 +289,35 @@ export const h = (...args) => {
 
   // Set up onUnmount if present
   if (onUnmountFn && el && el instanceof Element) {
-    // detect removal and call onUnmount
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        mutation.removedNodes.forEach((node) => {
-          if (node === el) {
-            onUnmountFn(el);
-            observer.disconnect();
-          }
-        });
-      });
-    });
-    if (el.parentNode) {
-      observer.observe(el.parentNode, { childList: true });
-    } else {
-      // If not mounted yet, observe when it gets a parent
-      const parentCheck = setInterval(() => {
-        if (el.parentNode) {
-          observer.observe(el.parentNode, { childList: true });
-          clearInterval(parentCheck);
-        }
-      }, 20);
-    }
+    observeUnmount(el, onUnmountFn);
   }
 
   return el;
+};
+
+const observeUnmount = (el, onUnmountFn) => {
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((m) => {
+      m.removedNodes.forEach((node) => {
+        if (node === el) {
+          onUnmountFn(el);
+          observer.disconnect();
+        }
+      });
+    });
+  });
+  const start = () => observer.observe(el.parentNode, { childList: true });
+  if (el.parentNode) {
+    start();
+  } else {
+    // Not mounted yet; start observing once a parent appears.
+    const wait = setInterval(() => {
+      if (el.parentNode) {
+        start();
+        clearInterval(wait);
+      }
+    }, 20);
+  }
 };
 
 api.h = h;
