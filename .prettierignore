@@ -1,0 +1,16 @@
+# htm template literals are whitespace-sensitive (`html` <div /> ` ` parses
+# differently from `html`<div />`` because htm only trims `\s*\n\s*`).
+# Keep the formatter out of these files so `html`...`` literals aren't collapsed
+# in ways that change parsed structure.
+test/htm/
+test/cosuous.js
+test/h/insert.js
+test/h/insert-bugs.js
+test/map/map-objects.js
+test/template.js
+
+# Vendored / generated
+dist/
+coverage/
+node_modules/
+**/__screenshots__/

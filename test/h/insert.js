@@ -17,7 +17,7 @@ test("inserts observable into simple text", () => {
   h(document.body, scratch);
 
   const counter = o(0);
-  scratch.appendChild(html` Here's a list of items: Count: ${counter} `);
+  scratch.appendChild(html`Here's a list of items: Count: ${counter}`);
   expect(scratch.innerHTML).toBe(`Here's a list of items: Count: 0`);
 
   counter(counter() + 1);
@@ -29,7 +29,7 @@ test("inserts fragments", () => {
     <h1>Hello world</h1>
     <p>Bye bye</p>
   `);
-  const res = html` <div>${frag}</div> `;
+  const res = html`<div>${frag}</div>`;
   expect(res.innerHTML).toBe("<h1>Hello world</h1><p>Bye bye</p>");
   expect(res.children.length).toBe(2);
 
@@ -58,7 +58,7 @@ test("inserts long fragments", () => {
     <p>Bye bye</p>
     <p>Hello again</p>
   `);
-  const res = html` <div>${frag}</div> `;
+  const res = html`<div>${frag}</div>`;
   expect(res.innerHTML).toBe("<h1>Hello world</h1><p>Bye bye</p><p>Hello again</p>");
   expect(res.children.length).toBe(3);
 

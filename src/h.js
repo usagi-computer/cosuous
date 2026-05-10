@@ -6,13 +6,13 @@
  *
  * @typedef {boolean} hSVG Determines if `h` will build HTML or SVG elements
  * @type {{
- * h:         import('./h.js').hTag
- * s:         hSVG
- * insert:    import('./insert.js').hInsert
- * property:  import('./property.js').hProperty
- * add:       import('./add.js').hAdd
- * rm:        import('./remove-nodes.js').hRemoveNodes
- * subscribe: (observer: () => *) => void
+ *   h:         hTag,
+ *   s:         hSVG,
+ *   insert:    hInsert,
+ *   property:  hProperty,
+ *   add:       hAdd,
+ *   rm:        hRemoveNodes,
+ *   subscribe: (observer: () => *) => void,
  * }}
  */
 // @ts-ignore Object is populated in index.js
@@ -68,7 +68,6 @@ export const add = (parent, value, endMark) => {
 };
 
 /**
- * @typedef {import('./add.js').Frag} Frag
  * @typedef {(el: Node, value: *, endMark: Node?, current: (Node | Frag)?,
  * startNode: Node?) => Node | Frag } hInsert
  * @type {hInsert}

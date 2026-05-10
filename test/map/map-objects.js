@@ -20,7 +20,7 @@ const div = document.createElement("div");
 let dispose;
 root((d) => {
   dispose = d;
-  div.appendChild(map(list, (item) => html` <div>${item.text}</div> `));
+  div.appendChild(map(list, (item) => html`<div>${item.text}</div>`));
 });
 
 test("Object reference - create", () => {

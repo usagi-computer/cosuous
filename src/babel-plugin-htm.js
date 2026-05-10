@@ -1,7 +1,7 @@
 import { build, treeify } from "./htm.js";
 
 /**
- * @param {{ types: import('@babel/types') }} babel
+ * @param {{ types: object }} babel  Babel core's `types` module.
  * @param {object} options
  * @param {string | false} [options.pragma=h]  JSX/hyperscript pragma.
  * @param {string} [options.tag=html]  The tagged template "tag" function name to process.

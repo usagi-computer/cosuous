@@ -5,26 +5,26 @@ import { map } from "cosuous/map";
 import { fragInnerHTML } from "./_utils.js";
 
 test("simple", () => {
-  expect(html` <h1></h1> `.outerHTML).toBe("<h1></h1>");
-  expect(html` <h1>hello world</h1> `.outerHTML).toBe("<h1>hello world</h1>");
+  expect(html`<h1></h1>`.outerHTML).toBe("<h1></h1>");
+  expect(html`<h1>hello world</h1>`.outerHTML).toBe("<h1>hello world</h1>");
 });
 
 test("returns a simple string", () => {
-  const frag = html` a `;
+  const frag = html`a`;
   expect(frag instanceof DocumentFragment).toBeTruthy();
   expect(frag.childNodes[0] instanceof Text).toBeTruthy();
   expect(frag.childNodes[0].textContent).toBe("a");
 });
 
 test("returns a simple number", () => {
-  const frag = html` ${9} `;
+  const frag = html`${9}`;
   expect(frag instanceof DocumentFragment).toBeTruthy();
   expect(frag.childNodes[0] instanceof Text).toBeTruthy();
   expect(frag.childNodes[0].textContent).toBe("9");
 });
 
 test("returns a document fragment", () => {
-  const frag = html` ${[html` <div>Banana</div> `, html` <div>Apple</div> `]} `;
+  const frag = html`${[html`<div>Banana</div>`, html`<div>Apple</div>`]}`;
   expect(frag instanceof DocumentFragment).toBeTruthy();
   expect(frag.childNodes[0].outerHTML).toBe("<div>Banana</div>");
   expect(frag.childNodes[1].outerHTML).toBe("<div>Apple</div>");
@@ -32,7 +32,7 @@ test("returns a document fragment", () => {
 
 test("returns a simple observable string", () => {
   const title = o("Banana");
-  const frag = html` ${title} `;
+  const frag = html`${title}`;
   expect(frag instanceof DocumentFragment).toBeTruthy();
   expect(frag.childNodes[0] instanceof Text).toBeTruthy();
   expect(frag.childNodes[0].textContent).toBe("Banana");

@@ -1,6 +1,6 @@
 import { Observable } from "./observable";
 
-export type ElementChild =
+type ElementChild =
   | Node
   | Function
   | Observable<unknown>

@@ -7,6 +7,10 @@ yarn-error.log
 coverage
 *.lcov
 
+# Vitest browser-mode failure artifacts
+.vitest-attachments/
+**/__screenshots__/
+
 /site/public/
 dist
 module

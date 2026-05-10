@@ -53,11 +53,11 @@ test("insert 9", () => {
 
   let active = o(1);
 
-  const Comp = (title) => html` <div>
+  const Comp = (title) => html`<div>
     9
     ${() => {
       active();
-      return html` <div>9 ${() => html` <h1>${title}</h1> `}</div> `;
+      return html`<div>9${() => html`<h1>${title}</h1>`}</div>`;
     }}
   </div>`;
 
