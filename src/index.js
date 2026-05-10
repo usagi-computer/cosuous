@@ -5,13 +5,26 @@
 
 import { api } from "./h.js";
 import htm from "./htm.js";
-import { cleanup, computed, o, observable, root, sample, subscribe } from "./observable.js";
+import {
+  computed,
+  effect,
+  effectScope,
+  endBatch,
+  isComputed,
+  isSignal,
+  onCleanup,
+  signal,
+  startBatch,
+  trigger,
+  untracked,
+} from "./observable.js";
 
-// Minified this is actually smaller than Object.assign(api, { ... })
-api.subscribe = subscribe;
-api.cleanup = cleanup;
-api.root = root;
-api.sample = sample;
+api.effect = effect;
+api.scope = effectScope;
+api.untracked = untracked;
+api.onCleanup = onCleanup;
+api.isSignal = isSignal;
+api.isComputed = isComputed;
 
 api.hs = (...args) => {
   const prevIsSvg = api.s;
@@ -33,4 +46,17 @@ export const html = (...args) => htm.apply(h, args);
 // `export const svg = htm.bind(hs)` is not tree-shakeable!
 export const svg = (...args) => htm.apply(hs, args);
 
-export { api, computed, o, observable };
+export {
+  api,
+  computed,
+  effect,
+  effectScope,
+  endBatch,
+  isComputed,
+  isSignal,
+  onCleanup,
+  signal,
+  startBatch,
+  trigger,
+  untracked,
+};

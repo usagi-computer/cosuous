@@ -1,4 +1,4 @@
-import { html, observable } from "cosuous";
+import { html, signal as observable } from "cosuous";
 import { _, d, dhtml, hydrate } from "cosuous/hydrate";
 import { expect, test, vi } from "vitest";
 

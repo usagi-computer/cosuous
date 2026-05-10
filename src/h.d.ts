@@ -1,8 +1,6 @@
 import { JSXInternal } from "./jsx";
 import { ElementChildren, FunctionComponent } from "./shared";
 
-import { subscribe } from "./observable";
-
 declare namespace _h {
   function h(
     type: string,
@@ -38,8 +36,13 @@ export interface HyperscriptApi {
   add(parent: Node, value: Value | Value[], endMark?: Node): Node | Frag;
   rm(parent: Node, startNode: Node, endMark: Node): void;
 
-  // Required from an observable implmentation
-  subscribe: typeof subscribe;
+  // Reactive primitives (provided by index.js wiring observable.js)
+  effect(fn: () => void): () => void;
+  scope(fn: () => void): () => void;
+  untracked<T>(fn: () => T): T;
+  onCleanup<T extends () => unknown>(fn: T): T;
+  isSignal(fn: () => void): boolean;
+  isComputed(fn: () => void): boolean;
 }
 
 export const api: HyperscriptApi;

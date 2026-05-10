@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
-import { root } from "cosuous/observable";
-import { o, h } from "cosuous";
+import { effectScope, signal } from "cosuous/observable";
+import { h } from "cosuous";
 import { map } from "cosuous/map";
 
 function lis(str) {
@@ -8,13 +8,13 @@ function lis(str) {
 }
 
 test("disposer index works correctly", () => {
-  let one = o(1);
-  let two = o(2);
-  let three = o(3);
-  let four = o(4);
-  let five = o(5);
+  let one = signal(1);
+  let two = signal(2);
+  let three = signal(3);
+  let four = signal(4);
+  let five = signal(5);
   // initialize 1, 2, 3, at indexes 0, 1, 2
-  const list = o([one, two, three]);
+  const list = signal([one, two, three]);
   const el = h(
     "ul",
     map(list, (item) => h("li", item)),
@@ -39,12 +39,12 @@ test("disposer index works correctly", () => {
 });
 
 test("last algorithm insertNodes -> disposes correct index", () => {
-  let one = o(1);
-  let two = o(2);
-  let three = o(3);
-  let four = o(4);
-  let five = o(5);
-  const list = o([one, two, three, four, five]);
+  let one = signal(1);
+  let two = signal(2);
+  let three = signal(3);
+  let four = signal(4);
+  let five = signal(5);
+  const list = signal([one, two, three, four, five]);
   const el = h(
     "ul",
     map(list, (item) => h("li", item)),
@@ -67,12 +67,12 @@ test("last algorithm insertNodes -> disposes correct index", () => {
 });
 
 test("swap backward -> disposes correct index", () => {
-  let one = o(1);
-  let two = o(2);
-  let three = o(3);
-  let four = o(4);
-  let five = o(5);
-  const list = o([one, two, three, four, five]);
+  let one = signal(1);
+  let two = signal(2);
+  let three = signal(3);
+  let four = signal(4);
+  let five = signal(5);
+  const list = signal([one, two, three, four, five]);
   const el = h(
     "ul",
     map(list, (item) => h("li", item)),
@@ -95,12 +95,12 @@ test("swap backward -> disposes correct index", () => {
 });
 
 test("swap forward -> disposes correct index", () => {
-  let one = o(1);
-  let two = o(2);
-  let three = o(3);
-  let four = o(4);
-  let five = o(5);
-  const list = o([one, two, three, four, five]);
+  let one = signal(1);
+  let two = signal(2);
+  let three = signal(3);
+  let four = signal(4);
+  let five = signal(5);
+  const list = signal([one, two, three, four, five]);
   const el = h(
     "ul",
     map(list, (item) => h("li", item)),
@@ -123,10 +123,10 @@ test("swap forward -> disposes correct index", () => {
 });
 
 test("removing one observable diposes correct index", () => {
-  let two = o(2);
-  let four = o(4);
-  let six = o(6);
-  const list = o([1, two, 3, four, 5, six, 7]);
+  let two = signal(2);
+  let four = signal(4);
+  let six = signal(6);
+  const list = signal([1, two, 3, four, 5, six, 7]);
   const el = h(
     "ul",
     map(list, (item) => h("li", item)),
@@ -148,12 +148,11 @@ test("removing one observable diposes correct index", () => {
 });
 
 test("explicit dispose works and disposes observables", () => {
-  let four = o(4);
-  const list = o([1, 2, 3, four]);
-  let dispose;
-  const el = root((d) => {
-    dispose = d;
-    return h(
+  let four = signal(4);
+  const list = signal([1, 2, 3, four]);
+  let el;
+  const dispose = effectScope(() => {
+    el = h(
       "ul",
       map(list, (item) => h("li", item)),
     );
@@ -176,8 +175,8 @@ test("explicit dispose works and disposes observables", () => {
 });
 
 test("emptying list disposes observables", () => {
-  let four = o(4);
-  const list = o([1, 2, 3, four]);
+  let four = signal(4);
+  const list = signal([1, 2, 3, four]);
 
   const el = h(
     "ul",

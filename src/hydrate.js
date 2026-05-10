@@ -184,7 +184,7 @@ export function hydrate(delta, root) {
         let hydrated;
         let marker;
         let startNode;
-        api.subscribe(() => {
+        api.effect(() => {
           isHydrated = hydrated;
 
           let result = arg();

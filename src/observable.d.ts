@@ -1,22 +1,24 @@
-export interface Observable<T> {
+export interface Signal<T> {
   (): T;
-  (nextValue: T): T;
+  (nextValue: T): void;
 }
-export function observable<T>(value: T): Observable<T>;
-export function o<T>(value: T): Observable<T>;
-export function computed<T extends () => unknown>(observer: T, seed?: unknown): T;
-export function S<T extends () => unknown>(observer: T, seed?: unknown): T;
+export interface Computed<T> {
+  (): T;
+}
 
-export function subscribe<T>(observer: () => T): () => void;
-export function unsubscribe<T>(observer: () => T): void;
-export function isListening(): boolean;
-export function root<T>(fn: () => T): T;
-export function sample<T>(fn: () => T): T;
-export function transaction<T>(fn: () => T): T;
-export function on<T extends () => unknown>(
-  observables: Observable<unknown>[],
-  fn: T,
-  seed?: unknown,
-  onchanges?: boolean,
-): T;
-export function cleanup<T extends () => unknown>(fn: T): T;
+export function signal<T>(): Signal<T | undefined>;
+export function signal<T>(initialValue: T): Signal<T>;
+export function computed<T>(getter: (previousValue?: T) => T): Computed<T>;
+
+export function effect(fn: () => void): () => void;
+export function effectScope(fn: () => void): () => void;
+export function untracked<T>(fn: () => T): T;
+export function onCleanup<T extends () => unknown>(fn: T): T;
+
+export function startBatch(): void;
+export function endBatch(): void;
+export function trigger(fn: () => void): void;
+
+export function isSignal(fn: () => void): boolean;
+export function isComputed(fn: () => void): boolean;
+export function setActiveSub(sub?: unknown): unknown;

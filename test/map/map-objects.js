@@ -1,25 +1,21 @@
 import { test, expect } from "vitest";
-import * as api from "cosuous/observable";
-import { o, h, html } from "cosuous";
+import { effectScope, signal } from "cosuous/observable";
+import { html } from "cosuous";
 import { map } from "cosuous/map";
-
-const root = api.root;
 
 function divs(str) {
   return "<div>" + str.split(",").join("</div><div>") + "</div>";
 }
 
-const one = { text: o(1) };
-const two = { text: o(2) };
-const three = { text: o(3) };
-const four = { text: o(4) };
-const five = { text: o(5) };
-const list = o([one, two, three, four, five]);
+const one = { text: signal(1) };
+const two = { text: signal(2) };
+const three = { text: signal(3) };
+const four = { text: signal(4) };
+const five = { text: signal(5) };
+const list = signal([one, two, three, four, five]);
 
 const div = document.createElement("div");
-let dispose;
-root((d) => {
-  dispose = d;
+const dispose = effectScope(() => {
   div.appendChild(map(list, (item) => html`<div>${item.text}</div>`));
 });
 

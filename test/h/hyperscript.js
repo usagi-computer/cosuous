@@ -1,5 +1,5 @@
 import { test, expect, vi } from "vitest";
-import { o, h, hs } from "cosuous";
+import { signal as o, h, hs } from "cosuous";
 
 test("simple", () => {
   expect(h("h1").outerHTML).toBe("<h1></h1>");
@@ -167,4 +167,13 @@ test("can use components", () => {
   const div = document.createElement("div");
   div.appendChild(frag);
   expect(div.innerHTML).toBe('<div>First</div><div id="cat">milk</div><div>Last</div>');
+});
+
+// Regression for sinuous#183: JSX emits h(Component, null, ...children) when
+// no props are passed; the component should be able to destructure props
+// without first falling back to `props || {}`.
+test("sinuous#183 - components receive {} when JSX passes null props", () => {
+  const Greet = ({ name = "world" }, ...children) => h("p", "Hi ", name, ...children);
+  const el = h(Greet, null, "!");
+  expect(el.outerHTML).toBe("<p>Hi world!</p>");
 });

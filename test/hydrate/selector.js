@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { dhtml, hydrate } from "cosuous/hydrate";
-import { observable } from "cosuous";
+import { signal as observable } from "cosuous";
 
 test("hydrate selects root node via id selector", () => {
   document.body.innerHTML = `

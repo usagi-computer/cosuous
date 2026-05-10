@@ -1,245 +1,138 @@
 import { test, expect, vi } from "vitest";
-import { o, subscribe, unsubscribe, cleanup, isListening } from "cosuous/observable";
+import {
+  computed,
+  effect,
+  effectScope,
+  endBatch,
+  isComputed,
+  isSignal,
+  onCleanup,
+  signal,
+  startBatch,
+  untracked,
+} from "cosuous/observable";
 
-test("initial value can be set", () => {
-  let title = o("Groovy!");
-  expect(title()).toBe("Groovy!");
+test("signal initial value", () => {
+  const s = signal("Groovy!");
+  expect(s()).toBe("Groovy!");
 });
 
-test("runs function on subscribe", () => {
-  subscribe(() => {});
+test("signal can be set without an effect", () => {
+  const s = signal();
+  s("Groovy!");
+  expect(s()).toBe("Groovy!");
 });
 
-test("observable can be set without subscription", () => {
-  let title = o();
-  title("Groovy!");
-  expect(title()).toBe("Groovy!");
+test("effect runs eagerly and re-runs on signal change", () => {
+  const s = signal(0);
+  const seen = [];
+  effect(() => seen.push(s()));
+  expect(seen).toEqual([0]);
+  s(1);
+  expect(seen).toEqual([0, 1]);
 });
 
-test("isListening", () => {
-  let title = o();
-  expect(!isListening()).toBeTruthy();
-  subscribe(() => {
-    title();
-    expect(isListening()).toBeTruthy();
+test("computed is lazy and re-derives on read after dep change", () => {
+  const a = signal(2);
+  const sq = computed(() => a() * a());
+  expect(sq()).toBe(4);
+  a(3);
+  expect(sq()).toBe(9);
+});
+
+test("effect dispose stops further runs", () => {
+  const s = signal(0);
+  const seen = [];
+  const stop = effect(() => seen.push(s()));
+  s(1);
+  stop();
+  s(2);
+  expect(seen).toEqual([0, 1]);
+});
+
+test("untracked reads do not register dependencies", () => {
+  const a = signal(1);
+  const b = signal(10);
+  let runs = 0;
+  effect(() => {
+    runs++;
+    a();
+    untracked(() => b());
   });
+  expect(runs).toBe(1);
+  b(20);
+  expect(runs).toBe(1);
+  a(2);
+  expect(runs).toBe(2);
 });
 
-test("updates when the observable is set", () => {
-  let title = o();
-  let text;
-  subscribe(() => (text = title()));
-
-  title("Welcome to Sinuous!");
-  expect(text).toBe("Welcome to Sinuous!");
-
-  title("Groovy!");
-  expect(text).toBe("Groovy!");
+test("startBatch/endBatch coalesces updates", () => {
+  const a = signal(1);
+  const b = signal(2);
+  const seen = [];
+  effect(() => seen.push(a() + b()));
+  expect(seen).toEqual([3]);
+  startBatch();
+  a(10);
+  b(20);
+  endBatch();
+  expect(seen).toEqual([3, 30]);
 });
 
-test("observable unsubscribe", () => {
-  let title = o("Initial title");
-  let text;
-  const unsubscribe = subscribe(() => (text = title()));
-
-  title("Welcome to Sinuous!");
-  expect(text).toBe("Welcome to Sinuous!");
-
-  unsubscribe();
-
-  title("Groovy!");
-  expect(text).toBe("Welcome to Sinuous!");
-});
-
-test("nested subscribe", () => {
-  let apple = o("apple");
-  let lemon = o("lemon");
-  let onion = o("onion");
-  let tempApple;
-  let tempLemon;
-  let tempOnion;
-
-  let veggieSpy;
-  const fruitSpy = vi.fn();
-  fruitSpy.mockImplementation(() => {
-    tempApple = apple();
-
-    veggieSpy = vi.fn();
-    veggieSpy.mockImplementation(() => {
-      tempOnion = onion();
-    });
-
-    subscribe(veggieSpy);
-
-    tempLemon = lemon();
+test("onCleanup runs before each effect re-run and on dispose", () => {
+  const s = signal(0);
+  const cleanups = [];
+  const stop = effect(() => {
+    const v = s();
+    onCleanup(() => cleanups.push(v));
   });
-
-  subscribe(fruitSpy);
-
-  expect(tempApple).toBe("apple");
-  expect(tempLemon).toBe("lemon");
-  expect(tempOnion).toBe("onion");
-  expect(fruitSpy.mock.calls.length).toBe(1);
-  expect(veggieSpy.mock.calls.length).toBe(1);
-
-  onion("peel");
-  expect(tempOnion).toBe("peel");
-  expect(fruitSpy.mock.calls.length).toBe(1);
-  expect(veggieSpy.mock.calls.length).toBe(2);
-
-  lemon("juice");
-  expect(tempLemon).toBe("juice");
-  expect(fruitSpy.mock.calls.length).toBe(2);
-  // this will be a new spy that was executed once
-  expect(veggieSpy.mock.calls.length).toBe(1);
+  s(1);
+  s(2);
+  stop();
+  expect(cleanups).toEqual([0, 1, 2]);
 });
 
-test("one level nested subscribe cleans up inner subscriptions", () => {
-  let apple = o("apple");
-  let lemon = o("lemon");
-  let grape = o("grape");
-  let onion = o("onion");
-  let bean = o("bean");
-  let carrot = o("carrot");
-  let onions = "";
-  let beans = "";
-  let carrots = "";
-
-  subscribe(() => {
-    apple();
-    subscribe(() => (onions += onion()));
-    grape();
-    subscribe(() => (beans += bean()));
-    subscribe(() => (carrots += carrot()));
-    lemon();
+test("onCleanup inside untracked still attaches to enclosing effect", () => {
+  const s = signal(0);
+  const cleanups = [];
+  const stop = effect(() => {
+    const v = s();
+    untracked(() => onCleanup(() => cleanups.push(v)));
   });
-
-  apple("juice");
-  lemon("juice");
-  grape("juice");
-
-  bean("bean");
-
-  expect(onions).toBe("onion".repeat(4));
-  expect(beans).toBe("bean".repeat(5));
+  s(1);
+  stop();
+  expect(cleanups).toEqual([0, 1]);
 });
 
-test("three level nested subscribe cleans up inner subscriptions", () => {
-  let apple = o("apple");
-  let lemon = o("lemon");
-  let grape = o("grape");
-  let onion = o("onion");
-  let bean = o("bean");
-  let carrot = o("carrot");
-  let peanut = o("peanut");
-  let onions = 0;
-  let beans = 0;
-  let carrots = 0;
-  let peanuts = 0;
-
-  const unsubscribe = subscribe(() => {
-    apple();
-    subscribe(() => {
-      bean();
-      beans += 1;
-      subscribe(() => {
-        onions += 1;
-        onion();
-        subscribe(() => peanut() && (peanuts += 1));
-      });
-    });
-    grape();
-    subscribe(() => carrot() && (carrots += 1));
-    lemon();
+test("effectScope groups child effects for batched disposal", () => {
+  const s = signal(0);
+  const seen = [];
+  const stop = effectScope(() => {
+    effect(() => seen.push("a:" + s()));
+    effect(() => seen.push("b:" + s()));
   });
-
-  apple("juice");
-  lemon("juice");
-  grape("juice");
-  expect(beans).toBe(4);
-
-  bean("bean");
-  expect(beans).toBe(5);
-
-  onion("onion");
-  onion("onion");
-  onion("onion");
-  expect(onions).toBe(8);
-
-  peanut("peanut");
-  peanut("peanut");
-  expect(peanuts).toBe(10);
-
-  unsubscribe();
-
-  apple("juice");
-  lemon("juice");
-  grape("juice");
-
-  bean("bean");
-  expect(beans).toBe(5);
-
-  onion("onion");
-  onion("onion");
-  onion("onion");
-  expect(onions).toBe(8);
-
-  peanut("peanut");
-  peanut("peanut");
-  expect(peanuts).toBe(10);
+  s(1);
+  expect(seen).toEqual(["a:0", "b:0", "a:1", "b:1"]);
+  stop();
+  s(2);
+  expect(seen).toEqual(["a:0", "b:0", "a:1", "b:1"]);
 });
 
-test("standalone unsubscribe works", () => {
-  let carrot = o();
-  const computed = vi.fn();
-  computed.mockImplementation(() => {
-    carrot();
-  });
-  subscribe(computed);
-  carrot("juice");
-
-  unsubscribe(computed);
-  carrot("juice");
-
-  expect(computed.mock.calls.length).toBe(2);
+test("isSignal / isComputed type discriminators", () => {
+  const s = signal(1);
+  const c = computed(() => s() + 1);
+  expect(isSignal(s)).toBe(true);
+  expect(isComputed(c)).toBe(true);
+  expect(isSignal(c)).toBe(false);
+  expect(isComputed(s)).toBe(false);
+  expect(isSignal(() => {})).toBe(false);
 });
 
-test("cleanup cleans up on update", () => {
-  let carrot = o();
-  let button = document.createElement("button");
-  // IE11 requires the button to be in dom before `button.click()` works.
-  document.body.appendChild(button);
-  let count = 0;
-
-  const computed = vi.fn();
-  computed.mockImplementation(() => {
-    carrot();
-    const onClick = () => (count += 1);
-    button.addEventListener("click", onClick);
-  });
-
-  const unsubscribe = subscribe(computed);
-  carrot(9);
-  carrot(10);
-  button.click();
-  expect(count).toBe(3);
-  unsubscribe();
-
-  count = 0;
-  button = document.createElement("button");
-  document.body.appendChild(button);
-
-  const computedWithCleanup = vi.fn();
-  computedWithCleanup.mockImplementation(() => {
-    carrot();
-    const onClick = () => (count += 1);
-    button.addEventListener("click", onClick);
-    cleanup(() => button.removeEventListener("click", onClick));
-  });
-
-  subscribe(computedWithCleanup);
-  carrot(9);
-  carrot(10);
-  button.click();
-  expect(count).toBe(1);
+test("multiple effect re-runs notify a spy", () => {
+  const s = signal(0);
+  const spy = vi.fn(() => s());
+  effect(spy);
+  s(1);
+  s(2);
+  expect(spy).toHaveBeenCalledTimes(3);
 });

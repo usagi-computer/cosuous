@@ -1,7 +1,7 @@
 import { test, expect } from "vitest";
 import { normalizeSvg } from "../_utils.js";
 import { ds, dsvg, hydrate } from "cosuous/hydrate";
-import { observable } from "cosuous";
+import { signal as observable } from "cosuous";
 
 test("supports hydrating SVG via hyperscript", () => {
   document.body.innerHTML = `<svg class="redbox" viewBox="0 0 100 100"><path d="M 8.74211 7.70899"></path></svg>`;

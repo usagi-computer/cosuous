@@ -1,9 +1,9 @@
-import { Observable } from "./observable";
+import { Signal } from "./observable";
 
 type ElementChild =
   | Node
   | Function
-  | Observable<unknown>
+  | Signal<unknown>
   | object
   | string
   | number

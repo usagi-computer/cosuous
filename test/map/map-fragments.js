@@ -1,25 +1,23 @@
 import { test, expect } from "vitest";
-import * as api from "cosuous/observable";
-import { o, h } from "cosuous";
+import { effectScope, signal } from "cosuous/observable";
+import { h } from "cosuous";
 import { map } from "cosuous/map";
-
-const root = api.root;
 
 let div;
 const n1 = "a",
   n2 = "b",
   n3 = "c",
   n4 = "d";
-const list = o([n1, n2, n3, n4]);
+const list = signal([n1, n2, n3, n4]);
 let dispose;
-const Component = () =>
-  root((d) => {
-    dispose = d;
+const Component = () => {
+  dispose = effectScope(() => {
     div = h(
       "div",
       map(list, (item) => h([item, item])),
     );
   });
+};
 
 function apply(array) {
   list(array);

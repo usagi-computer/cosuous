@@ -1,6 +1,6 @@
 /* Adapted from Stage0 - The MIT License - Pavel Martynov */
 /* Adapted from DOM Expressions - The MIT License - Ryan Carniato */
-import { api } from "./index.js";
+import { api } from './index.js';
 
 export const GROUPING = "__g";
 export const FORWARD = "nextSibling";
@@ -15,7 +15,7 @@ export const BACKWARD = "previousSibling";
  * @return {DocumentFragment}
  */
 export function map(items, expr, cleaning) {
-  const { subscribe, root, sample, cleanup } = api;
+  const { effect, scope, untracked, onCleanup } = api;
 
   // Disable cleaning for templates by default.
   if (cleaning == null) cleaning = !expr.$t;
@@ -25,11 +25,12 @@ export function map(items, expr, cleaning) {
   const afterNode = add(parent, "");
   const disposers = new Map();
 
-  const unsubscribe = subscribe((a) => {
+  let prev = [];
+  const unsubscribe = effect(() => {
     const b = items();
-    return sample(() =>
+    prev = untracked(() =>
       reconcile(
-        a || [],
+        prev,
         b || [],
         beforeNode,
         afterNode,
@@ -40,8 +41,8 @@ export function map(items, expr, cleaning) {
     );
   });
 
-  cleanup(unsubscribe);
-  cleanup(disposeAll);
+  onCleanup(unsubscribe);
+  onCleanup(disposeAll);
 
   function disposeAll() {
     disposers.forEach((d) => d());
@@ -55,15 +56,15 @@ export function map(items, expr, cleaning) {
   }
 
   function createFn(parent, item, i, data, afterNode) {
-    // The root call makes it possible the child's computations outlive
-    // their parents' update cycle.
-    return cleaning
-      ? root((disposeFn) => {
-          const node = add(parent, expr(item, i, data), afterNode);
-          disposers.set(node, disposeFn);
-          return node;
-        })
-      : add(parent, expr(item, i, data), afterNode);
+    // The scope call makes it possible for the child's effects to outlive
+    // their parent's update cycle and be disposed individually.
+    if (!cleaning) return add(parent, expr(item, i, data), afterNode);
+    let node;
+    const disposeFn = scope(() => {
+      node = add(parent, expr(item, i, data), afterNode);
+    });
+    disposers.set(node, disposeFn);
+    return node;
   }
 
   return parent;
@@ -175,11 +176,14 @@ export function reconcile(a, b, beforeNode, afterNode, createFn, onClear, onRemo
   let toRemove = [];
   for (i = aStart; i <= aEnd; i++) {
     tmp = I.get(a[i]);
-    if (tmp) {
+    // I maps b's items to their indices; when a reused item lands at index 0
+    // (the typical case after no prefix matches), `tmp` is 0 which is falsy.
+    // Compare to undefined explicitly so the index-0 case is treated as a hit.
+    if (tmp === undefined) {
+      toRemove.push(i);
+    } else {
       P[tmp] = i;
       length++;
-    } else {
-      toRemove.push(i);
     }
   }
 

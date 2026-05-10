@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
-import { o, html } from "cosuous";
-import { subscribe } from "cosuous/observable";
+import { signal as o, html } from "cosuous";
+import { effect as subscribe } from "cosuous/observable";
 import { map } from "cosuous/map";
 import { fragInnerHTML } from "./_utils.js";
 
@@ -155,6 +155,10 @@ test("nested fragments without root", () => {
   expect(div.children.length).toBe(0);
 
   choice(1);
+  // Force Story effects to re-run so the now-detached endMarks get re-attached
+  // to their original fragments. alien-signals (unlike sinuous) only notifies
+  // observers on a value change, so a redundant `show(true)` would be a no-op.
+  show(false);
   show(true);
   show2(true);
 

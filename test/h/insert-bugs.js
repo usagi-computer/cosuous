@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { o, h, html } from "cosuous";
+import { signal as o, h, html } from "cosuous";
 import { insert } from "../../src/h.js";
 
 test("empty fragment clear bug", () => {

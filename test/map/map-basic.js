@@ -1,20 +1,18 @@
 import { test, expect } from "vitest";
-import { root } from "cosuous/observable";
-import { o, h, html } from "cosuous";
+import { effectScope, signal } from "cosuous/observable";
+import { h, html } from "cosuous";
 import { map } from "cosuous/map";
 
-const list = o([]);
-const show = o(true);
-const fallback = o(
+const list = signal([]);
+const show = signal(true);
+const fallback = signal(
   html`<ul>
     <li></li>
   </ul>`,
 );
 
 let div;
-let dispose;
-root((d) => {
-  dispose = d;
+const dispose = effectScope(() => {
   div = html`
     <div>${() => (show() ? html`${map(list, (item) => html`${item}`)}` : html`${fallback}`)}</div>
   `;
@@ -83,4 +81,28 @@ test("Basic map - update 5", () => {
 
 test("Basic map - dispose", () => {
   dispose();
+});
+
+// Regression for sinuous#239: when a list shrinks so that the surviving item
+// lands at index 0 of the new list, the truthiness check on the position-map
+// lookup used to misclassify it as "not reused", destroying and recreating
+// the DOM node. The surviving node should keep its identity.
+test("sinuous#239 - shrinking list preserves index-0 reused node identity", () => {
+  const items = signal(["foo", "BAR", "baz"]);
+  let host;
+  const dispose239 = effectScope(() => {
+    host = h(
+      "div",
+      map(items, (item) => h("span", item)),
+    );
+  });
+
+  expect(host.innerHTML).toBe("<span>foo</span><span>BAR</span><span>baz</span>");
+  const barNode = host.querySelectorAll("span")[1];
+
+  items(["BAR"]);
+  expect(host.innerHTML).toBe("<span>BAR</span>");
+  expect(host.querySelector("span")).toBe(barNode);
+
+  dispose239();
 });

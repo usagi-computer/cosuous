@@ -22,8 +22,17 @@ declare module "cosuous/jsx" {
 declare namespace cosuous {
   export import JSX = JSXInternal;
 
-  export import observable = _o.observable;
-  export import o = _o.o;
+  export import signal = _o.signal;
+  export import computed = _o.computed;
+  export import effect = _o.effect;
+  export import effectScope = _o.effectScope;
+  export import untracked = _o.untracked;
+  export import onCleanup = _o.onCleanup;
+  export import startBatch = _o.startBatch;
+  export import endBatch = _o.endBatch;
+  export import trigger = _o.trigger;
+  export import isSignal = _o.isSignal;
+  export import isComputed = _o.isComputed;
 
   const html: (
     strings: TemplateStringsArray,
@@ -66,12 +75,6 @@ declare namespace cosuous {
   interface CosuousApi extends HyperscriptApi {
     // Hyperscript
     hs: <T extends () => unknown>(closure: T) => ReturnType<T>;
-
-    // Observable
-    subscribe: typeof _o.subscribe;
-    cleanup: typeof _o.cleanup;
-    root: typeof _o.root;
-    sample: typeof _o.sample;
   }
 
   const api: CosuousApi;

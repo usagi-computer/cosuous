@@ -2,7 +2,7 @@
 
 /**
  * Internal API.
- * Consumer must provide an observable at api.subscribe<T>(observer: () => T).
+ * Consumer must provide a reactive effect at api.effect(fn: () => void).
  *
  * @typedef {boolean} hSVG Determines if `h` will build HTML or SVG elements
  * @type {{
@@ -12,7 +12,9 @@
  *   property:  hProperty,
  *   add:       hAdd,
  *   rm:        hRemoveNodes,
- *   subscribe: (observer: () => *) => void,
+ *   effect:    (fn: () => void) => () => void,
+ *   isSignal:  (fn: Function) => boolean,
+ *   isComputed:(fn: Function) => boolean,
  * }}
  */
 // @ts-ignore Object is populated in index.js
@@ -121,7 +123,7 @@ export const insert = (el, value, endMark, current, startNode) => {
   }
 
   if (typeof value === "function") {
-    api.subscribe(() => {
+    api.effect(() => {
       current = api.insert(el, value.call({ el, endMark }), endMark, current, startNode);
     });
     return current;
@@ -164,12 +166,18 @@ export const property = (el, value, name, isAttr, isCss) => {
     for (name in value) {
       api.property(el, value[name], name, isAttr, isCss);
     }
-  } else if (name[0] === "o" && name[1] === "n" && !value.$o) {
-    // Functions added as event handlers are not executed
-    // on render unless they have an observable indicator.
+  } else if (
+    name[0] === "o" &&
+    name[1] === "n" &&
+    !api.isSignal(value) &&
+    !api.isComputed(value) &&
+    !value.$o
+  ) {
+    // Functions added as event handlers are not executed on render unless
+    // they are reactive (signal/computed) or carry a template-tag marker.
     handleEvent(el, name, value);
   } else if (typeof value === "function") {
-    api.subscribe(() => {
+    api.effect(() => {
       api.property(el, value.call({ el, name }), name, isAttr, isCss);
     });
   } else if (isCss) {
@@ -270,8 +278,11 @@ export const h = (...args) => {
         const endMark = /** @type {Text} */ (api.add(el, ""));
         api.insert(el, arg, endMark);
       } else {
-        // Support Components
-        el = arg.apply(null, args.splice(1));
+        // Support Components. JSX emits h(Component, null, ...) when no props
+        // are passed; coerce to {} so components can destructure props.
+        const componentArgs = args.splice(1);
+        if (componentArgs[0] == null) componentArgs[0] = {};
+        el = arg.apply(null, componentArgs);
       }
     } else {
       api.add(el, "" + arg);
