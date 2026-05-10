@@ -1,87 +1,86 @@
-import test from 'tape';
-import { root } from 'sinuous/observable';
-import { o, h, html } from 'sinuous';
-import { map } from 'sinuous/map';
+import { test, expect } from "vitest";
+import { root } from "cosuous/observable";
+import { o, h, html } from "cosuous";
+import { map } from "cosuous/map";
 
 const list = o([]);
 const show = o(true);
-const fallback = o(html`<ul><li></li></ul>`);
+const fallback = o(
+  html`<ul>
+    <li></li>
+  </ul>`,
+);
 
 let div;
 let dispose;
-root(d => {
+root((d) => {
   dispose = d;
   div = html`
-    <div>
-      ${() => show()
-        ? html`${map(list, item => html`${item}`)}`
-        : html`${fallback}`
-      }
-    </div>
+    <div>${() => (show() ? html`${map(list, (item) => html`${item}`)}` : html`${fallback}`)}</div>
   `;
 });
 
-test('Basic map - create', t => {
-  list([['a', 1], ['b', 2], ['c', 3], ['d', 4]]);
-  t.equal(div.innerHTML, 'a1b2c3d4');
-  t.end();
+test("Basic map - create", () => {
+  list([
+    ["a", 1],
+    ["b", 2],
+    ["c", 3],
+    ["d", 4],
+  ]);
+  expect(div.innerHTML).toBe("a1b2c3d4");
 });
 
-test('Basic map - update', t => {
-  list([['b', 2, 99], ['a', 1], ['c']]);
-  t.equal(div.innerHTML, 'b299a1c');
-  t.end();
+test("Basic map - update", () => {
+  list([["b", 2, 99], ["a", 1], ["c"]]);
+  expect(div.innerHTML).toBe("b299a1c");
 });
 
-test('Basic map - clear', t => {
+test("Basic map - clear", () => {
   list([]);
-  t.equal(div.innerHTML, '');
-  t.end();
+  expect(div.innerHTML).toBe("");
 });
 
-test('Basic map - update 2', t => {
+test("Basic map - update 2", () => {
   show(false);
-  list([['b', 2, 99], ['a', 1], ['c']]);
-  t.equal(div.innerHTML, '<ul><li></li></ul>');
-  t.end();
+  list([["b", 2, 99], ["a", 1], ["c"]]);
+  expect(div.innerHTML).toBe("<ul><li></li></ul>");
 });
 
-test('Basic map - clear 2', t => {
+test("Basic map - clear 2", () => {
   show(true);
   list([]);
-  fallback('');
-  t.equal(div.innerHTML, '');
-  t.end();
+  fallback("");
+  expect(div.innerHTML).toBe("");
 });
 
-test('Basic map - update 3', t => {
-  div.insertBefore(h('i'), div.firstChild);
-  div.insertBefore(h('b'), div.firstChild);
+test("Basic map - update 3", () => {
+  div.insertBefore(h("i"), div.firstChild);
+  div.insertBefore(h("b"), div.firstChild);
 
-  div.appendChild(h('i'));
-  div.appendChild(h('b'));
+  div.appendChild(h("i"));
+  div.appendChild(h("b"));
 
-  list([['b', 2, 99], ['a', 1], ['c']]);
-  t.equal(div.innerHTML, '<b></b><i></i>b299a1c<i></i><b></b>');
-  t.end();
+  list([["b", 2, 99], ["a", 1], ["c"]]);
+  expect(div.innerHTML).toBe("<b></b><i></i>b299a1c<i></i><b></b>");
 });
 
-test('Basic map - update 4', t => {
+test("Basic map - update 4", () => {
   list([]);
   show(false);
-  fallback(html`<ul><li></li></ul>`);
-  t.equal(div.innerHTML, '<b></b><i></i><ul><li></li></ul><i></i><b></b>');
-  t.end();
+  fallback(
+    html`<ul>
+      <li></li>
+    </ul>`,
+  );
+  expect(div.innerHTML).toBe("<b></b><i></i><ul><li></li></ul><i></i><b></b>");
 });
 
-test('Basic map - update 5', t => {
+test("Basic map - update 5", () => {
   show(true);
   fallback(11);
-  t.equal(div.innerHTML, '<b></b><i></i><i></i><b></b>');
-  t.end();
+  expect(div.innerHTML).toBe("<b></b><i></i><i></i><b></b>");
 });
 
-test('Basic map - dispose', t => {
+test("Basic map - dispose", () => {
   dispose();
-  t.end();
 });

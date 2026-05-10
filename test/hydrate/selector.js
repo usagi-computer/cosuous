@@ -1,8 +1,8 @@
-import test from 'tape';
-import { dhtml, hydrate } from 'sinuous/hydrate';
-import { observable } from 'sinuous';
+import { test, expect } from "vitest";
+import { dhtml, hydrate } from "cosuous/hydrate";
+import { observable } from "cosuous";
 
-test('hydrate selects root node via id selector', function(t) {
+test("hydrate selects root node via id selector", () => {
   document.body.innerHTML = `
     <div id="root">
       <button>something</button>
@@ -15,13 +15,12 @@ test('hydrate selects root node via id selector', function(t) {
     </div>
   `);
 
-  t.equal(div, document.querySelector('#root'));
+  expect(div).toBe(document.querySelector("#root"));
 
   div.parentNode.removeChild(div);
-  t.end();
 });
 
-test('hydrate selects root node via class selector', function(t) {
+test("hydrate selects root node via class selector", () => {
   document.body.innerHTML = `
     <div class="root pure">
       <button>something</button>
@@ -34,15 +33,14 @@ test('hydrate selects root node via class selector', function(t) {
     </div>
   `);
 
-  t.equal(div, document.querySelector('.root.pure'));
-  t.equal(div, document.querySelector('.root'));
-  t.equal(div, document.querySelector('.pure'));
+  expect(div).toBe(document.querySelector(".root.pure"));
+  expect(div).toBe(document.querySelector(".root"));
+  expect(div).toBe(document.querySelector(".pure"));
 
   div.parentNode.removeChild(div);
-  t.end();
 });
 
-test('hydrate selects root node via tag selector', function(t) {
+test("hydrate selects root node via tag selector", () => {
   document.body.innerHTML = `
     <button>something</button>
   `;
@@ -51,24 +49,23 @@ test('hydrate selects root node via tag selector', function(t) {
     <button title="Apply pressure">something</button>
   `);
 
-  t.equal(btn, document.querySelector('button'));
+  expect(btn).toBe(document.querySelector("button"));
 
   btn.parentNode.removeChild(btn);
-  t.end();
 });
 
-test('hydrate selects root node via partial class selector', function(t) {
+test("hydrate selects root node via partial class selector", () => {
   document.body.innerHTML = `
     <div class="root pure">
       <button>something</button>
     </div>
   `;
 
-  const isActive = observable('');
+  const isActive = observable("");
   const div = hydrate(dhtml`
     <div class="root pure${isActive}">
       <button
-        onclick=${() => isActive(isActive() ? '' : ' is-active')}
+        onclick=${() => isActive(isActive() ? "" : " is-active")}
         title="Apply pressure"
       >
         something
@@ -78,12 +75,11 @@ test('hydrate selects root node via partial class selector', function(t) {
 
   const btn = div.children[0];
   btn.click();
-  t.equal(div.className, 'root pure is-active', 'click called');
+  expect(div.className).toBe("root pure is-active");
 
-  t.equal(div, document.querySelector('.root.pure'));
-  t.equal(div, document.querySelector('.root'));
-  t.equal(div, document.querySelector('.pure'));
+  expect(div).toBe(document.querySelector(".root.pure"));
+  expect(div).toBe(document.querySelector(".root"));
+  expect(div).toBe(document.querySelector(".pure"));
 
   div.parentNode.removeChild(div);
-  t.end();
 });

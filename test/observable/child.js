@@ -1,8 +1,7 @@
-import test from 'tape';
-import spy from 'ispy';
-import { o, S, transaction, observable, sample } from 'sinuous/observable';
+import { test, expect, vi } from "vitest";
+import { o, S, transaction, observable, sample } from "cosuous/observable";
 
-test('parent cleans up inner subscriptions', function(t) {
+test("parent cleans up inner subscriptions", () => {
   let i = 0;
 
   const data = o(null);
@@ -11,19 +10,19 @@ test('parent cleans up inner subscriptions', function(t) {
   let childValue;
   let childValue2;
 
-  const child = d => {
+  const child = (d) => {
     S(function nested() {
       childValue = d();
       i++;
     });
-    return 'Hi';
+    return "Hi";
   };
 
-  const child2 = d => {
+  const child2 = (d) => {
     S(function nested2() {
       childValue2 = d();
     });
-    return 'Hi';
+    return "Hi";
   };
 
   S(function cacheFun(prev) {
@@ -43,25 +42,24 @@ test('parent cleans up inner subscriptions', function(t) {
   });
 
   // 2nd
-  data('name');
-  t.equal(childValue, 'name');
-  t.equal(childValue2, 'name');
+  data("name");
+  expect(childValue).toBe("name");
+  expect(childValue2).toBe("name");
 
   // 3rd
   data(null);
-  t.equal(childValue, null);
-  t.equal(childValue2, null);
+  expect(childValue).toBe(null);
+  expect(childValue2).toBe(null);
 
   // 4th
-  data('name2');
-  t.equal(childValue, 'name2');
-  t.equal(childValue2, 'name2');
+  data("name2");
+  expect(childValue).toBe("name2");
+  expect(childValue2).toBe("name2");
 
-  t.equal(i, 4);
-  t.end();
+  expect(i).toBe(4);
 });
 
-test('parent cleans up inner conditional subscriptions', function(t) {
+test("parent cleans up inner conditional subscriptions", () => {
   let i = 0;
 
   const data = o(null);
@@ -69,12 +67,12 @@ test('parent cleans up inner conditional subscriptions', function(t) {
 
   let childValue;
 
-  const child = d => {
+  const child = (d) => {
     S(function nested() {
       childValue = d();
       i++;
     });
-    return 'Hi';
+    return "Hi";
   };
 
   S(function cacheFun(prev) {
@@ -94,29 +92,28 @@ test('parent cleans up inner conditional subscriptions', function(t) {
   let view;
   S(() => (view = memo()));
 
-  t.equal(view, undefined);
+  expect(view).toBe(undefined);
 
   // Run 1st time
-  data('name');
-  t.equal(childValue, 'name');
+  data("name");
+  expect(childValue).toBe("name");
 
-  t.equal(view, 'Hi');
+  expect(view).toBe("Hi");
 
   // 2nd
-  data('name2');
-  t.equal(childValue, 'name2');
+  data("name2");
+  expect(childValue).toBe("name2");
 
   // data is null -> cache is false -> child is not run here
   data(null);
-  t.equal(childValue, 'name2');
+  expect(childValue).toBe("name2");
 
-  t.equal(view, undefined);
+  expect(view).toBe(undefined);
 
-  t.equal(i, 2);
-  t.end();
+  expect(i).toBe(2);
 });
 
-test('parent cleans up inner conditional subscriptions w/ other child', function(t) {
+test("parent cleans up inner conditional subscriptions w/ other child", () => {
   let i = 0;
 
   const data = o(null);
@@ -125,19 +122,19 @@ test('parent cleans up inner conditional subscriptions w/ other child', function
   let childValue;
   let childValue2;
 
-  const child = d => {
+  const child = (d) => {
     S(function nested() {
       childValue = d();
       i++;
     });
-    return 'Hi';
+    return "Hi";
   };
 
-  const child2 = d => {
+  const child2 = (d) => {
     S(function nested2() {
       childValue2 = d();
     });
-    return 'Hi';
+    return "Hi";
   };
 
   S(function cacheFun(prev) {
@@ -159,125 +156,121 @@ test('parent cleans up inner conditional subscriptions w/ other child', function
   let view;
   S(() => (view = memo()));
 
-  t.equal(view, undefined);
+  expect(view).toBe(undefined);
 
   // 2nd
-  data('name');
-  t.equal(childValue, 'name');
-  t.equal(childValue2, 'name');
+  data("name");
+  expect(childValue).toBe("name");
+  expect(childValue2).toBe("name");
 
-  t.equal(view, 'Hi');
+  expect(view).toBe("Hi");
 
   // 3rd
   data(null);
-  t.equal(childValue, 'name');
-  t.equal(childValue2, null);
+  expect(childValue).toBe("name");
+  expect(childValue2).toBe(null);
 
-  t.equal(view, undefined);
+  expect(view).toBe(undefined);
 
   // 4th
-  data('name2');
-  t.equal(childValue, 'name2');
-  t.equal(childValue2, 'name2');
+  data("name2");
+  expect(childValue).toBe("name2");
+  expect(childValue2).toBe("name2");
 
-  t.equal(i, 2);
-  t.end();
+  expect(i).toBe(2);
 });
 
-test('deeply nested cleanup of subscriptions', function(t) {
+test("deeply nested cleanup of subscriptions", () => {
   const data = o(null);
 
-  const spy1 = spy();
-  spy1.delegate = () => {
+  const spy1 = vi.fn();
+  spy1.mockImplementation(() => {
     spy2();
-  };
+  });
 
-  const spy2 = spy();
-  spy2.delegate = () => {
+  const spy2 = vi.fn();
+  spy2.mockImplementation(() => {
     data();
     child3();
-  };
+  });
 
-  const spy3 = spy();
-  spy3.delegate = () => {
+  const spy3 = vi.fn();
+  spy3.mockImplementation(() => {
     data();
-  };
+  });
 
   const child1 = () => {
     S(spy1);
-    return 'Hi';
+    return "Hi";
   };
 
   const child3 = () => {
     S(spy3);
-    return 'Hi';
+    return "Hi";
   };
 
   S(() => {
     child1();
   });
 
-  t.equal(spy1.callCount, 1);
-  t.equal(spy3.callCount, 1);
+  expect(spy1.mock.calls.length).toBe(1);
+  expect(spy3.mock.calls.length).toBe(1);
 
-  data('banana');
+  data("banana");
 
-  t.equal(spy3.callCount, 2);
-
-  t.end();
+  expect(spy3.mock.calls.length).toBe(2);
 });
 
-test('insures that new dependencies are updated before dependee', function(t) {
-  var order = '';
+test("insures that new dependencies are updated before dependee", () => {
+  var order = "";
   var a = o(0);
 
   var b = S(function x() {
-    order += 'b';
-    console.log('B');
+    order += "b";
+    console.log("B");
     return a() + 1;
   });
 
   var c = S(function y() {
-    order += 'c';
-    console.log('C');
+    order += "c";
+    console.log("C");
     return b() || d();
   });
 
   function z() {
-    order += 'd';
-    console.log('D');
+    order += "d";
+    console.log("D");
     return a() + 10;
   }
   var d = S(z);
 
-  t.equal(order, 'bcd', '1st bcd test');
+  expect(order).toBe("bcd");
 
-  order = '';
+  order = "";
   a(-1);
 
-  t.equal(b(), 0, 'b equals 0');
-  t.equal(order, 'bcd', '2nd bcd test');
-  t.equal(d(), 9, 'd equals 9');
-  t.equal(c(), 9, 'c equals d(9)');
+  expect(b()).toBe(0);
+  expect(order).toBe("bcd");
+  expect(d()).toBe(9);
+  expect(c()).toBe(9);
 
-  order = '';
+  order = "";
   a(0);
 
-  t.equal(order, 'bc', '3rd bcd test');
-  t.equal(c(), 1);
-  t.end();
+  expect(order).toBe("bc");
+  expect(c()).toBe(1);
 });
 
-test('unrelated state via transaction updates view correctly', function(t) {
+test("unrelated state via transaction updates view correctly", () => {
   const data = observable(null),
     trigger = observable(false),
     cache = observable(sample(() => !!trigger())),
-    child = data => {
-      S(() => console.log('nested', data().length));
-      return 'Hi';
+    child = (data) => {
+      S(() => console.log("nested", data().length));
+      return "Hi";
     };
 
-  S(prev => {
+  S((prev) => {
     const d = !!data();
     if (d === prev) return prev;
     cache(d);
@@ -288,24 +281,22 @@ test('unrelated state via transaction updates view correctly', function(t) {
 
   let view;
   S(() => (view = memo()));
-  t.equal(view, undefined);
+  expect(view).toBe(undefined);
 
   transaction(() => {
     trigger(true);
-    data('name');
+    data("name");
   });
-  t.equal(view, 'Hi');
+  expect(view).toBe("Hi");
 
   transaction(() => {
     trigger(true);
-    data('name2');
+    data("name2");
   });
 
   transaction(() => {
     data(undefined);
     trigger(false);
   });
-  t.equal(view, undefined);
-
-  t.end();
+  expect(view).toBe(undefined);
 });

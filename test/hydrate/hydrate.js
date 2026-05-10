@@ -1,9 +1,8 @@
-import test from 'tape';
-import spy from 'ispy';
-import { d, dhtml, hydrate, _ } from 'sinuous/hydrate';
-import { observable, html } from 'sinuous';
+import { test, expect, vi } from "vitest";
+import { d, dhtml, hydrate, _ } from "cosuous/hydrate";
+import { observable, html } from "cosuous";
 
-test('hydrate component w/ children', function(t) {
+test("hydrate component w/ children", () => {
   document.body.innerHTML = `
     <div id="wrap">
       <div>34</div>
@@ -38,40 +37,35 @@ test('hydrate component w/ children', function(t) {
     <//>
   `);
 
-  t.equal(div.id, 'wrap');
-  t.equal(div.children[0].className, 'age hidden');
-  t.equal(div.children[1].className, 'name hidden');
-  t.equal(div.children[1].children[0].className, 'green');
-
-  t.end();
+  expect(div.id).toBe("wrap");
+  expect(div.children[0].className).toBe("age hidden");
+  expect(div.children[1].className).toBe("name hidden");
+  expect(div.children[1].children[0].className).toBe("green");
 });
 
-test('hydrates div with children', function(t) {
+test("hydrates div with children", () => {
   const delta = dhtml`<div>${[dhtml`<b />`]}</div>`;
   delete delta._children[0]._parent; // eslint-disable-line
 
-  t.deepEqual(
-    delta,
-    { type: 'div', _children: [ { type: 'b', _children: [] } ] }
-  );
-
-  t.end();
+  expect(delta).toEqual({ type: "div", _children: [{ type: "b", _children: [] }] });
 });
 
-test('hydrates root bug', function(t) {
+test("hydrates root bug", () => {
   document.body.innerHTML = `
     <img class="hidden" />
   `;
 
-  const img = hydrate(dhtml`
+  const img = hydrate(
+    dhtml`
     <img class="hidden block" />
-  `, document.querySelector('img'));
+  `,
+    document.querySelector("img"),
+  );
 
-  t.equal(img.className, 'hidden block');
-  t.end();
+  expect(img.className).toBe("hidden block");
 });
 
-test('hydrate function undefined bug', function(t) {
+test("hydrate function undefined bug", () => {
   document.body.innerHTML = `
     <div class="navbar-item">
       <a>...</a>
@@ -84,11 +78,10 @@ test('hydrate function undefined bug', function(t) {
     </div>
   `);
 
-  t.equal(div.querySelector('a').textContent, '...');
-  t.end();
+  expect(div.querySelector("a").textContent).toBe("...");
 });
 
-test('hydrate function bug', function(t) {
+test("hydrate function bug", () => {
   document.body.innerHTML = `
     <div class="navbar-item">
       <a>...</a>
@@ -97,15 +90,14 @@ test('hydrate function bug', function(t) {
 
   const div = hydrate(dhtml`
     <div class="navbar-item">
-      <a>${() => 'Wesley'}</a>
+      <a>${() => "Wesley"}</a>
     </div>
   `);
 
-  t.equal(div.querySelector('a').textContent, 'Wesley');
-  t.end();
+  expect(div.querySelector("a").textContent).toBe("Wesley");
 });
 
-test('add insert into empty node feature', function(t) {
+test("add insert into empty node feature", () => {
   document.body.innerHTML = `
     <div class="navbar-item">
       <a></a>
@@ -114,88 +106,87 @@ test('add insert into empty node feature', function(t) {
 
   const div = hydrate(dhtml`
     <div class="navbar-item">
-      <a>${() => 'Wesley'}</a>
+      <a>${() => "Wesley"}</a>
     </div>
   `);
 
-  t.equal(div.querySelector('a').textContent, 'Wesley');
-  t.end();
+  expect(div.querySelector("a").textContent).toBe("Wesley");
 });
 
-test('hydrate conditional root element', function(t) {
+test("hydrate conditional root element", () => {
   document.body.innerHTML = `<player-x></player-x>`;
 
   const showing = observable(true);
 
   var player = hydrate(dhtml`
-    ${() => (player = showing() ? dhtml`<player-x autoplay />` : '')}
+    ${() => (player = showing() ? dhtml`<player-x autoplay />` : "")}
   `);
 
-  t.equal(player.tagName, 'PLAYER-X');
-  t.equal(player.autoplay, true);
+  expect(player.tagName).toBe("PLAYER-X");
+  expect(player.autoplay).toBe(true);
 
   showing(false);
-  t.equal(player, '');
-  t.equal(document.body.innerHTML, '');
+  expect(player).toBe("");
+  expect(document.body.innerHTML).toBe("");
 
   showing(true);
-  t.equal(player.tagName, 'PLAYER-X');
-  t.equal(document.body.innerHTML, '<player-x></player-x>');
-
-  t.end();
+  expect(player.tagName).toBe("PLAYER-X");
+  expect(document.body.innerHTML).toBe("<player-x></player-x>");
 });
 
-test('hydrate conditional root element w/ explicit selector', function(t) {
+test("hydrate conditional root element w/ explicit selector", () => {
   document.body.innerHTML = `<player-x></player-x>`;
 
   const showing = observable(true);
 
-  var player = hydrate(dhtml`
-    ${() => (player = showing() ? dhtml`<player-x autoplay />` : '')}
-  `, document.querySelector('player-x'));
+  var player = hydrate(
+    dhtml`
+    ${() => (player = showing() ? dhtml`<player-x autoplay />` : "")}
+  `,
+    document.querySelector("player-x"),
+  );
 
-  t.equal(player.tagName, 'PLAYER-X');
-  t.equal(player.autoplay, true);
+  expect(player.tagName).toBe("PLAYER-X");
+  expect(player.autoplay).toBe(true);
 
   showing(false);
-  t.equal(player, '');
-  t.equal(document.body.innerHTML, '');
+  expect(player).toBe("");
+  expect(document.body.innerHTML).toBe("");
 
   showing(true);
-  t.equal(player.tagName, 'PLAYER-X');
-  t.equal(document.body.innerHTML, '<player-x></player-x>');
-
-  t.end();
+  expect(player.tagName).toBe("PLAYER-X");
+  expect(document.body.innerHTML).toBe("<player-x></player-x>");
 });
 
-test('hydrate conditional root element w/ children bug', function(t) {
+test("hydrate conditional root element w/ children bug", () => {
   document.body.innerHTML = `<player-x><div></div></player-x>`;
 
   const showing = observable(true);
 
   var player = hydrate(dhtml`
-    ${() => (player = showing() ? dhtml`
+    ${() =>
+      (player = showing()
+        ? dhtml`
       <player-x autoplay>
         <div />
       <//>
-    ` : '')}
+    `
+        : "")}
   `);
 
-  t.equal(player.tagName, 'PLAYER-X');
-  t.equal(player.autoplay, true);
+  expect(player.tagName).toBe("PLAYER-X");
+  expect(player.autoplay).toBe(true);
 
   showing(false);
-  t.equal(player, '');
-  t.equal(document.body.innerHTML, '');
+  expect(player).toBe("");
+  expect(document.body.innerHTML).toBe("");
 
   showing(true);
-  t.equal(player.tagName, 'PLAYER-X');
-  t.equal(document.body.innerHTML, '<player-x><div></div></player-x>');
-
-  t.end();
+  expect(player.tagName).toBe("PLAYER-X");
+  expect(document.body.innerHTML).toBe("<player-x><div></div></player-x>");
 });
 
-test('hydrate w/ observables bug', function(t) {
+test("hydrate w/ observables bug", () => {
   document.body.innerHTML = `
     <div class="box level">
       <div class="level-item">
@@ -211,10 +202,10 @@ test('hydrate w/ observables bug', function(t) {
   `;
 
   const count = observable(0);
-  const down = spy();
-  down.delegate = () => count(count() - 1);
-  const up = spy();
-  up.delegate = () => count(count() + 1);
+  const down = vi.fn();
+  down.mockImplementation(() => count(count() - 1));
+  const up = vi.fn();
+  up.mockImplementation(() => count(count() + 1));
 
   const delta = dhtml`
     <div class="box level">
@@ -234,37 +225,32 @@ test('hydrate w/ observables bug', function(t) {
     </div>
   `;
 
-  const box = hydrate(delta, document.querySelector('.box'));
+  const box = hydrate(delta, document.querySelector(".box"));
 
-  box.querySelectorAll('.button')[0].click();
-  t.equal(down.callCount, 1, 'click called');
+  box.querySelectorAll(".button")[0].click();
+  expect(down.mock.calls.length).toBe(1);
 
-  t.equal(box.querySelector('h1').textContent, '-1');
-
-  t.end();
+  expect(box.querySelector("h1").textContent).toBe("-1");
 });
 
-test('hydrate adds event listeners', function(t) {
+test("hydrate adds event listeners", () => {
   document.body.innerHTML = `
     <div>
       <button>something</button>
     </div>
   `;
 
-  const click = spy();
-  const delta = d('div', [
-    d('button', { onclick: click, title: 'Apply pressure' }, 'something')
-  ]);
-  const div = hydrate(delta, document.querySelector('div'));
+  const click = vi.fn();
+  const delta = d("div", [d("button", { onclick: click, title: "Apply pressure" }, "something")]);
+  const div = hydrate(delta, document.querySelector("div"));
   const btn = div.children[0];
   btn.click();
-  t.equal(click.callCount, 1, 'click called');
+  expect(click.mock.calls.length).toBe(1);
 
   div.parentNode.removeChild(div);
-  t.end();
 });
 
-test('hydrate works with nested children and patches text', function(t) {
+test("hydrate works with nested children and patches text", () => {
   document.body.innerHTML = `
     <div class="container">
       <h1>Banana</h1>
@@ -285,22 +271,18 @@ test('hydrate works with nested children and patches text', function(t) {
     </div>
   `;
 
-  const div = hydrate(delta, document.querySelector('div'));
+  const div = hydrate(delta, document.querySelector("div"));
 
-  t.equal(
-    div.outerHTML,
-    `<div class="container">
+  expect(div.outerHTML).toBe(`<div class="container">
       <h1>Banana milkshake</h1>
       <div class="main">
         <button>Cherry</button>Text node patch</div>
-    </div>`
-  );
+    </div>`);
 
   div.parentNode.removeChild(div);
-  t.end();
 });
 
-test('hydrate can add observables', function(t) {
+test("hydrate can add observables", () => {
   document.body.innerHTML = `
     <div>
       0
@@ -310,33 +292,22 @@ test('hydrate can add observables', function(t) {
   `;
 
   const count = observable(0);
-  const toggle = observable('off');
-  const delta = d('div', [
-    count,
-    d('button', { class: 'toggle' }, toggle),
-    count
-  ]);
-  const div = hydrate(delta, document.querySelector('div'));
+  const toggle = observable("off");
+  const delta = d("div", [count, d("button", { class: "toggle" }, toggle), count]);
+  const div = hydrate(delta, document.querySelector("div"));
   count(1);
 
-  t.equal(
-    div.outerHTML,
-    `<div>1<button class="toggle">off</button>1</div>`
-  );
+  expect(div.outerHTML).toBe(`<div>1<button class="toggle">off</button>1</div>`);
 
   count(22);
-  toggle('on');
+  toggle("on");
 
-  t.equal(
-    div.outerHTML,
-    `<div>22<button class="toggle">on</button>22</div>`
-  );
+  expect(div.outerHTML).toBe(`<div>22<button class="toggle">on</button>22</div>`);
 
   div.parentNode.removeChild(div);
-  t.end();
 });
 
-test('hydrate can add conditional observables in tags', function(t) {
+test("hydrate can add conditional observables in tags", () => {
   document.body.innerHTML = `
     <div class="hamburger">
       <span>Pickle</span>
@@ -346,44 +317,37 @@ test('hydrate can add conditional observables in tags', function(t) {
     </div>
   `;
 
-  const sauce = observable('');
+  const sauce = observable("");
   const delta = dhtml`
     <div class="hamburger">
       <span>Pickle</span>
-      <span>${() => sauce() === 'mayo' ? 'Mayo' : 'Ketchup'}</span>
+      <span>${() => (sauce() === "mayo" ? "Mayo" : "Ketchup")}</span>
       <span>Cheese</span>
       <span>Ham</span>
     </div>
   `;
-  const div = hydrate(delta, document.querySelector('div'));
+  const div = hydrate(delta, document.querySelector("div"));
 
-  t.equal(
-    div.outerHTML,
-    `<div class="hamburger">
+  expect(div.outerHTML).toBe(`<div class="hamburger">
       <span>Pickle</span>
       <span>Ketchup</span>
       <span>Cheese</span>
       <span>Ham</span>
-    </div>`
-  );
+    </div>`);
 
-  sauce('mayo');
+  sauce("mayo");
 
-  t.equal(
-    div.outerHTML,
-    `<div class="hamburger">
+  expect(div.outerHTML).toBe(`<div class="hamburger">
       <span>Pickle</span>
       <span>Mayo</span>
       <span>Cheese</span>
       <span>Ham</span>
-    </div>`
-  );
+    </div>`);
 
   div.parentNode.removeChild(div);
-  t.end();
 });
 
-test('hydrate works with a placeholder character', function(t) {
+test("hydrate works with a placeholder character", () => {
   document.body.innerHTML = `
     <div class="container">
       <h1>Banana</h1>
@@ -395,7 +359,7 @@ test('hydrate works with a placeholder character', function(t) {
     </div>
   `;
 
-  const click = spy();
+  const click = vi.fn();
   const delta = dhtml`
     <div>
       <h1>${_}</h1>
@@ -406,63 +370,52 @@ test('hydrate works with a placeholder character', function(t) {
       </div>
     </div>
   `;
-  const div = hydrate(delta, document.querySelector('div'));
-  const btn = div.querySelector('.btn');
+  const div = hydrate(delta, document.querySelector("div"));
+  const btn = div.querySelector(".btn");
   btn.click();
-  t.equal(click.callCount, 1, 'click called');
+  expect(click.mock.calls.length).toBe(1);
 
-  t.equal(
-    div.outerHTML,
-    `<div class="container">
+  expect(div.outerHTML).toBe(`<div class="container">
       <h1>Banana</h1>
       <div class="main">
         <button>Cherry</button>
         Text node
         <button class="btn">Bom</button>
       </div>
-    </div>`
-  );
+    </div>`);
 
   div.parentNode.removeChild(div);
-  t.end();
 });
 
-test('hydrate can add a node from function', function(t) {
+test("hydrate can add a node from function", () => {
   document.body.innerHTML = `
     <div>
       <span>Pear</span>
     </div>
   `;
 
-  const fruit = observable('Pear');
+  const fruit = observable("Pear");
   const delta = dhtml`
     <div>
       ${() => dhtml`<span>${fruit}</span>`}
     </div>
   `;
-  const div = hydrate(delta, document.querySelector('div'));
+  const div = hydrate(delta, document.querySelector("div"));
 
-  t.equal(
-    div.outerHTML,
-    `<div>
+  expect(div.outerHTML).toBe(`<div>
       <span>Pear</span>
-    </div>`
-  );
+    </div>`);
 
-  fruit('Apple');
+  fruit("Apple");
 
-  t.equal(
-    div.outerHTML,
-    `<div>
+  expect(div.outerHTML).toBe(`<div>
       <span>Apple</span>
-    </div>`
-  );
+    </div>`);
 
   div.parentNode.removeChild(div);
-  t.end();
 });
 
-test('hydrate can add a fragment from function', function(t) {
+test("hydrate can add a fragment from function", () => {
   document.body.innerHTML = `
     <div>
       <span>Pear</span>
@@ -471,8 +424,8 @@ test('hydrate can add a fragment from function', function(t) {
     </div>
   `;
 
-  const fruit = observable('Pear');
-  const veggie = observable('Tomato');
+  const fruit = observable("Pear");
+  const veggie = observable("Tomato");
   const delta = dhtml`
     <div>
       ${() => dhtml`
@@ -482,91 +435,70 @@ test('hydrate can add a fragment from function', function(t) {
       `}
     </div>
   `;
-  const div = hydrate(delta, document.querySelector('div'));
+  const div = hydrate(delta, document.querySelector("div"));
 
-  t.equal(
-    div.outerHTML,
-    `<div>
+  expect(div.outerHTML).toBe(`<div>
       <span>Pear</span>
       <span>Banana</span>
       <span>Tomato</span>
-    </div>`
-  );
+    </div>`);
 
-  fruit('Apple');
-  veggie('Potato');
+  fruit("Apple");
+  veggie("Potato");
 
-  t.equal(
-    div.outerHTML,
-    `<div>
+  expect(div.outerHTML).toBe(`<div>
       <span>Apple</span>
       <span>Banana</span>
       <span>Potato</span>
-    </div>`
-  );
+    </div>`);
 
   div.parentNode.removeChild(div);
-  t.end();
 });
 
-test('hydrates adjacent text nodes', function(t) {
+test("hydrates adjacent text nodes", () => {
   document.body.innerHTML = `
     <div>Hi John Snow<span>!</span></div>
   `;
 
-  const greeting = observable('Hi');
-  const name = observable('John Snow');
+  const greeting = observable("Hi");
+  const name = observable("John Snow");
   const delta = dhtml`
     <div>${greeting} ${name}<span>!</span></div>
   `;
-  const div = hydrate(delta, document.querySelector('div'));
+  const div = hydrate(delta, document.querySelector("div"));
 
-  t.equal(
-    div.outerHTML,
-    `<div>Hi John Snow<span>!</span></div>`
-  );
+  expect(div.outerHTML).toBe(`<div>Hi John Snow<span>!</span></div>`);
 
-  name('Wesley Luyten');
+  name("Wesley Luyten");
 
-  t.equal(
-    div.outerHTML,
-    `<div>Hi Wesley Luyten<span>!</span></div>`
-  );
+  expect(div.outerHTML).toBe(`<div>Hi Wesley Luyten<span>!</span></div>`);
 
   div.parentNode.removeChild(div);
-  t.end();
 });
 
-test('hydrate can add conditional observables in content', function(t) {
+test("hydrate can add conditional observables in content", () => {
   document.body.innerHTML = `
     <div class="hamburger">Pickle Ketchup Cheese Ham</div>
   `;
 
-  const sauce = observable('');
+  const sauce = observable("");
   const delta = dhtml`
     <div class="hamburger">
-      Pickle ${() => sauce() === 'mayo' ? 'Mayo' : 'Ketchup'} Cheese Ham
+      Pickle ${() => (sauce() === "mayo" ? "Mayo" : "Ketchup")} Cheese Ham
     </div>
   `;
-  const div = hydrate(delta, document.querySelector('div'));
+  const div = hydrate(delta, document.querySelector("div"));
 
-  t.equal(
-    div.outerHTML,
-    `<div class="hamburger">Pickle Ketchup Cheese Ham</div>`
-  );
+  expect(div.outerHTML).toBe(`<div class="hamburger">Pickle Ketchup Cheese Ham</div>`);
 
-  sauce('mayo');
+  sauce("mayo");
 
-  t.equal(
-    div.outerHTML,
-    `<div class="hamburger">Pickle Mayo Cheese Ham</div>`
-  );
+  expect(div.outerHTML).toBe(`<div class="hamburger">Pickle Mayo Cheese Ham</div>`);
 
   div.parentNode.removeChild(div);
-  t.end();
 });
 
-test('hydrate can add conditional observables in content w/ newlines', function(t) {
+test("hydrate can add conditional observables in content w/ newlines", () => {
   document.body.innerHTML = `
     <div class="hamburger">
       Pickle
@@ -576,71 +508,65 @@ test('hydrate can add conditional observables in content w/ newlines', function(
     </div>
   `;
 
-  const sauce = observable('');
+  const sauce = observable("");
   const delta = dhtml`
     <div class="hamburger">
       Pickle
-      ${() => sauce() === 'mayo' ? 'Mayo' : 'Ketchup'}
+      ${() => (sauce() === "mayo" ? "Mayo" : "Ketchup")}
       Cheese
       Ham
     </div>
   `;
-  const div = hydrate(delta, document.querySelector('div'));
+  const div = hydrate(delta, document.querySelector("div"));
 
-  t.equal(
-    div.outerHTML,
-    `<div class="hamburger">
+  expect(div.outerHTML).toBe(`<div class="hamburger">
       Pickle
       Ketchup
       Cheese
       Ham
-    </div>`
-  );
+    </div>`);
 
-  sauce('mayo');
+  sauce("mayo");
 
-  t.equal(
-    div.outerHTML,
-    `<div class="hamburger">
+  expect(div.outerHTML).toBe(`<div class="hamburger">
       Pickle
       Mayo
       Cheese
       Ham
-    </div>`
-  );
+    </div>`);
 
   div.parentNode.removeChild(div);
-  t.end();
 });
 
-test('hydrate can create dom after hydration', function(t) {
+test("hydrate can create dom after hydration", () => {
   document.body.innerHTML = `
     <button>
       ...
     </button>
   `;
 
-  const avatar = observable('W');
+  const avatar = observable("W");
 
-  const button = hydrate(dhtml`
+  const button = hydrate(
+    dhtml`
     <button>
       ${avatar}
     </button>
-  `, document.querySelector('button'));
+  `,
+    document.querySelector("button"),
+  );
 
-  t.equal(button.childNodes[0].textContent, 'W');
+  expect(button.childNodes[0].textContent).toBe("W");
 
   avatar(html`
     W
     <img class="hidden" src="https://sinuous.io/" />
   `);
 
-  t.equal(button.childNodes[2].src, 'https://sinuous.io/');
-
-  t.end();
+  expect(button.childNodes[2].src).toBe("https://sinuous.io/");
 });
 
-test('hydrate components', function(t) {
+test("hydrate components", () => {
   document.body.innerHTML = `
     <div id="wrap">
       <div class="name">
@@ -649,7 +575,7 @@ test('hydrate components', function(t) {
     </div>
   `;
 
-  const name = observable('Wes');
+  const name = observable("Wes");
 
   const Name = (props) => {
     return dhtml`
@@ -665,24 +591,22 @@ test('hydrate components', function(t) {
     </div>
   `);
 
-  t.equal(div.children[0].className, 'name hidden');
-  t.equal(div.children[0].children[0].textContent, 'Wes');
+  expect(div.children[0].className).toBe("name hidden");
+  expect(div.children[0].children[0].textContent).toBe("Wes");
 
-  name('Joe');
+  name("Joe");
 
-  t.equal(div.children[0].children[0].textContent, 'Joe');
-
-  t.end();
+  expect(div.children[0].children[0].textContent).toBe("Joe");
 });
 
-test('hydrate root component', function(t) {
+test("hydrate root component", () => {
   document.body.innerHTML = `
     <div class="name">
       <span>Wes</span>
     </div>
   `;
 
-  const name = observable('Wes');
+  const name = observable("Wes");
 
   const Name = (props) => {
     return dhtml`
@@ -696,12 +620,10 @@ test('hydrate root component', function(t) {
     <${Name} text=${name} />
   `);
 
-  t.equal(div.className, 'name');
-  t.equal(div.children[0].textContent, 'Wes');
+  expect(div.className).toBe("name");
+  expect(div.children[0].textContent).toBe("Wes");
 
-  name('Joe');
+  name("Joe");
 
-  t.equal(div.children[0].textContent, 'Joe');
-
-  t.end();
+  expect(div.children[0].textContent).toBe("Joe");
 });

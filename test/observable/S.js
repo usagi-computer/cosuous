@@ -1,114 +1,104 @@
-import test from 'tape';
-import spy from 'ispy';
-import { o, S } from 'sinuous/observable';
+import { test, expect, vi } from "vitest";
+import { o, S } from "cosuous/observable";
 
 // Tests from S.js
 
-test('generates a function', function(t) {
-  t.plan(1);
-  var f = S(function() {
+test("generates a function", () => {
+  var f = S(function () {
     return 1;
   });
-  t.assert(typeof f === 'function');
+  expect(typeof f === "function").toBeTruthy();
 });
 
-test('returns initial value of wrapped function', function(t) {
-  t.plan(1);
-  var f = S(function() {
+test("returns initial value of wrapped function", () => {
+  var f = S(function () {
     return 1;
   });
-  t.equal(f(), 1);
+  expect(f()).toBe(1);
 });
 
-test('occurs once intitially', function(t) {
-  var callSpy = spy();
+test("occurs once intitially", () => {
+  var callSpy = vi.fn();
   S(callSpy);
-  t.equal(callSpy.callCount, 1);
-  t.end();
+  expect(callSpy.mock.calls.length).toBe(1);
 });
 
-test('does not re-occur when read', function(t) {
-  var callSpy = spy(),
+test("does not re-occur when read", () => {
+  var callSpy = vi.fn(),
     f = S(callSpy);
   f();
   f();
   f();
 
-  t.equal(callSpy.callCount, 1);
-  t.end();
+  expect(callSpy.mock.calls.length).toBe(1);
 });
 
-test('updates when S.data is set', function(t) {
+test("updates when S.data is set", () => {
   var d = o(1),
     fevals = 0;
 
-  S(function() {
+  S(function () {
     fevals++;
     return d();
   });
   fevals = 0;
 
   d(1);
-  t.equal(fevals, 1);
-  t.end();
+  expect(fevals).toBe(1);
 });
 
-test('does not update when S.data is read', function(t) {
+test("does not update when S.data is read", () => {
   var d = o(1),
     fevals = 0;
 
-  S(function() {
+  S(function () {
     fevals++;
     return d();
   });
   fevals = 0;
 
   d();
-  t.equal(fevals, 0);
-  t.end();
+  expect(fevals).toBe(0);
 });
 
-test('updates return value', function(t) {
+test("updates return value", () => {
   var d = o(1),
-    f = S(function() {
+    f = S(function () {
       return d();
     });
 
   d(2);
-  t.equal(f(), 2);
-  t.end();
+  expect(f()).toBe(2);
 });
 
-test('set works from other computed', function(t) {
+test("set works from other computed", () => {
   var banana = o();
   var count = 0;
   S(() => {
     count++;
-    return banana() + ' shake';
+    return banana() + " shake";
   });
-  t.equal(count, 1);
+  expect(count).toBe(1);
 
   var carrot = o();
   S(() => {
-    console.log('banana false');
+    console.log("banana false");
     banana(false);
 
-    carrot() + ' soup';
+    carrot() + " soup";
 
-    console.log('banana true');
+    console.log("banana true");
     banana(true);
   });
 
-  carrot('carrot');
-  t.equal(count, 5);
+  carrot("carrot");
+  expect(count).toBe(5);
 
   banana(false);
-  t.equal(count, 6);
-
-  t.end();
+  expect(count).toBe(6);
 });
 
-(function() {
+(function () {
   var i, j, e, fevals, f;
 
   function init() {
@@ -116,124 +106,113 @@ test('set works from other computed', function(t) {
     j = o(1);
     e = o(2);
     fevals = 0;
-    f = S(function() {
+    f = S(function () {
       fevals++;
       return i() ? j() : e();
     });
     fevals = 0;
   }
 
-  test('updates on active dependencies', function(t) {
+  test("updates on active dependencies", () => {
     init();
     j(5);
-    t.equal(fevals, 1);
-    t.equal(f(), 5);
-    t.end();
+    expect(fevals).toBe(1);
+    expect(f()).toBe(5);
   });
 
-  test('does not update on inactive dependencies', function(t) {
+  test("does not update on inactive dependencies", () => {
     init();
     e(5);
-    t.equal(fevals, 0);
-    t.equal(f(), 1);
-    t.end();
+    expect(fevals).toBe(0);
+    expect(f()).toBe(1);
   });
 
-  test('deactivates obsolete dependencies', function(t) {
+  test("deactivates obsolete dependencies", () => {
     init();
     i(false);
     fevals = 0;
     j(5);
-    t.equal(fevals, 0);
-    t.end();
+    expect(fevals).toBe(0);
   });
 
-  test('activates new dependencies', function(t) {
+  test("activates new dependencies", () => {
     init();
     i(false);
     fevals = 0;
     e(5);
-    t.equal(fevals, 1);
-    t.end();
+    expect(fevals).toBe(1);
   });
 })();
 
-test('does not register a dependency', function(t) {
+test("does not register a dependency", () => {
   var fevals = 0,
     d;
 
-  S(function() {
+  S(function () {
     fevals++;
     d = o(1);
   });
 
   fevals = 0;
   d(2);
-  t.equal(fevals, 0);
-  t.end();
+  expect(fevals).toBe(0);
 });
 
-test('reads as undefined', function(t) {
-  var f = S(function() {});
-  t.equal(f(), undefined);
-  t.end();
+test("reads as undefined", () => {
+  var f = S(function () {});
+  expect(f()).toBe(undefined);
 });
 
-test('reduces seed value', function(t) {
+test("reduces seed value", () => {
   var a = o(5),
-    f = S(function(v) {
+    f = S(function (v) {
       return v + a();
     }, 5);
-  t.equal(f(), 10);
+  expect(f()).toBe(10);
   a(6);
-  t.equal(f(), 16);
-  t.end();
+  expect(f()).toBe(16);
 });
 
-(function() {
+(function () {
   var d, fcount, f, gcount, g;
 
   function init() {
-    (d = o(1)),
+    ((d = o(1)),
       (fcount = 0),
-      (f = S(function() {
+      (f = S(function () {
         fcount++;
         return d();
       })),
       (gcount = 0),
-      (g = S(function() {
+      (g = S(function () {
         gcount++;
         return f();
-      }));
+      })));
   }
 
-  test('does not cause re-evaluation', function(t) {
+  test("does not cause re-evaluation", () => {
     init();
-    t.equal(fcount, 1);
-    t.end();
+    expect(fcount).toBe(1);
   });
 
-  test('does not occur from a read', function(t) {
+  test("does not occur from a read", () => {
     init();
     f();
-    t.equal(gcount, 1);
-    t.end();
+    expect(gcount).toBe(1);
   });
 
-  test('does not occur from a read of the watcher', function(t) {
+  test("does not occur from a read of the watcher", () => {
     init();
     g();
-    t.equal(gcount, 1);
-    t.end();
+    expect(gcount).toBe(1);
   });
 
-  test('occurs when computation updates', function(t) {
+  test("occurs when computation updates", () => {
     init();
     d(2);
-    t.equal(fcount, 2);
-    t.equal(gcount, 2);
-    t.equal(g(), 2);
-    t.end();
+    expect(fcount).toBe(2);
+    expect(gcount).toBe(2);
+    expect(g()).toBe(2);
   });
 })();
 
@@ -263,7 +242,7 @@ test('reduces seed value', function(t) {
 //   t.equal(function () { d(0); }).toThrow();
 // });
 
-test('propagates in topological order', function(t) {
+test("propagates in topological order", () => {
   //
   //     c1
   //    /  \
@@ -273,29 +252,28 @@ test('propagates in topological order', function(t) {
   //    \  /
   //     a1
   //
-  var seq = '',
+  var seq = "",
     a1 = o(true),
-    b1 = S(function() {
+    b1 = S(function () {
       a1();
-      seq += 'b1';
+      seq += "b1";
     }),
-    b2 = S(function() {
+    b2 = S(function () {
       a1();
-      seq += 'b2';
+      seq += "b2";
     }),
-    c1 = S(function() {
-      b1(), b2();
-      seq += 'c1';
+    c1 = S(function () {
+      (b1(), b2());
+      seq += "c1";
     });
 
-  seq = '';
+  seq = "";
   a1(true);
 
-  t.equal(seq, 'b1b2c1');
-  t.end();
+  expect(seq).toBe("b1b2c1");
 });
 
-test('only propagates once with linear convergences', function(t) {
+test("only propagates once with linear convergences", () => {
   //         d
   //         |
   // +---+---+---+---+
@@ -306,34 +284,33 @@ test('only propagates once with linear convergences', function(t) {
   //         v
   //         g
   var d = o(0),
-    f1 = S(function() {
+    f1 = S(function () {
       return d();
     }),
-    f2 = S(function() {
+    f2 = S(function () {
       return d();
     }),
-    f3 = S(function() {
+    f3 = S(function () {
       return d();
     }),
-    f4 = S(function() {
+    f4 = S(function () {
       return d();
     }),
-    f5 = S(function() {
+    f5 = S(function () {
       return d();
     }),
     gcount = 0,
-    g = S(function() {
+    g = S(function () {
       gcount++;
       return f1() + f2() + f3() + f4() + f5();
     });
 
   gcount = 0;
   d(0);
-  t.equal(gcount, 1);
-  t.end();
+  expect(gcount).toBe(1);
 });
 
-test('only propagates once with exponential convergence', function(t) {
+test("only propagates once with exponential convergence", () => {
   //     d
   //     |
   // +---+---+
@@ -348,32 +325,31 @@ test('only propagates once with exponential convergence', function(t) {
   //     v
   //     h
   var d = o(0),
-    f1 = S(function() {
+    f1 = S(function () {
       return d();
     }),
-    f2 = S(function() {
+    f2 = S(function () {
       return d();
     }),
-    f3 = S(function() {
+    f3 = S(function () {
       return d();
     }),
-    g1 = S(function() {
+    g1 = S(function () {
       return f1() + f2() + f3();
     }),
-    g2 = S(function() {
+    g2 = S(function () {
       return f1() + f2() + f3();
     }),
-    g3 = S(function() {
+    g3 = S(function () {
       return f1() + f2() + f3();
     }),
     hcount = 0,
-    h = S(function() {
+    h = S(function () {
       hcount++;
       return g1() + g2() + g3();
     });
 
   hcount = 0;
   d(0);
-  t.equal(hcount, 1);
-  t.end();
+  expect(hcount).toBe(1);
 });

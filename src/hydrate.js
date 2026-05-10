@@ -1,5 +1,5 @@
-import { h, hs, api } from './index.js';
-import htm from './htm.js';
+import { h, hs, api } from "./index.js";
+import htm from "./htm.js";
 
 export const d = context();
 export const ds = context(true);
@@ -19,7 +19,7 @@ export const _ = {};
 let isHydrated;
 
 /**
- * Create a sinuous `treeify` function.
+ * Create a cosuous `treeify` function.
  * @param  {boolean} isSvg
  * @return {Function}
  */
@@ -34,7 +34,7 @@ export function context(isSvg) {
 
     function item(arg) {
       if (arg == null);
-      else if (arg === _ || typeof arg === 'function') {
+      else if (arg === _ || typeof arg === "function") {
         // Components can only be the first argument.
         if (vnode) {
           addChild(vnode, arg);
@@ -44,7 +44,7 @@ export function context(isSvg) {
       } else if (Array.isArray(arg)) {
         vnode = vnode || { _children: [] };
         arg.forEach(item);
-      } else if (typeof arg === 'object') {
+      } else if (typeof arg === "object") {
         if (arg._children) {
           addChild(vnode, arg);
         } else {
@@ -92,12 +92,9 @@ export function hydrate(delta, root) {
     return;
   }
 
-  if (typeof delta.type === 'function') {
+  if (typeof delta.type === "function") {
     // Support Components
-    delta = delta.type.apply(
-      null,
-      [delta._props].concat(delta._children.map((c) => c()))
-    );
+    delta = delta.type.apply(null, [delta._props].concat(delta._children.map((c) => c())));
   }
 
   let isFragment = delta.type === undefined;
@@ -109,12 +106,12 @@ export function hydrate(delta, root) {
   }
 
   function findRootSelector(delta) {
-    let selector = '';
+    let selector = "";
     let prop;
     if (delta._props && (prop = delta._props.id)) {
-      selector = '#';
+      selector = "#";
     } else if (delta._props && (prop = delta._props.class)) {
-      selector = '.';
+      selector = ".";
     } else if ((prop = delta.type)) {
       // delta.type is truthy
     } else {
@@ -124,11 +121,11 @@ export function hydrate(delta, root) {
 
     return (
       selector +
-      (typeof prop === 'function' ? prop() : prop)
-        .split(' ')
+      (typeof prop === "function" ? prop() : prop)
+        .split(" ")
         // Escape CSS selector https://bit.ly/36h9I83
-        .map((sel) => sel.replace(/([^\x80-\uFFFF\w-])/g, '\\$1'))
-        .join('.')
+        .map((sel) => sel.replace(/([^\x80-\uFFFF\w-])/g, "\\$1"))
+        .join(".")
     );
   }
 
@@ -169,7 +166,7 @@ export function hydrate(delta, root) {
         // Skip placeholder underscore.
         if (arg === _) {
           el._index++;
-        } else if (typeof arg === 'object') {
+        } else if (typeof arg === "object") {
           if (arg.type === null && target.nodeType === 3) {
             // This is a text vnode, add noskip so spaces don't get skipped.
             target._noskip = true;
@@ -181,9 +178,9 @@ export function hydrate(delta, root) {
         }
       }
 
-      if (typeof arg === 'function') {
+      if (typeof arg === "function") {
         current = target ? target.data : undefined;
-        prefix = '';
+        prefix = "";
         let hydrated;
         let marker;
         let startNode;
@@ -195,8 +192,7 @@ export function hydrate(delta, root) {
             result = result.type ? result : result._children;
           }
 
-          const isStringable =
-            typeof result === 'string' || typeof result === 'number';
+          const isStringable = typeof result === "string" || typeof result === "number";
           result = isStringable ? prefix + result : result;
 
           if (hydrated || (!target && !isFragment)) {
@@ -219,16 +215,16 @@ export function hydrate(delta, root) {
             }
 
             if (!isRootFragment && target) {
-              marker = api.add(el, '', filterChildNodes(el)[el._index]);
+              marker = api.add(el, "", filterChildNodes(el)[el._index]);
             } else {
-              marker = api.add(el.parentNode, '', el.nextSibling);
+              marker = api.add(el.parentNode, "", el.nextSibling);
             }
           }
 
           isHydrated = false;
           hydrated = true;
         });
-      } else if (typeof arg === 'object') {
+      } else if (typeof arg === "object") {
         if (!arg._children) {
           api.property(el, arg, null, delta._isSvg);
         }
@@ -249,6 +245,6 @@ export function hydrate(delta, root) {
  */
 function filterChildNodes(parent) {
   return Array.from(parent.childNodes).filter(
-    (el) => el.nodeType !== 3 || el.data.trim() || el._noskip
+    (el) => el.nodeType !== 3 || el.data.trim() || el._noskip,
   );
 }

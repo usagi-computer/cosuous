@@ -1,35 +1,35 @@
-# Sinuous Hydrate
+# Cosuous Hydrate
 
-Sinuous Hydrate is a small add-on for [Sinuous](https://github.com/luwes/sinuous) that provides fast hydration of static HTML. The HTML or SVG that is defined with this API doesn't have to be exactly the same as the HTML coming from the server. It's perfectly valid to only define the attributes that have any dynamic values in it. This is intentionally done to minimize duplication.
+Cosuous Hydrate is a small add-on for Cosuous that provides fast hydration of static HTML. The HTML or SVG that is defined with this API doesn't have to be exactly the same as the HTML coming from the server. It's perfectly valid to only define the attributes that have any dynamic values in it. This is intentionally done to minimize duplication.
 
 # Example
 
 ```js
-import { observable } from 'sinuous';
-import { hydrate, d } from 'sinuous/hydrate';
-import { openLogin } from './auth.js';
+import { observable } from "cosuous";
+import { hydrate, d } from "cosuous/hydrate";
+import { openLogin } from "./auth.js";
 
-const isActive = observable('');
+const isActive = observable("");
 
 hydrate(
   dhtml`
     <a class="login-btn button is-dark" onclick=${openLogin} />
-  `
+  `,
 );
 
 hydrate(
   dhtml`
     <a
       class="navbar-burger burger${isActive}"
-      onclick=${() => isActive(!isActive() ? ' is-active' : '')}
+      onclick=${() => isActive(!isActive() ? " is-active" : "")}
     />
-  `
+  `,
 );
 
 hydrate(
   dhtml`
     <a class="navbar-menu${isActive}" />
-  `
+  `,
 );
 ```
 
@@ -71,7 +71,7 @@ A placeholder for content in tags that get skipped. The placeholder prevents dup
 For example:
 
 ```js
-import { hydrate, dhtml, _ } from 'sinuous/hydrate';
+import { hydrate, dhtml, _ } from "cosuous/hydrate";
 
 document.body.innerHTML = `
   <div class="container">

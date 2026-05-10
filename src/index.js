@@ -1,18 +1,19 @@
 /*
- * Sinuous by Wesley Luyten (@luwes).
+ * Cosuous by Dania Rifki (@Kaleidosium), forked from Sinuous by Wesley Luyten (@luwes).
  * Really ties all the packages together.
  */
-import {
-  o,
-  observable,
-  computed,
-  subscribe,
-  cleanup,
-  root,
-  sample,
-} from './observable.js';
+
 import { api } from './h.js';
 import htm from './htm.js';
+import {
+  cleanup,
+  computed,
+  o,
+  observable,
+  root,
+  sample,
+  subscribe,
+} from './observable.js';
 
 // Minified this is actually smaller than Object.assign(api, { ... })
 api.subscribe = subscribe;
@@ -40,4 +41,4 @@ export const html = (...args) => htm.apply(h, args);
 // `export const svg = htm.bind(hs)` is not tree-shakeable!
 export const svg = (...args) => htm.apply(hs, args);
 
-export { api, o, observable, computed };
+export { api, computed, o, observable };

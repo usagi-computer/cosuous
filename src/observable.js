@@ -115,7 +115,7 @@ function observable(value) {
   }
 
   // Tiny indicator that this is an observable function.
-  // Used in sinuous/h/src/property.js
+  // Used in cosuous/h/src/property.js
   data.$o = 1;
   data._observers = new Set();
   // The 'not set' value must be unique, so `nullish` can be set in a transaction.
@@ -164,7 +164,7 @@ function computed(observer, value) {
   }
 
   // Tiny indicator that this is an observable function.
-  // Used in sinuous/h/src/property.js
+  // Used in cosuous/h/src/property.js
   data.$o = 1;
 
   function data() {

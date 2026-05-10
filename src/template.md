@@ -1,16 +1,16 @@
-# Sinuous Template
+# Cosuous Template
 
 A template can look something like this:
 
 ```js
-import { h } from 'sinuous';
-import { template, t, o } from 'sinuous/template';
+import { h } from "cosuous";
+import { template, t, o } from "cosuous/template";
 
 const Row = template(
   () => html`
-    <tr class=${o('selected')}>
-      <td class="col-md-1" textContent=${t('id')} />
-      <td class="col-md-4"><a>${o('label')}</a></td>
+    <tr class=${o("selected")}>
+      <td class="col-md-1" textContent=${t("id")} />
+      <td class="col-md-4"><a>${o("label")}</a></td>
       <td class="col-md-1">
         <a>
           <span class="glyphicon glyphicon-remove remove" />
@@ -18,7 +18,7 @@ const Row = template(
       </td>
       <td class="col-md-6" />
     </tr>
-  `
+  `,
 );
 ```
 
@@ -29,5 +29,5 @@ const Row = template(
 The `Row` in this case would accept a object like so
 
 ```js
-Row({ id: 1, label: 'Banana', selected: 'peel' });
+Row({ id: 1, label: "Banana", selected: "peel" });
 ```

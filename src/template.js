@@ -1,4 +1,4 @@
-import { api } from './index.js';
+import { api } from "./index.js";
 
 let recordedActions;
 
@@ -20,7 +20,6 @@ export function o(key) {
  */
 export function t(key, observed, bind) {
   const tag = function () {
-    // eslint-disable-next-line
     const { el, name, endMark } = this;
 
     const action = (element, endMark, propName, value) => {
@@ -36,7 +35,7 @@ export function t(key, observed, bind) {
           element.firstChild === element.lastChild &&
           element.firstChild === endMark
         ) {
-          endMark._current = '';
+          endMark._current = "";
         }
 
         state._current = api.insert(element, value, endMark, state._current);
@@ -55,7 +54,7 @@ export function t(key, observed, bind) {
   };
 
   // Tiny indicator that this is a template tag.
-  // Used in sinuous/h/src/property.js
+  // Used in cosuous/h/src/property.js
   tag.$o = 2;
 
   return tag;
@@ -87,8 +86,7 @@ export function template(elementRef, noClone) {
   if (!noClone) {
     cloneActions.forEach((action) => {
       action._paths = createPath(fragment, action._el);
-      action._endMarkPath =
-        action._endMark && createPath(action._el, action._endMark);
+      action._endMarkPath = action._endMark && createPath(action._el, action._endMark);
     });
   }
 
@@ -167,9 +165,7 @@ api.action = (action, props, keyedActions) => {
           },
         });
       }
-      keyedActions[key].push(
-        action.bind(null, target, action._endMarkTarget, propName)
-      );
+      keyedActions[key].push(action.bind(null, target, action._endMarkTarget, propName));
     }
   };
 };

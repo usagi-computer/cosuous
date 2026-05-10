@@ -1,4 +1,4 @@
-import { build, treeify } from './htm.js';
+import { build, treeify } from "./htm.js";
 
 /**
  * @param {{ types: import('@babel/types') }} babel
@@ -13,7 +13,7 @@ import { build, treeify } from './htm.js';
  * @param {boolean} [options.wrapExpression=''] If set wraps the generated expression with a function passing the same arguments the tagged template would receive.
  */
 export default function htmBabelPlugin({ types: t }, options = {}) {
-  const pragmaString = options.pragma === false ? false : options.pragma || 'h';
+  const pragmaString = options.pragma === false ? false : options.pragma || "h";
   const pragma = pragmaString === false ? false : dottedIdentifier(pragmaString);
   const useBuiltIns = options.useBuiltIns;
   const useNativeSpread = options.useNativeSpread;
@@ -26,28 +26,29 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
     if (pragmaString === false || imp === false) {
       return null;
     }
-    const pragmaRoot = t.identifier(pragmaString.split('.')[0]);
+    const pragmaRoot = t.identifier(pragmaString.split(".")[0]);
     // eslint-disable-next-line
-    const { module, export: export_ } = typeof imp !== 'string' ? imp : {
-      module: imp,
-      export: null
-    };
+    const { module, export: export_ } =
+      typeof imp !== "string"
+        ? imp
+        : {
+            module: imp,
+            export: null,
+          };
 
     let specifier;
-    if (export_ === '*') {
+    if (export_ === "*") {
       specifier = t.importNamespaceSpecifier(pragmaRoot);
-    }
-    else if (export_ === 'default') {
+    } else if (export_ === "default") {
       specifier = t.importDefaultSpecifier(pragmaRoot);
-    }
-    else {
+    } else {
       specifier = t.importSpecifier(pragmaRoot, export_ ? t.identifier(export_) : pragmaRoot);
     }
     return t.importDeclaration([specifier], t.stringLiteral(module));
   }
 
   function dottedIdentifier(keypath) {
-    const path = keypath.split('.');
+    const path = keypath.split(".");
     let out;
     for (let i = 0; i < path.length; i++) {
       const ident = propertyName(path[i]);
@@ -57,9 +58,9 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
   }
 
   function patternStringToRegExp(str) {
-    const parts = str.split('/').slice(1);
-    const end = parts.pop() || '';
-    return new RegExp(parts.join('/'), end);
+    const parts = str.split("/").slice(1);
+    const end = parts.pop() || "";
+    return new RegExp(parts.join("/"), end);
   }
 
   function propertyName(key) {
@@ -70,23 +71,21 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
   }
 
   function objectProperties(obj) {
-    return Object.keys(obj).map(key => {
-      const values = obj[key].map(valueOrNode =>
-        t.isNode(valueOrNode) ? maybeField(valueOrNode) : t.valueToNode(valueOrNode)
+    return Object.keys(obj).map((key) => {
+      const values = obj[key].map((valueOrNode) =>
+        t.isNode(valueOrNode) ? maybeField(valueOrNode) : t.valueToNode(valueOrNode),
       );
 
       let node = values[0];
       if (values.length > 1) {
         if (!t.isStringLiteral(node)) {
-          node = t.binaryExpression('+', t.stringLiteral(''), concatFunctionNode(node));
+          node = t.binaryExpression("+", t.stringLiteral(""), concatFunctionNode(node));
         }
-        values.slice(1).forEach(value => {
-          node = t.binaryExpression('+', node, concatFunctionNode(value));
+        values.slice(1).forEach((value) => {
+          node = t.binaryExpression("+", node, concatFunctionNode(value));
         });
         if (values.some(isFunctionLike)) {
-          node = t.functionExpression(null, [], t.blockStatement([
-            t.returnStatement(node)
-          ]));
+          node = t.functionExpression(null, [], t.blockStatement([t.returnStatement(node)]));
         }
       }
 
@@ -97,11 +96,11 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
   function stringValue(str) {
     if (options.monomorphic) {
       return t.objectExpression([
-        t.objectProperty(propertyName('type'), t.numericLiteral(3)),
-        t.objectProperty(propertyName('tag'), t.nullLiteral()),
-        t.objectProperty(propertyName('props'), t.nullLiteral()),
-        t.objectProperty(propertyName('children'), t.nullLiteral()),
-        t.objectProperty(propertyName('text'), t.stringLiteral(str))
+        t.objectProperty(propertyName("type"), t.numericLiteral(3)),
+        t.objectProperty(propertyName("tag"), t.nullLiteral()),
+        t.objectProperty(propertyName("props"), t.nullLiteral()),
+        t.objectProperty(propertyName("children"), t.nullLiteral()),
+        t.objectProperty(propertyName("text"), t.stringLiteral(str)),
       ]);
     }
     return t.stringLiteral(str);
@@ -118,13 +117,15 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
     }
 
     if (inlineVNodes) {
-      return t.objectExpression([
-        options.monomorphic && t.objectProperty(propertyName('type'), t.numericLiteral(1)),
-        t.objectProperty(propertyName('tag'), tag),
-        t.objectProperty(propertyName('props'), props),
-        t.objectProperty(propertyName('children'), children),
-        options.monomorphic && t.objectProperty(propertyName('text'), t.nullLiteral())
-      ].filter(Boolean));
+      return t.objectExpression(
+        [
+          options.monomorphic && t.objectProperty(propertyName("type"), t.numericLiteral(1)),
+          t.objectProperty(propertyName("tag"), tag),
+          t.objectProperty(propertyName("props"), props),
+          t.objectProperty(propertyName("children"), children),
+          options.monomorphic && t.objectProperty(propertyName("text"), t.nullLiteral()),
+        ].filter(Boolean),
+      );
     }
 
     // Passing `{variableArity:false}` always produces `h(tag, props, children)` - where `children` is always an Array.
@@ -155,18 +156,17 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 
     if (useNativeSpread) {
       const properties = [];
-      args.forEach(arg => {
+      args.forEach((arg) => {
         if (t.isNode(arg)) {
           properties.push(t.spreadElement(arg));
-        }
-        else {
+        } else {
           properties.push(...objectProperties(arg));
         }
       });
       return t.objectExpression(properties);
     }
 
-    const helper = useBuiltIns ? dottedIdentifier('Object.assign') : state.addHelper('extends');
+    const helper = useBuiltIns ? dottedIdentifier("Object.assign") : state.addHelper("extends");
     return t.callExpression(helper, args.map(propsNode));
   }
 
@@ -178,16 +178,18 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
     node = maybeField(node);
 
     if (t.isNode(node)) return node;
-    if (typeof node === 'string') return stringValue(node);
-    if (node === undefined) return t.identifier('undefined');
+    if (typeof node === "string") return stringValue(node);
+    if (node === undefined) return t.identifier("undefined");
 
     const { tag, props, children } = node;
-    const isComponent = typeof tag !== 'string';
+    const isComponent = typeof tag !== "string";
     const newTag = isComponent ? tag : t.stringLiteral(tag);
     const newProps = spreadNode(props, state);
-    const newChildren = t.arrayExpression((children || [])
-      .map(child => transform(child, state))
-      .map(child => isComponent ? t.arrowFunctionExpression([], child) : child));
+    const newChildren = t.arrayExpression(
+      (children || [])
+        .map((child) => transform(child, state))
+        .map((child) => (isComponent ? t.arrowFunctionExpression([], child) : child)),
+    );
     return createVNode(newTag, newProps, newChildren);
   }
 
@@ -200,17 +202,19 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
 
   function isFunctionLike(node) {
     return (
-      t.isIdentifier(node) ||
-      t.isFunctionExpression(node) ||
-      t.isArrowFunctionExpression(node)
+      t.isIdentifier(node) || t.isFunctionExpression(node) || t.isArrowFunctionExpression(node)
     );
   }
 
   function concatFunctionNode(node) {
     if (isFunctionLike(node)) {
-      const typeofNode = t.unaryExpression('typeof', node);
-      const isNodeFunction = t.binaryExpression('===', typeofNode, t.stringLiteral('function'));
-      return t.conditionalExpression(isNodeFunction, t.callExpression(t.memberExpression(node, t.identifier('call')), [t.thisExpression()]), node);
+      const typeofNode = t.unaryExpression("typeof", node);
+      const isNodeFunction = t.binaryExpression("===", typeofNode, t.stringLiteral("function"));
+      return t.conditionalExpression(
+        isNodeFunction,
+        t.callExpression(t.memberExpression(node, t.identifier("call")), [t.thisExpression()]),
+        node,
+      );
     }
     return node;
   }
@@ -218,14 +222,14 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
   // The tagged template tag function name we're looking for.
   // This is static because it's generally assigned via htm.bind(h),
   // which could be imported from elsewhere, making tracking impossible.
-  const htmlName = options.tag || 'html';
+  const htmlName = options.tag || "html";
   return {
-    name: 'htm',
+    name: "htm",
     visitor: {
       Program: {
         exit(path, state) {
-          if (state.get('hasHtm') && importDeclaration) {
-            path.unshiftContainer('body', importDeclaration);
+          if (state.get("hasHtm") && importDeclaration) {
+            path.unshiftContainer("body", importDeclaration);
           }
         },
       },
@@ -233,8 +237,8 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
         fields = new Map();
 
         const tag = path.node.tag.name;
-        if (htmlName[0] === '/' ? patternStringToRegExp(htmlName).test(tag) : tag === htmlName) {
-          const statics = path.node.quasi.quasis.map(e => e.value.raw);
+        if (htmlName[0] === "/" ? patternStringToRegExp(htmlName).test(tag) : tag === htmlName) {
+          const statics = path.node.quasi.quasis.map((e) => e.value.raw);
           const exprs = path.node.quasi.expressions;
 
           let tree = treeify(build(statics), exprs);
@@ -246,19 +250,17 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
           }
 
           if (wrapExpression) {
-            exprs.forEach(expr => {
+            exprs.forEach((expr) => {
               fields.set(expr, path.scope.generateUidIdentifier("field"));
             });
           }
 
           let node = Array.isArray(tree)
             ? t.callExpression(pragma, [
-              t.arrayExpression(tree.map(root => transform(root, state)))
-            ])
-            : t.isNode(tree) || typeof tree === 'string'
-              ? t.callExpression(pragma, [
-                t.arrayExpression([transform(tree, state)])
+                t.arrayExpression(tree.map((root) => transform(root, state))),
               ])
+            : t.isNode(tree) || typeof tree === "string"
+              ? t.callExpression(pragma, [t.arrayExpression([transform(tree, state)])])
               : transform(tree, state);
 
           if (wrapExpression) {
@@ -268,15 +270,15 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
             node = t.callExpression(dottedIdentifier(`${wrapExpression}.apply`), [
               t.arrowFunctionExpression(taggedArgs, node),
               t.arrayExpression([
-                t.arrayExpression(statics.map(str => t.stringLiteral(str))),
-                ...exprs
-              ])
+                t.arrayExpression(statics.map((str) => t.stringLiteral(str))),
+                ...exprs,
+              ]),
             ]);
           }
           path.replaceWith(node);
-          state.set('hasHtm', true);
+          state.set("hasHtm", true);
         }
-      }
-    }
+      },
+    },
   };
 }

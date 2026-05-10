@@ -2,6 +2,8 @@
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+> Cosuous is forked from [Sinuous](https://github.com/luwes/sinuous). The entries below are the upstream Sinuous changelog and are preserved here for historical context. Cosuous-specific changes will be added on top as new versions ship.
+
 ## 0.28.0 - 2022-01-30
 
 ### Added
@@ -197,19 +199,19 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ```js
 plugins: [
   [
-    'sinuous/babel-plugin-htm',
+    "sinuous/babel-plugin-htm",
     {
-      import: 'sinuous',
+      import: "sinuous",
     },
   ],
   [
-    'sinuous/babel-plugin-htm',
+    "sinuous/babel-plugin-htm",
     {
-      pragma: 'hs',
-      tag: 'svg',
-      import: 'sinuous',
+      pragma: "hs",
+      tag: "svg",
+      import: "sinuous",
     },
-    'svg',
+    "svg",
   ],
 ];
 ```

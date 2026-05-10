@@ -1,64 +1,61 @@
-import test from 'tape';
-import { o, S, root, transaction } from 'sinuous/observable';
+import { test, expect } from "vitest";
+import { o, S, root, transaction } from "cosuous/observable";
 
-test('batches all changes until end', function(t) {
+test("batches all changes until end", () => {
   var d1 = o(9);
   var d2 = o(99);
 
-  transaction(function() {
+  transaction(function () {
     d1(10);
     d2(100);
-    t.equal(d1(), 9);
-    t.equal(d2(), 99);
+    expect(d1()).toBe(9);
+    expect(d2()).toBe(99);
   });
 
-  t.equal(d1(), 10);
-  t.equal(d2(), 100);
-  t.end();
+  expect(d1()).toBe(10);
+  expect(d2()).toBe(100);
 });
 
-test('halts propagation within its scope', function(t) {
-  root(function() {
+test("halts propagation within its scope", () => {
+  root(function () {
     var d1 = o(9);
     var d2 = o(99);
 
-    var f = S(function() {
+    var f = S(function () {
       return d1() + d2();
     });
 
-    transaction(function() {
+    transaction(function () {
       d1(10);
       d2(100);
 
-      t.equal(f(), 9 + 99);
+      expect(f()).toBe(9 + 99);
     });
 
-    t.equal(f(), 10 + 100);
-    t.end();
+    expect(f()).toBe(10 + 100);
   });
 });
 
-test('nested transaction', function(t) {
+test("nested transaction", () => {
   var d = o(1);
 
-  transaction(function() {
+  transaction(function () {
     d(2);
-    t.equal(d(), 1);
+    expect(d()).toBe(1);
 
-    transaction(function() {
+    transaction(function () {
       d(3);
-      t.equal(d(), 1);
+      expect(d()).toBe(1);
 
-      transaction(function() {
+      transaction(function () {
         d(4);
       });
 
-      t.equal(d(), 1);
+      expect(d()).toBe(1);
     });
 
-    t.equal(d(), 1);
+    expect(d()).toBe(1);
   });
 
-  t.equal(d(), 4);
-  t.end();
+  expect(d()).toBe(4);
 });

@@ -1,6 +1,6 @@
-# Sinuous Observable
+# Cosuous Observable
 
-Sinuous Observable is a tiny reactive library. It shares the core features of [S.js](https://github.com/adamhaile/S) to be the engine driving the reactive dom operations in [Sinuous](https://github.com/luwes/sinuous).
+Cosuous Observable is a tiny reactive library. It shares the core features of [S.js](https://github.com/adamhaile/S) to be the engine driving the reactive dom operations in Cosuous.
 
 ## Features
 
@@ -182,32 +182,32 @@ Unsubscribe from an observer.
 # Example
 
 ```js
-import observable, { S } from 'sinuous/observable';
+import observable, { S } from "cosuous/observable";
 
-var order = '',
+var order = "",
   a = observable(0),
   b = S(function () {
-    order += 'b';
+    order += "b";
     return a() + 1;
   }),
   c = S(function () {
-    order += 'c';
+    order += "c";
     return b() || d();
   }),
   d = S(function () {
-    order += 'd';
+    order += "d";
     return a() + 10;
   });
 
 console.log(order); // bcd
 
-order = '';
+order = "";
 a(-1);
 
 console.log(order); // bcd
 console.log(c()); // 9
 
-order = '';
+order = "";
 a(0);
 
 console.log(order); // bcd

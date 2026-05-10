@@ -1,102 +1,91 @@
-import test from 'tape';
-import * as api from 'sinuous/observable';
-import { o, h, html } from 'sinuous';
-import { map } from 'sinuous/map';
+import { test, expect } from "vitest";
+import * as api from "cosuous/observable";
+import { o, h, html } from "cosuous";
+import { map } from "cosuous/map";
 
 const root = api.root;
 
 let div;
-const n1 = 'a',
-  n2 = 'b',
-  n3 = 'c',
-  n4 = 'd';
+const n1 = "a",
+  n2 = "b",
+  n3 = "c",
+  n4 = "d";
 const list = o([n1, n2, n3, n4]);
 let dispose;
 const Component = () =>
-  root(d => {
+  root((d) => {
     dispose = d;
     div = h(
-      'div',
-      map(list, item => html`${item}`)
+      "div",
+      map(list, (item) => html`${item}`),
     );
   });
 
-function apply(t, array) {
+function apply(array) {
   list(array);
-  t.equal(div.innerHTML, array.join(''));
+  expect(div.innerHTML).toBe(array.join(""));
   list([n1, n2, n3, n4]);
-  t.equal(div.innerHTML, 'abcd');
+  expect(div.innerHTML).toBe("abcd");
 }
 
-test('Create map control flow', t => {
+test("Create map control flow", () => {
   Component();
 
-  t.equal(div.innerHTML, 'abcd');
-  t.end();
+  expect(div.innerHTML).toBe("abcd");
 });
 
-test('1 missing', t => {
-  apply(t, [n2, n3, n4]);
-  apply(t, [n1, n3, n4]);
-  apply(t, [n1, n2, n4]);
-  apply(t, [n1, n2, n3]);
-  t.end();
+test("1 missing", () => {
+  apply([n2, n3, n4]);
+  apply([n1, n3, n4]);
+  apply([n1, n2, n4]);
+  apply([n1, n2, n3]);
 });
 
-test('2 missing', t => {
-  apply(t, [n3, n4]);
-  apply(t, [n2, n4]);
-  apply(t, [n2, n3]);
-  apply(t, [n1, n4]);
-  apply(t, [n1, n3]);
-  apply(t, [n1, n2]);
-  t.end();
+test("2 missing", () => {
+  apply([n3, n4]);
+  apply([n2, n4]);
+  apply([n2, n3]);
+  apply([n1, n4]);
+  apply([n1, n3]);
+  apply([n1, n2]);
 });
 
-test('3 missing', t => {
-  apply(t, [n1]);
-  apply(t, [n2]);
-  apply(t, [n3]);
-  apply(t, [n4]);
-  t.end();
+test("3 missing", () => {
+  apply([n1]);
+  apply([n2]);
+  apply([n3]);
+  apply([n4]);
 });
 
-test('all missing', t => {
-  apply(t, []);
-  t.end();
+test("all missing", () => {
+  apply([]);
 });
 
-test('swaps', t => {
-  apply(t, [n2, n1, n3, n4]);
-  apply(t, [n3, n2, n1, n4]);
-  apply(t, [n4, n2, n3, n1]);
-  t.end();
+test("swaps", () => {
+  apply([n2, n1, n3, n4]);
+  apply([n3, n2, n1, n4]);
+  apply([n4, n2, n3, n1]);
 });
 
-test('rotations', t => {
-  apply(t, [n2, n3, n4, n1]);
-  apply(t, [n3, n4, n1, n2]);
-  apply(t, [n4, n1, n2, n3]);
-  t.end();
+test("rotations", () => {
+  apply([n2, n3, n4, n1]);
+  apply([n3, n4, n1, n2]);
+  apply([n4, n1, n2, n3]);
 });
 
-test('reversal', t => {
-  apply(t, [n4, n3, n2, n1]);
-  t.end();
+test("reversal", () => {
+  apply([n4, n3, n2, n1]);
 });
 
-test('full replace', t => {
-  apply(t, ['e', 'f', 'g', 'h']);
-  t.end();
+test("full replace", () => {
+  apply(["e", "f", "g", "h"]);
 });
 
-test('swap backward edge', t => {
-  list(['milk', 'bread', 'chips', 'cookie', 'honey']);
-  list(['chips', 'bread', 'cookie', 'milk', 'honey']);
-  t.end();
+test("swap backward edge", () => {
+  list(["milk", "bread", "chips", "cookie", "honey"]);
+  list(["chips", "bread", "cookie", "milk", "honey"]);
 });
 
-test('dispose', t => {
+test("dispose", () => {
   dispose();
-  t.end();
 });

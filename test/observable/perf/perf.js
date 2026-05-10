@@ -1,9 +1,9 @@
-const test = require('tape');
-const { observable, computed, subscribe } = require('../..');
-const log = require('./index.js').logMeasurement;
+const test = require("tape");
+const { observable, computed, subscribe } = require("../..");
+const log = require("./index.js").logMeasurement;
 
 function gc() {
-  if (typeof global.gc === 'function') global.gc();
+  if (typeof global.gc === "function") global.gc();
 }
 
 function now() {
@@ -22,25 +22,25 @@ results of this test:
 186/113 after remove filter/length call to detect whether depencies are stable. 300 times faster. w00t.
 
 */
-test('one observes ten thousand that observe one', function(t) {
+test("one observes ten thousand that observe one", function (t) {
   gc();
   const a = observable(2);
 
   // many observers that listen to one..
   const observers = [];
   for (let i = 0; i < 10000; i++) {
-    (function(idx) {
+    (function (idx) {
       observers.push(
-        computed(function() {
+        computed(function () {
           return a() * idx;
-        })
+        }),
       );
     })(i);
   }
 
   // let bCalcs = 0
   // one observers that listens to many..
-  const b = computed(function() {
+  const b = computed(function () {
     let res = 0;
     for (let i = 0; i < observers.length; i++) res += observers[i]();
     // bCalcs += 1
@@ -60,24 +60,24 @@ test('one observes ten thousand that observe one', function(t) {
   const end = now();
 
   log(
-    'One observers many observes one - Started/Updated in ' +
+    "One observers many observes one - Started/Updated in " +
       (initial - start) +
-      '/' +
+      "/" +
       (end - initial) +
-      ' ms.'
+      " ms.",
   );
   t.end();
 });
 
-test('five hundrend properties that observe their sibling', function(t) {
+test("five hundrend properties that observe their sibling", function (t) {
   gc();
   const observables = [observable(1)];
   for (let i = 0; i < 500; i++) {
-    (function(idx) {
+    (function (idx) {
       observables.push(
-        computed(function() {
+        computed(function () {
           return observables[idx]() + 1;
-        })
+        }),
       );
     })(i);
   }
@@ -95,21 +95,21 @@ test('five hundrend properties that observe their sibling', function(t) {
   const end = now();
 
   log(
-    '500 props observing sibling -  Started/Updated in ' +
+    "500 props observing sibling -  Started/Updated in " +
       (initial - start) +
-      '/' +
+      "/" +
       (end - initial) +
-      ' ms.'
+      " ms.",
   );
   t.end();
 });
 
-test('late dependency change', function(t) {
+test("late dependency change", function (t) {
   gc();
   const values = [];
   for (let i = 0; i < 100; i++) values.push(observable(0));
 
-  const sum = computed(function() {
+  const sum = computed(function () {
     let sum = 0;
     for (let i = 0; i < 100; i++) sum += values[i]();
     return sum;
@@ -123,28 +123,28 @@ test('late dependency change', function(t) {
   for (let i = 0; i < 10000; i++) values[99](i);
 
   t.equal(sum(), 9999);
-  log('Late dependency change - Updated in ' + (new Date() - start) + 'ms.');
+  log("Late dependency change - Updated in " + (new Date() - start) + "ms.");
   t.end();
 });
 
-test('lots of unused computables', function(t) {
+test("lots of unused computables", function (t) {
   gc();
   const a = observable(1);
 
   // many observers that listen to one..
   const observers = [];
   for (let i = 0; i < 10000; i++) {
-    (function(idx) {
+    (function (idx) {
       observers.push(
-        computed(function() {
+        computed(function () {
           return a() * idx;
-        })
+        }),
       );
     })(i);
   }
 
   // one observers that listens to many..
-  const b = computed(function() {
+  const b = computed(function () {
     let res = 0;
     for (let i = 0; i < observers.length; i++) res += observers[i]();
     return res;
@@ -175,16 +175,16 @@ test('lots of unused computables', function(t) {
 
   const end = now();
 
-  log('Unused computables -   Updated in ' + (end - start) + ' ms.');
+  log("Unused computables -   Updated in " + (end - start) + " ms.");
   t.end();
 });
 
-test('many unreferenced observables', function(t) {
+test("many unreferenced observables", function (t) {
   gc();
   const a = observable(3);
   const b = observable(6);
   const c = observable(7);
-  const d = computed(function() {
+  const d = computed(function () {
     return a() * b() * c();
   });
   t.equal(d(), 126);
@@ -196,12 +196,12 @@ test('many unreferenced observables', function(t) {
   }
   const end = now();
 
-  log('Unused observables -  Updated in ' + (end - start) + ' ms.');
+  log("Unused observables -  Updated in " + (end - start) + " ms.");
 
   t.end();
 });
 
-test('observe and dispose', t => {
+test("observe and dispose", (t) => {
   gc();
 
   const start = now();
@@ -222,7 +222,15 @@ test('observe and dispose', t => {
     observers[observers.length - 1 - i]();
   }
 
-  log('Observable with many observers + dispose - after subscribe: ' + (afterSubscribe - start) + 'ms, after set: ' + (afterSet - start) + 'ms, total: ' + (now() - start) + 'ms');
+  log(
+    "Observable with many observers + dispose - after subscribe: " +
+      (afterSubscribe - start) +
+      "ms, after set: " +
+      (afterSet - start) +
+      "ms, total: " +
+      (now() - start) +
+      "ms",
+  );
   t.end();
 });
 

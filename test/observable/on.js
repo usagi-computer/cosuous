@@ -1,136 +1,129 @@
-import test from 'tape';
-import spy from 'ispy';
-import { o, root, on } from 'sinuous/observable';
+import { test, expect, vi } from "vitest";
+import { o, root, on } from "cosuous/observable";
 
-test('registers a dependency', function(t) {
-  root(function() {
+test("registers a dependency", () => {
+  root(function () {
     var d = o(1),
-      callSpy = spy(),
-      f = on(d, function() {
+      callSpy = vi.fn(),
+      f = on(d, function () {
         callSpy();
       });
 
-    t.equal(callSpy.callCount, 1);
+    expect(callSpy.mock.calls.length).toBe(1);
 
     d(2);
 
-    t.equal(callSpy.callCount, 2);
+    expect(callSpy.mock.calls.length).toBe(2);
   });
-  t.end();
 });
 
-test('prohibits dynamic dependencies', function(t) {
-  root(function() {
+test("prohibits dynamic dependencies", () => {
+  root(function () {
     var d = o(1),
-      callSpy = spy(),
+      callSpy = vi.fn(),
       s = on(
-        function() {},
-        function() {
+        function () {},
+        function () {
           callSpy();
           return d();
-        }
+        },
       );
 
-    t.equal(callSpy.callCount, 1);
+    expect(callSpy.mock.calls.length).toBe(1);
 
     d(2);
 
-    t.equal(callSpy.callCount, 1);
+    expect(callSpy.mock.calls.length).toBe(1);
   });
-  t.end();
 });
 
-test('allows multiple dependencies', function(t) {
-  root(function() {
+test("allows multiple dependencies", () => {
+  root(function () {
     var a = o(1),
       b = o(2),
       c = o(3),
-      callSpy = spy(),
+      callSpy = vi.fn(),
       f = on(
-        function() {
+        function () {
           a();
           b();
           c();
         },
-        function() {
+        function () {
           callSpy();
-        }
+        },
       );
 
-    t.equal(callSpy.callCount, 1);
+    expect(callSpy.mock.calls.length).toBe(1);
 
     a(4);
     b(5);
     c(6);
 
-    t.equal(callSpy.callCount, 4);
+    expect(callSpy.mock.calls.length).toBe(4);
   });
-  t.end();
 });
 
-test('allows an array of dependencies', function(t) {
-  root(function() {
+test("allows an array of dependencies", () => {
+  root(function () {
     var a = o(1),
       b = o(2),
       c = o(3),
-      callSpy = spy(),
-      f = on([a, b, c], function() {
+      callSpy = vi.fn(),
+      f = on([a, b, c], function () {
         callSpy();
       });
 
-    t.equal(callSpy.callCount, 1);
+    expect(callSpy.mock.calls.length).toBe(1);
 
     a(4);
     b(5);
     c(6);
 
-    t.equal(callSpy.callCount, 4);
+    expect(callSpy.mock.calls.length).toBe(4);
   });
-  t.end();
 });
 
-test('modifies its accumulator when reducing', function(t) {
-  root(function() {
+test("modifies its accumulator when reducing", () => {
+  root(function () {
     var a = o(1),
       c = on(
         a,
-        function(sum) {
+        function (sum) {
           return sum + a();
         },
-        0
+        0,
       );
 
-    t.equal(c(), 1);
+    expect(c()).toBe(1);
 
     a(2);
 
-    t.equal(c(), 3);
+    expect(c()).toBe(3);
 
     a(3);
     a(4);
 
-    t.equal(c(), 10);
+    expect(c()).toBe(10);
   });
-  t.end();
 });
 
-test('suppresses initial run when onchanges is true', function(t) {
-  root(function() {
+test("suppresses initial run when onchanges is true", () => {
+  root(function () {
     var a = o(1),
       c = on(
         a,
-        function() {
+        function () {
           return a() * 2;
         },
         0,
-        true
+        true,
       );
 
-    t.equal(c(), 0);
+    expect(c()).toBe(0);
 
     a(2);
 
-    t.equal(c(), 4);
+    expect(c()).toBe(4);
   });
-  t.end();
 });

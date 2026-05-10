@@ -1,15 +1,15 @@
-export = sinuous;
-export as namespace sinuous;
+export = cosuous;
+export as namespace cosuous;
 
-import { JSXInternal } from './jsx';
-import { HyperscriptApi } from './h';
-import * as _shared from './shared'
-import * as _o from './observable';
+import { JSXInternal } from "./jsx";
+import { HyperscriptApi } from "./h";
+import * as _shared from "./shared";
+import * as _o from "./observable";
 
 import FunctionComponent = _shared.FunctionComponent;
 import ElementChildren = _shared.ElementChildren;
 
-declare module 'sinuous/jsx' {
+declare module "cosuous/jsx" {
   namespace JSXInternal {
     interface DOMAttributes<Target extends EventTarget> {
       children?: ElementChildren;
@@ -19,66 +19,51 @@ declare module 'sinuous/jsx' {
 
 // Adapted from Preact's index.d.ts
 // Namespace prevents conflict with React typings
-declare namespace sinuous {
+declare namespace cosuous {
   export import JSX = JSXInternal;
 
   export import observable = _o.observable;
   export import o = _o.o;
 
-  const html: (strings: TemplateStringsArray, ...values: unknown[]) => HTMLElement | DocumentFragment;
+  const html: (
+    strings: TemplateStringsArray,
+    ...values: unknown[]
+  ) => HTMLElement | DocumentFragment;
   const svg: (strings: TemplateStringsArray, ...values: unknown[]) => SVGElement | DocumentFragment;
 
   // Split HyperscriptApi's h() tag into functions with more narrow typings
   function h(
     type: string,
-    props:
-      | JSXInternal.HTMLAttributes &
-        Record<string, unknown>
-      | null,
+    props: (JSXInternal.HTMLAttributes & Record<string, unknown>) | null,
     ...children: ElementChildren[]
   ): HTMLElement;
   function h(
     type: FunctionComponent,
-    props:
-      | JSXInternal.HTMLAttributes &
-        Record<string, unknown>
-      | null,
+    props: (JSXInternal.HTMLAttributes & Record<string, unknown>) | null,
     ...children: ElementChildren[]
   ): HTMLElement | DocumentFragment;
-  function h(
-    tag: ElementChildren[] | [],
-    ...children: ElementChildren[]
-  ): DocumentFragment;
+  function h(tag: ElementChildren[] | [], ...children: ElementChildren[]): DocumentFragment;
   namespace h {
     export import JSX = JSXInternal;
   }
 
   function hs(
     type: string,
-    props:
-      | JSXInternal.SVGAttributes &
-        Record<string, unknown>
-      | null,
+    props: (JSXInternal.SVGAttributes & Record<string, unknown>) | null,
     ...children: ElementChildren[]
   ): SVGElement;
   function hs(
     type: FunctionComponent,
-    props:
-      | JSXInternal.SVGAttributes &
-        Record<string, unknown>
-      | null,
+    props: (JSXInternal.SVGAttributes & Record<string, unknown>) | null,
     ...children: ElementChildren[]
   ): SVGElement | DocumentFragment;
-  function hs(
-    tag: ElementChildren[] | [],
-    ...children: ElementChildren[]
-  ): DocumentFragment;
+  function hs(tag: ElementChildren[] | [], ...children: ElementChildren[]): DocumentFragment;
   namespace hs {
     export import JSX = JSXInternal;
   }
 
-  /** Sinuous API */
-  interface SinuousApi extends HyperscriptApi {
+  /** Cosuous API */
+  interface CosuousApi extends HyperscriptApi {
     // Hyperscript
     hs: <T extends () => unknown>(closure: T) => ReturnType<T>;
 
@@ -89,6 +74,5 @@ declare namespace sinuous {
     sample: typeof _o.sample;
   }
 
-  const api: SinuousApi;
-
+  const api: CosuousApi;
 }

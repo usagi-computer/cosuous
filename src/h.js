@@ -23,7 +23,7 @@ const EMPTY_ARR = [];
 
 /** @type {(value: *) => Text | Node | DocumentFragment} */
 const castNode = (value) => {
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     return document.createTextNode(value);
   }
   // Note that a DocumentFragment is an instance of Node
@@ -48,7 +48,7 @@ const frag = (value) => {
 
   // It looks recursive here but the next call's fragOrNode is only Text('')
   return {
-    _startMark: /** @type {Text} */ (api.add(value, '', childNodes[0])),
+    _startMark: /** @type {Text} */ (api.add(value, "", childNodes[0])),
   };
 };
 
@@ -84,13 +84,13 @@ export const insert = (el, value, endMark, current, startNode) => {
   // @ts-ignore Allow empty if statement
   if (value === current);
   else if (
-    (!current || typeof current === 'string') &&
+    (!current || typeof current === "string") &&
     // @ts-ignore Doesn't like `value += ''`
-    // eslint-disable-next-line no-implicit-coercion
-    (typeof value === 'string' || (typeof value === 'number' && (value += '')))
+
+    (typeof value === "string" || (typeof value === "number" && (value += "")))
   ) {
     // Block optimized for string insertion.
-    // eslint-disable-next-line eqeqeq
+
     if (current == null || !el.firstChild) {
       if (endMark) {
         api.add(el, value, endMark);
@@ -106,7 +106,7 @@ export const insert = (el, value, endMark, current, startNode) => {
       }
     }
     current = value;
-  } else if (typeof value === 'function') {
+  } else if (typeof value === "function") {
     api.subscribe(() => {
       current = api.insert(el, value.call({ el, endMark }), endMark, current, startNode);
     });
@@ -117,12 +117,13 @@ export const insert = (el, value, endMark, current, startNode) => {
       if (current) {
         if (!startNode) {
           // Support fragments
-          startNode = (current._startMark && current._startMark.nextSibling) || endMark.previousSibling;
+          startNode =
+            (current._startMark && current._startMark.nextSibling) || endMark.previousSibling;
         }
         api.rm(el, startNode, endMark);
       }
     } else {
-      el.textContent = '';
+      el.textContent = "";
     }
     current = null;
 
@@ -163,17 +164,16 @@ const handleEvent = (el, name, value) => {
  * @type {hProperty}
  */
 export const property = (el, value, name, isAttr, isCss) => {
-  // eslint-disable-next-line eqeqeq
   if (value == null) return;
-  if (!name || (name === 'attrs' && (isAttr = true))) {
+  if (!name || (name === "attrs" && (isAttr = true))) {
     for (name in value) {
       api.property(el, value[name], name, isAttr, isCss);
     }
-  } else if (name[0] === 'o' && name[1] === 'n' && !value.$o) {
+  } else if (name[0] === "o" && name[1] === "n" && !value.$o) {
     // Functions added as event handlers are not executed
     // on render unless they have an observable indicator.
     handleEvent(el, name, value);
-  } else if (typeof value === 'function') {
+  } else if (typeof value === "function") {
     api.subscribe(() => {
       api.property(el, value.call({ el, name }), name, isAttr, isCss);
     });
@@ -182,19 +182,19 @@ export const property = (el, value, name, isAttr, isCss) => {
   } else if (
     // isAttr wont be true for 'for' but it needs to be an attribute
     isAttr ||
-    name.slice(0, 5) === 'data-' ||
-    name.slice(0, 5) === 'aria-' ||
-    name === 'for'
+    name.slice(0, 5) === "data-" ||
+    name.slice(0, 5) === "aria-" ||
+    name === "for"
   ) {
     el.setAttribute(name, value);
-  } else if (name === 'style') {
-    if (typeof value === 'string') {
+  } else if (name === "style") {
+    if (typeof value === "string") {
       el.style.cssText = value;
     } else {
       api.property(el, value, null, isAttr, true);
     }
   } else {
-    if (name === 'class') name += 'Name';
+    if (name === "class") name += "Name";
     el[name] = value;
   }
 };
@@ -216,7 +216,7 @@ export const removeNodes = (parent, startNode, endMark) => {
 };
 
 /**
- * Sinuous `h` tag aka hyperscript.
+ * Cosuous `h` tag aka hyperscript.
  * @typedef {HTMLElement | SVGElement | DocumentFragment} DOM
  * @typedef {(tag: string? | [], props: object?, ...children: Node | *) => DOM} hTag
  * @type {hTag}
@@ -229,13 +229,15 @@ export const h = (...args) => {
 
   const item = (/** @type {*} */ arg) => {
     // @ts-ignore Allow empty if
-    // eslint-disable-next-line eqeqeq
+
     if (arg == null);
-    else if (typeof arg === 'string') {
+    else if (typeof arg === "string") {
       if (el) {
         api.add(el, arg);
       } else {
-        el = api.s ? document.createElementNS('http://www.w3.org/2000/svg', arg) : document.createElement(arg);
+        el = api.s
+          ? document.createElementNS("http://www.w3.org/2000/svg", arg)
+          : document.createElement(arg);
       }
     } else if (Array.isArray(arg)) {
       // Support Fragments
@@ -248,37 +250,36 @@ export const h = (...args) => {
         // Support updates
         el = arg;
       }
-    } else if (typeof arg === 'object') {
+    } else if (typeof arg === "object") {
       // Detect onMount
-      if (arg && typeof arg.onMount === 'function') {
+      if (arg && typeof arg.onMount === "function") {
         onMountFn = arg.onMount;
         // eslint-disable-next-line no-unused-vars
         const { onMount, ...rest } = arg;
         api.property(el, rest, null, api.s);
       }
       // Detect onUnmount
-      if (arg && typeof arg.onUnmount === 'function') {
+      if (arg && typeof arg.onUnmount === "function") {
         onUnmountFn = arg.onUnmount;
         // eslint-disable-next-line no-unused-vars
         const { onUnmount, ...rest } = arg;
         api.property(el, rest, null, api.s);
       }
-      if (!('onMount' in arg) && !('onUnmount' in arg)) {
+      if (!("onMount" in arg) && !("onUnmount" in arg)) {
         // @ts-ignore 0 | 1 is a boolean but can't type cast; they don't overlap
         api.property(el, arg, null, api.s);
       }
-    } else if (typeof arg === 'function') {
+    } else if (typeof arg === "function") {
       if (el) {
         // See note in add.js#frag() - This is a Text('') node
-        const endMark = /** @type {Text} */ (api.add(el, ''));
+        const endMark = /** @type {Text} */ (api.add(el, ""));
         api.insert(el, arg, endMark);
       } else {
         // Support Components
         el = arg.apply(null, args.splice(1));
       }
     } else {
-      // eslint-disable-next-line no-implicit-coercion,prefer-template
-      api.add(el, '' + arg);
+      api.add(el, "" + arg);
     }
   };
   args.forEach(item);

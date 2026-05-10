@@ -1,41 +1,37 @@
-import test from 'tape';
-import { hs, svg } from 'sinuous';
-import { normalizeSvg } from '../../test/_utils.js';
+import { test, expect } from "vitest";
+import { hs, svg } from "cosuous";
+import { normalizeSvg } from "../../test/_utils.js";
 
-test('normalizeSvg', function(t) {
+test("normalizeSvg", () => {
   // IE11 adds xmlns and has a self closing tags.
-  t.equal(
+  expect(
     normalizeSvg(
-      '<svg xmlns="http://www.w3.org/2000/svg" class="redbox" viewBox="0 0 100 100"><path d="M 8.74211 7.70899" /></svg>'
+      '<svg xmlns="http://www.w3.org/2000/svg" class="redbox" viewBox="0 0 100 100"><path d="M 8.74211 7.70899" /></svg>',
     ),
-    '<svg class="redbox" viewBox="0 0 100 100"><path d="M 8.74211 7.70899"></path></svg>'
-  );
-  t.end();
+  ).toBe('<svg class="redbox" viewBox="0 0 100 100"><path d="M 8.74211 7.70899"></path></svg>');
 });
 
-test('supports SVG', function(t) {
+test("supports SVG", () => {
   const svg = hs(
-    'svg',
-    { class: 'redbox', viewBox: '0 0 100 100' },
-    hs('path', { d: 'M 8.74211 7.70899' })
+    "svg",
+    { class: "redbox", viewBox: "0 0 100 100" },
+    hs("path", { d: "M 8.74211 7.70899" }),
   );
 
-  t.equal(
-    normalizeSvg(svg),
-    '<svg class="redbox" viewBox="0 0 100 100"><path d="M 8.74211 7.70899"></path></svg>'
+  expect(normalizeSvg(svg)).toBe(
+    '<svg class="redbox" viewBox="0 0 100 100"><path d="M 8.74211 7.70899"></path></svg>',
   );
-  t.end();
 });
 
-test('can add an array of svg elements', function(t) {
+test("can add an array of svg elements", () => {
   const circles = [1, 2, 3];
-  t.equal(
+  expect(
     normalizeSvg(
       svg`<svg>
-        ${() => circles.map(c => svg`<circle cx="0" cy="${c}" r="10" />`)}
-      </svg>`
+        ${() => circles.map((c) => svg`<circle cx="0" cy="${c}" r="10" />`)}
+      </svg>`,
     ),
-    '<svg><circle cx="0" cy="1" r="10"></circle><circle cx="0" cy="2" r="10"></circle><circle cx="0" cy="3" r="10"></circle></svg>'
+  ).toBe(
+    '<svg><circle cx="0" cy="1" r="10"></circle><circle cx="0" cy="2" r="10"></circle><circle cx="0" cy="3" r="10"></circle></svg>',
   );
-  t.end();
 });

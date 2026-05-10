@@ -1,11 +1,11 @@
-import fs from 'fs';
-import path from 'path';
-import test from 'tape';
-import { fileURLToPath } from 'url';
+import fs from "fs";
+import path from "path";
+import { test, expect, describe } from "vitest";
+import { fileURLToPath } from "url";
 
-import { transform } from '@babel/core';
+import { transform } from "@babel/core";
 
-import htmBabelPlugin from '../../src/babel-plugin-htm.js';
+import htmBabelPlugin from "../../src/babel-plugin-htm.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,658 +13,595 @@ const __dirname = path.dirname(__filename);
 const options = {
   babelrc: false,
   configFile: false,
-  sourceType: 'script',
-  compact: true
+  sourceType: "script",
+  compact: true,
 };
 
-const describe = (title, fn) => fn() && console.log(title);
-
-describe('htm/babel', () => {
-  test('basic transformation', t => {
-    t.equal(
-      transform('html`<div id=hello>hello</div>`;', {
+describe("htm/babel", () => {
+  test("basic transformation", () => {
+    expect(
+      transform("html`<div id=hello>hello</div>`;", {
         ...options,
-        plugins: [htmBabelPlugin]
+        plugins: [htmBabelPlugin],
       }).code,
-      `h("div",{id:"hello"},"hello");`
-    );
-    t.end();
+    ).toBe(`h("div",{id:"hello"},"hello");`);
   });
 
-  test('basic transformation with variable', t => {
-    t.equal(
+  test("basic transformation with variable", () => {
+    expect(
       transform('var name="world";html`<div id=hello>hello, ${name}</div>`;', {
         ...options,
-        plugins: [htmBabelPlugin]
+        plugins: [htmBabelPlugin],
       }).code,
-      `var name="world";h("div",{id:"hello"},"hello, ",name);`
-    );
-    t.end();
+    ).toBe(`var name="world";h("div",{id:"hello"},"hello, ",name);`);
   });
 
-  test('basic nested transformation', t => {
-    t.equal(
-      transform('html`<a b=${2} ...${{ c: 3 }}>d: ${4}</a>`;', {
+  test("basic nested transformation", () => {
+    expect(
+      transform("html`<a b=${2} ...${{ c: 3 }}>d: ${4}</a>`;", {
         ...options,
         plugins: [
           [
             htmBabelPlugin,
             {
-              useBuiltIns: true
-            }
-          ]
-        ]
+              useBuiltIns: true,
+            },
+          ],
+        ],
       }).code,
-      `h("a",Object.assign({b:2},{c:3}),"d: ",4);`
-    );
+    ).toBe(`h("a",Object.assign({b:2},{c:3}),"d: ",4);`);
 
-    t.equal(
-      transform('html`<a b=${2} ...${{ c: 3 }}>d: ${4}</a>`;', {
+    expect(
+      transform("html`<a b=${2} ...${{ c: 3 }}>d: ${4}</a>`;", {
         ...options,
         plugins: [
           [
             htmBabelPlugin,
             {
-              useNativeSpread: true
-            }
-          ]
-        ]
+              useNativeSpread: true,
+            },
+          ],
+        ],
       }).code,
-      `h("a",{b:2,...{c:3}},"d: ",4);`
-    );
-    t.end();
+    ).toBe(`h("a",{b:2,...{c:3}},"d: ",4);`);
   });
 
-  test('spread a single variable', t => {
-    t.equal(
-      transform('html`<a ...${foo}></a>`;', {
+  test("spread a single variable", () => {
+    expect(
+      transform("html`<a ...${foo}></a>`;", {
         ...options,
-        plugins: [htmBabelPlugin]
+        plugins: [htmBabelPlugin],
       }).code,
-      `h("a",foo);`
-    );
+    ).toBe(`h("a",foo);`);
 
-    t.equal(
-      transform('html`<a ...${foo}></a>`;', {
+    expect(
+      transform("html`<a ...${foo}></a>`;", {
         ...options,
         plugins: [
           [
             htmBabelPlugin,
             {
-              useNativeSpread: true
-            }
-          ]
-        ]
+              useNativeSpread: true,
+            },
+          ],
+        ],
       }).code,
-      `h("a",foo);`
-    );
-    t.end();
+    ).toBe(`h("a",foo);`);
   });
 
-  test('spread two variables', t => {
-    t.equal(
-      transform('html`<a ...${foo} ...${bar}></a>`;', {
+  test("spread two variables", () => {
+    expect(
+      transform("html`<a ...${foo} ...${bar}></a>`;", {
         ...options,
         plugins: [
           [
             htmBabelPlugin,
             {
-              useBuiltIns: true
-            }
-          ]
-        ]
+              useBuiltIns: true,
+            },
+          ],
+        ],
       }).code,
-      `h("a",Object.assign({},foo,bar));`
-    );
+    ).toBe(`h("a",Object.assign({},foo,bar));`);
 
-    t.equal(
-      transform('html`<a ...${foo} ...${bar}></a>`;', {
+    expect(
+      transform("html`<a ...${foo} ...${bar}></a>`;", {
         ...options,
         plugins: [
           [
             htmBabelPlugin,
             {
-              useNativeSpread: true
-            }
-          ]
-        ]
+              useNativeSpread: true,
+            },
+          ],
+        ],
       }).code,
-      `h("a",{...foo,...bar});`
-    );
-    t.end();
+    ).toBe(`h("a",{...foo,...bar});`);
   });
 
-  test('property followed by a spread', t => {
-    t.equal(
+  test("property followed by a spread", () => {
+    expect(
       transform('html`<a b="1" ...${foo}></a>`;', {
         ...options,
         plugins: [
           [
             htmBabelPlugin,
             {
-              useBuiltIns: true
-            }
-          ]
-        ]
+              useBuiltIns: true,
+            },
+          ],
+        ],
       }).code,
-      `h("a",Object.assign({b:"1"},foo));`
-    );
+    ).toBe(`h("a",Object.assign({b:"1"},foo));`);
 
-    t.equal(
+    expect(
       transform('html`<a b="1" ...${foo}></a>`;', {
         ...options,
         plugins: [
           [
             htmBabelPlugin,
             {
-              useNativeSpread: true
-            }
-          ]
-        ]
+              useNativeSpread: true,
+            },
+          ],
+        ],
       }).code,
-      `h("a",{b:"1",...foo});`
-    );
-    t.end();
+    ).toBe(`h("a",{b:"1",...foo});`);
   });
 
-  test('spread followed by a property', t => {
-    t.equal(
+  test("spread followed by a property", () => {
+    expect(
       transform('html`<a ...${foo} b="1"></a>`;', {
         ...options,
         plugins: [
           [
             htmBabelPlugin,
             {
-              useBuiltIns: true
-            }
-          ]
-        ]
+              useBuiltIns: true,
+            },
+          ],
+        ],
       }).code,
-      `h("a",Object.assign({},foo,{b:"1"}));`
-    );
+    ).toBe(`h("a",Object.assign({},foo,{b:"1"}));`);
 
-    t.equal(
+    expect(
       transform('html`<a ...${foo} b="1"></a>`;', {
         ...options,
         plugins: [
           [
             htmBabelPlugin,
             {
-              useNativeSpread: true
-            }
-          ]
-        ]
+              useNativeSpread: true,
+            },
+          ],
+        ],
       }).code,
-      `h("a",{...foo,b:"1"});`
-    );
-    t.end();
+    ).toBe(`h("a",{...foo,b:"1"});`);
   });
 
-  test('mix-and-match spreads', t => {
-    t.equal(
+  test("mix-and-match spreads", () => {
+    expect(
       transform('html`<a b="1" ...${foo} c=${2} ...${{d:3}}></a>`;', {
         ...options,
         plugins: [
           [
             htmBabelPlugin,
             {
-              useBuiltIns: true
-            }
-          ]
-        ]
+              useBuiltIns: true,
+            },
+          ],
+        ],
       }).code,
-      `h("a",Object.assign({b:"1"},foo,{c:2},{d:3}));`
-    );
+    ).toBe(`h("a",Object.assign({b:"1"},foo,{c:2},{d:3}));`);
 
-    t.equal(
+    expect(
       transform('html`<a b="1" ...${foo} c=${2} ...${{d:3}}></a>`;', {
         ...options,
         plugins: [
           [
             htmBabelPlugin,
             {
-              useNativeSpread: true
-            }
-          ]
-        ]
+              useNativeSpread: true,
+            },
+          ],
+        ],
       }).code,
-      `h("a",{b:"1",...foo,c:2,...{d:3}});`
-    );
-    t.end();
+    ).toBe(`h("a",{b:"1",...foo,c:2,...{d:3}});`);
   });
 
-  test('mix-and-match dynamic and static values', t => {
-    t.equal(
+  test("mix-and-match dynamic and static values", () => {
+    expect(
       transform('html`<a b="1${2}${3}"></a>`;', {
         ...options,
         plugins: [
           [
             htmBabelPlugin,
             {
-              useBuiltIns: true
-            }
-          ]
-        ]
+              useBuiltIns: true,
+            },
+          ],
+        ],
       }).code,
-      `h("a",{b:"1"+2+3});`
-    );
+    ).toBe(`h("a",{b:"1"+2+3});`);
 
-    t.equal(
+    expect(
       transform('html`<a b="1${2}${3}"></a>`;', {
         ...options,
         plugins: [
           [
             htmBabelPlugin,
             {
-              useNativeSpread: true
-            }
-          ]
-        ]
+              useNativeSpread: true,
+            },
+          ],
+        ],
       }).code,
-      `h("a",{b:"1"+2+3});`
-    );
-    t.end();
+    ).toBe(`h("a",{b:"1"+2+3});`);
   });
 
-  test('coerces props to strings when needed', t => {
-    t.equal(
-      transform('html`<a b=\'${1}${2}${"3"}${4}\'></a>`;', {
+  test("coerces props to strings when needed", () => {
+    expect(
+      transform("html`<a b='${1}${2}${\"3\"}${4}'></a>`;", {
         ...options,
         plugins: [
           [
             htmBabelPlugin,
             {
-              useBuiltIns: true
-            }
-          ]
-        ]
+              useBuiltIns: true,
+            },
+          ],
+        ],
       }).code,
-      `h("a",{b:""+1+2+"3"+4});`
-    );
+    ).toBe(`h("a",{b:""+1+2+"3"+4});`);
 
-    t.equal(
-      transform('html`<a b=\'${1}${2}${"3"}${4}\'></a>`;', {
+    expect(
+      transform("html`<a b='${1}${2}${\"3\"}${4}'></a>`;", {
         ...options,
         plugins: [
           [
             htmBabelPlugin,
             {
-              useNativeSpread: true
-            }
-          ]
-        ]
+              useNativeSpread: true,
+            },
+          ],
+        ],
       }).code,
-      `h("a",{b:""+1+2+"3"+4});`
-    );
-    t.end();
+    ).toBe(`h("a",{b:""+1+2+"3"+4});`);
   });
 
-  test('coerces props to strings only when needed', t => {
-    t.equal(
+  test("coerces props to strings only when needed", () => {
+    expect(
       transform('html`<a b=\'${"1"}${2}${"3"}${4}\'></a>`;', {
         ...options,
         plugins: [
           [
             htmBabelPlugin,
             {
-              useBuiltIns: true
-            }
-          ]
-        ]
+              useBuiltIns: true,
+            },
+          ],
+        ],
       }).code,
-      `h("a",{b:"1"+2+"3"+4});`
-    );
+    ).toBe(`h("a",{b:"1"+2+"3"+4});`);
 
-    t.equal(
+    expect(
       transform('html`<a b=\'${"1"}${2}${"3"}${4}\'></a>`;', {
         ...options,
         plugins: [
           [
             htmBabelPlugin,
             {
-              useNativeSpread: true
-            }
-          ]
-        ]
+              useNativeSpread: true,
+            },
+          ],
+        ],
       }).code,
-      `h("a",{b:"1"+2+"3"+4});`
-    );
-    t.end();
+    ).toBe(`h("a",{b:"1"+2+"3"+4});`);
   });
 
-  test('should add children without closure', t => {
-    t.equal(
-      transform('html`<div><b /></div>`;', {
+  test("should add children without closure", () => {
+    expect(
+      transform("html`<div><b /></div>`;", {
         ...options,
-        plugins: [
-          [
-            htmBabelPlugin
-          ]
-        ]
+        plugins: [[htmBabelPlugin]],
       }).code,
-      `h("div",null,h("b",null));`
-    );
-    t.equal(
-      transform('html`<div><b /><i /></div>`;', {
+    ).toBe(`h("div",null,h("b",null));`);
+    expect(
+      transform("html`<div><b /><i /></div>`;", {
         ...options,
-        plugins: [
-          [
-            htmBabelPlugin
-          ]
-        ]
+        plugins: [[htmBabelPlugin]],
       }).code,
-      `h("div",null,h("b",null),h("i",null));`
-    );
-    t.end();
+    ).toBe(`h("div",null,h("b",null),h("i",null));`);
   });
 
-  test('should wrap children of component in closure', t => {
-    t.equal(
-      transform('html`<${Component}><div></div><//>`;', {
+  test("should wrap children of component in closure", () => {
+    expect(
+      transform("html`<${Component}><div></div><//>`;", {
         ...options,
-        plugins: [
-          [
-            htmBabelPlugin
-          ]
-        ]
+        plugins: [[htmBabelPlugin]],
       }).code,
-      `h(Component,null,()=>h("div",null));`
-    );
-    t.equal(
-      transform('html`<${Component}><div /><b /><//>`;', {
+    ).toBe(`h(Component,null,()=>h("div",null));`);
+    expect(
+      transform("html`<${Component}><div /><b /><//>`;", {
         ...options,
-        plugins: [
-          [
-            htmBabelPlugin
-          ]
-        ]
+        plugins: [[htmBabelPlugin]],
       }).code,
-      `h(Component,null,()=>h("div",null),()=>h("b",null));`
-    );
-    t.equal(
-      transform('html`<${Component}><div><${Component}><b /><//></div><//>`;', {
+    ).toBe(`h(Component,null,()=>h("div",null),()=>h("b",null));`);
+    expect(
+      transform("html`<${Component}><div><${Component}><b /><//></div><//>`;", {
         ...options,
-        plugins: [
-          [
-            htmBabelPlugin
-          ]
-        ]
+        plugins: [[htmBabelPlugin]],
       }).code,
-      `h(Component,null,()=>h("div",null,h(Component,null,()=>h("b",null))));`
-    );
-    t.end();
+    ).toBe(`h(Component,null,()=>h("div",null,h(Component,null,()=>h("b",null))));`);
   });
 
-  describe('{variableArity:false}', () => {
-    test('should pass no children as an empty Array', t => {
-      t.equal(
-        transform('html`<div />`;', {
+  describe("{variableArity:false}", () => {
+    test("should pass no children as an empty Array", () => {
+      expect(
+        transform("html`<div />`;", {
           ...options,
           plugins: [
             [
               htmBabelPlugin,
               {
-                variableArity: false
-              }
-            ]
-          ]
+                variableArity: false,
+              },
+            ],
+          ],
         }).code,
-        `h("div",null,[]);`
-      );
-      t.end();
+      ).toBe(`h("div",null,[]);`);
     });
 
-    test('should pass children as an Array', t => {
-      t.equal(
-        transform('html`<div id=hello>hello</div>`;', {
+    test("should pass children as an Array", () => {
+      expect(
+        transform("html`<div id=hello>hello</div>`;", {
           ...options,
           plugins: [
             [
               htmBabelPlugin,
               {
-                variableArity: false
-              }
-            ]
-          ]
+                variableArity: false,
+              },
+            ],
+          ],
         }).code,
-        `h("div",{id:"hello"},["hello"]);`
-      );
-      t.end();
+      ).toBe(`h("div",{id:"hello"},["hello"]);`);
     });
   });
 
-  describe('{pragma:false}', () => {
-    test('should transform to inline vnodes', t => {
-      t.equal(
-        transform(
-          'var name="world",vnode=html`<div id=hello>hello, ${name}</div>`;',
-          {
-            ...options,
-            plugins: [
-              [
-                htmBabelPlugin,
-                {
-                  pragma: false
-                }
-              ]
-            ]
-          }
-        ).code,
-        `var name="world",vnode={tag:"div",props:{id:"hello"},children:["hello, ",name]};`
-      );
-      t.end();
+  describe("{pragma:false}", () => {
+    test("should transform to inline vnodes", () => {
+      expect(
+        transform('var name="world",vnode=html`<div id=hello>hello, ${name}</div>`;', {
+          ...options,
+          plugins: [
+            [
+              htmBabelPlugin,
+              {
+                pragma: false,
+              },
+            ],
+          ],
+        }).code,
+      ).toBe(`var name="world",vnode={tag:"div",props:{id:"hello"},children:["hello, ",name]};`);
     });
   });
 
-  describe('{monomorphic:true}', () => {
-    test('should transform to monomorphic inline vnodes', t => {
-      t.equal(
-        transform(
-          'var name="world",vnode=html`<div id=hello>hello, ${name}</div>`;',
-          {
-            ...options,
-            plugins: [
-              [
-                htmBabelPlugin,
-                {
-                  monomorphic: true
-                }
-              ]
-            ]
-          }
-        ).code,
-        `var name="world",vnode={type:1,tag:"div",props:{id:"hello"},children:[{type:3,tag:null,props:null,children:null,text:"hello, "},name],text:null};`
+  describe("{monomorphic:true}", () => {
+    test("should transform to monomorphic inline vnodes", () => {
+      expect(
+        transform('var name="world",vnode=html`<div id=hello>hello, ${name}</div>`;', {
+          ...options,
+          plugins: [
+            [
+              htmBabelPlugin,
+              {
+                monomorphic: true,
+              },
+            ],
+          ],
+        }).code,
+      ).toBe(
+        `var name="world",vnode={type:1,tag:"div",props:{id:"hello"},children:[{type:3,tag:null,props:null,children:null,text:"hello, "},name],text:null};`,
       );
-      t.end();
     });
   });
 
   describe('{import:"preact"}', () => {
-    test('should do nothing when pragma=false', (t) => {
-      t.equal(
+    test("should do nothing when pragma=false", () => {
+      expect(
         transform('var name="world",vnode=html`<div id=hello>hello, ${name}</div>`;', {
           ...options,
           plugins: [
-            [htmBabelPlugin, {
-              pragma: false,
-              import: 'preact'
-            }]
-          ]
-        }).code
-      , `var name="world",vnode={tag:"div",props:{id:"hello"},children:["hello, ",name]};`);
-      t.end();
+            [
+              htmBabelPlugin,
+              {
+                pragma: false,
+                import: "preact",
+              },
+            ],
+          ],
+        }).code,
+      ).toBe(`var name="world",vnode={tag:"div",props:{id:"hello"},children:["hello, ",name]};`);
     });
-    test('should do nothing when tag is not used', (t) => {
-      t.equal(
+    test("should do nothing when tag is not used", () => {
+      expect(
         transform('console.log("hi");', {
           ...options,
           plugins: [
-            [htmBabelPlugin, {
-              import: 'preact'
-            }]
-          ]
-        }).code
-      , `console.log("hi");`);
-      t.end();
+            [
+              htmBabelPlugin,
+              {
+                import: "preact",
+              },
+            ],
+          ],
+        }).code,
+      ).toBe(`console.log("hi");`);
     });
-    test('should add import', (t) => {
-      t.equal(
-        transform('html`<div id=hello>hello</div>`;', {
+    test("should add import", () => {
+      expect(
+        transform("html`<div id=hello>hello</div>`;", {
           ...options,
           plugins: [
-            [htmBabelPlugin, {
-              import: 'preact'
-            }]
-          ]
-        }).code
-      , `import{h}from"preact";h("div",{id:"hello"},"hello");`);
-      t.end();
+            [
+              htmBabelPlugin,
+              {
+                import: "preact",
+              },
+            ],
+          ],
+        }).code,
+      ).toBe(`import{h}from"preact";h("div",{id:"hello"},"hello");`);
     });
-    test('should add import for pragma', (t) => {
-      t.equal(
-        transform('html`<div id=hello>hello</div>`;', {
+    test("should add import for pragma", () => {
+      expect(
+        transform("html`<div id=hello>hello</div>`;", {
           ...options,
           plugins: [
-            [htmBabelPlugin, {
-              pragma: 'createElement',
-              import: 'react'
-            }]
-          ]
-        }).code
-      , `import{createElement}from"react";createElement("div",{id:"hello"},"hello");`);
-      t.end();
+            [
+              htmBabelPlugin,
+              {
+                pragma: "createElement",
+                import: "react",
+              },
+            ],
+          ],
+        }).code,
+      ).toBe(`import{createElement}from"react";createElement("div",{id:"hello"},"hello");`);
     });
   });
 
-  describe('{import:Object}', () => {
-    test('should add import', (t) => {
-      t.equal(
-        transform('html`<div id=hello>hello</div>`;', {
+  describe("{import:Object}", () => {
+    test("should add import", () => {
+      expect(
+        transform("html`<div id=hello>hello</div>`;", {
           ...options,
           plugins: [
-            [htmBabelPlugin, {
-              import: {
-                module: 'preact',
-                export: 'h'
-              }
-            }]
-          ]
-        }).code
-      , `import{h}from"preact";h("div",{id:"hello"},"hello");`);
-      t.end();
+            [
+              htmBabelPlugin,
+              {
+                import: {
+                  module: "preact",
+                  export: "h",
+                },
+              },
+            ],
+          ],
+        }).code,
+      ).toBe(`import{h}from"preact";h("div",{id:"hello"},"hello");`);
     });
-    test('should add import as pragma', (t) => {
-      t.equal(
-        transform('html`<div id=hello>hello</div>`;', {
+    test("should add import as pragma", () => {
+      expect(
+        transform("html`<div id=hello>hello</div>`;", {
           ...options,
           plugins: [
-            [htmBabelPlugin, {
-              pragma: 'hh',
-              import: {
-                module: 'preact',
-                export: 'h'
-              }
-            }]
-          ]
-        }).code
-      , `import{h as hh}from"preact";hh("div",{id:"hello"},"hello");`);
-      t.end();
+            [
+              htmBabelPlugin,
+              {
+                pragma: "hh",
+                import: {
+                  module: "preact",
+                  export: "h",
+                },
+              },
+            ],
+          ],
+        }).code,
+      ).toBe(`import{h as hh}from"preact";hh("div",{id:"hello"},"hello");`);
     });
-    test('should add import default', (t) => {
-      t.equal(
-        transform('html`<div id=hello>hello</div>`;', {
+    test("should add import default", () => {
+      expect(
+        transform("html`<div id=hello>hello</div>`;", {
           ...options,
           plugins: [
-            [htmBabelPlugin, {
-              pragma: 'React.createElement',
-              import: {
-                module: 'react',
-                export: 'default'
-              }
-            }]
-          ]
-        }).code
-      , `import React from"react";React.createElement("div",{id:"hello"},"hello");`);
-      t.end();
+            [
+              htmBabelPlugin,
+              {
+                pragma: "React.createElement",
+                import: {
+                  module: "react",
+                  export: "default",
+                },
+              },
+            ],
+          ],
+        }).code,
+      ).toBe(`import React from"react";React.createElement("div",{id:"hello"},"hello");`);
     });
-    test('should add import *', (t) => {
-      t.equal(
-        transform('html`<div id=hello>hello</div>`;', {
+    test("should add import *", () => {
+      expect(
+        transform("html`<div id=hello>hello</div>`;", {
           ...options,
           plugins: [
-            [htmBabelPlugin, {
-              pragma: 'Preact.h',
-              import: {
-                module: 'preact',
-                export: '*'
-              }
-            }]
-          ]
-        }).code
-      , `import*as Preact from"preact";Preact.h("div",{id:"hello"},"hello");`);
-      t.end();
+            [
+              htmBabelPlugin,
+              {
+                pragma: "Preact.h",
+                import: {
+                  module: "preact",
+                  export: "*",
+                },
+              },
+            ],
+          ],
+        }).code,
+      ).toBe(`import*as Preact from"preact";Preact.h("div",{id:"hello"},"hello");`);
     });
   });
 
   describe('{wrapExpressions:"h.wrap"}', () => {
-    test('should transform to a wrapped expression', t => {
-      t.equal(
-        transform(
-          'var name="world";html`<div id=hello>hello, ${name}</div>`;',
-          {
-            ...options,
-            plugins: [
-              [
-                htmBabelPlugin,
-                {
-                  wrapExpression: 'h.wrap'
-                }
-              ]
-            ]
-          }
-        ).code,
-        `var name="world";h.wrap.apply((_statics,_field)=>h("div",{id:"hello"},"hello, ",_field),[["<div id=hello>hello, ","</div>"],name]);`
+    test("should transform to a wrapped expression", () => {
+      expect(
+        transform('var name="world";html`<div id=hello>hello, ${name}</div>`;', {
+          ...options,
+          plugins: [
+            [
+              htmBabelPlugin,
+              {
+                wrapExpression: "h.wrap",
+              },
+            ],
+          ],
+        }).code,
+      ).toBe(
+        `var name="world";h.wrap.apply((_statics,_field)=>h("div",{id:"hello"},"hello, ",_field),[["<div id=hello>hello, ","</div>"],name]);`,
       );
-      t.end();
     });
 
-    test('should transform to a wrapped expression', t => {
-      t.equal(
-        transform(
-          'var name="world";html`<div id=hello>hello, ${html`<h1>${name}</h1>`}</div>`;',
-          {
-            ...options,
-            plugins: [
-              [
-                htmBabelPlugin,
-                {
-                  wrapExpression: 'h.wrap'
-                }
-              ]
-            ]
-          }
-        ).code,
-        `var name="world";h.wrap.apply((_statics,_field)=>h("div",{id:"hello"},"hello, ",_field),[["<div id=hello>hello, ","</div>"],h.wrap.apply((_statics2,_field2)=>h("h1",null,_field2),[["<h1>","</h1>"],name])]);`
+    test("should transform to a wrapped expression nested", () => {
+      expect(
+        transform('var name="world";html`<div id=hello>hello, ${html`<h1>${name}</h1>`}</div>`;', {
+          ...options,
+          plugins: [
+            [
+              htmBabelPlugin,
+              {
+                wrapExpression: "h.wrap",
+              },
+            ],
+          ],
+        }).code,
+      ).toBe(
+        `var name="world";h.wrap.apply((_statics,_field)=>h("div",{id:"hello"},"hello, ",_field),[["<div id=hello>hello, ","</div>"],h.wrap.apply((_statics2,_field2)=>h("h1",null,_field2),[["<h1>","</h1>"],name])]);`,
       );
-
-      t.end();
     });
   });
 
-  describe('main test suite', () => {
+  describe("main test suite", () => {
     // Run all of the main tests against the Babel plugin:
-    const mod = fs.readFileSync(
-      path.resolve(__dirname, 'index.js'), 'utf8').replace(/\\0/g, '\0'
-    );
-    const { code } = transform(
-      mod
-        .replace("import test from 'tape';", '')
-        .replace(/^\s*import htm from\s+(['"]).*?\1[\s;]*$/im, 'const htm = function(){};'
-    ), {
+    // Read index.js, strip its vitest/htm imports, transform with the plugin,
+    // then eval the result inside this describe block so its `test(...)` and
+    // `expect(...)` calls register against the current vitest context.
+    const mod = fs.readFileSync(path.resolve(__dirname, "index.js"), "utf8").replace(/\\0/g, "\0");
+    const stripped = mod
+      .replace(/^\s*import\s*\{\s*test\s*,\s*expect\s*\}\s*from\s*['"]vitest['"]\s*;?\s*$/m, "")
+      .replace(/^\s*import\s+htm\s+from\s+(['"]).*?\1[\s;]*$/im, "const htm = function(){};");
+    const { code } = transform(stripped, {
       ...options,
-      plugins: [htmBabelPlugin]
+      plugins: [htmBabelPlugin],
     });
-    eval(code);
+    // eslint-disable-next-line no-new-func
+    new Function("test", "expect", code)(test, expect);
   });
-
 });

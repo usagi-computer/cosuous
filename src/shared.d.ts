@@ -1,18 +1,18 @@
-import { Observable } from './observable';
+import { Observable } from "./observable";
 
 export type ElementChild =
-    | Node
-    | Function
-    | Observable<unknown>
-    | object
-    | string
-    | number
-    | boolean
-    | null
-    | undefined;
-  type ElementChildren = ElementChild[] | ElementChild;
+  | Node
+  | Function
+  | Observable<unknown>
+  | object
+  | string
+  | number
+  | boolean
+  | null
+  | undefined;
+type ElementChildren = ElementChild[] | ElementChild;
 
 export interface FunctionComponent {
-  (props: object, ...children: ElementChildren[]): Node
-  (...children: ElementChildren[]): Node
+  (props: object, ...children: ElementChildren[]): Node;
+  (...children: ElementChildren[]): Node;
 }

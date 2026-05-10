@@ -1,7 +1,0 @@
----
-env:
-  browser: true
-
-rules:
-  fp/no-mutating-methods: off
-  fp/no-loops: off

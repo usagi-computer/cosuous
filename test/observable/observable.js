@@ -1,126 +1,109 @@
-import test from 'tape';
-import spy from 'ispy';
-import {
-  o,
-  subscribe,
-  unsubscribe,
-  cleanup,
-  isListening
-} from 'sinuous/observable';
+import { test, expect, vi } from "vitest";
+import { o, subscribe, unsubscribe, cleanup, isListening } from "cosuous/observable";
 
-test('initial value can be set', function(t) {
-  let title = o('Groovy!');
-  t.equal(title(), 'Groovy!');
-  t.end();
+test("initial value can be set", () => {
+  let title = o("Groovy!");
+  expect(title()).toBe("Groovy!");
 });
 
-test('runs function on subscribe', function(t) {
-  subscribe(t.pass);
-  t.end();
+test("runs function on subscribe", () => {
+  subscribe(() => {});
 });
 
-test('observable can be set without subscription', function(t) {
+test("observable can be set without subscription", () => {
   let title = o();
-  title('Groovy!');
-  t.equal(title(), 'Groovy!');
-  t.end();
+  title("Groovy!");
+  expect(title()).toBe("Groovy!");
 });
 
-test('isListening', function(t) {
+test("isListening", () => {
   let title = o();
-  t.assert(!isListening());
+  expect(!isListening()).toBeTruthy();
   subscribe(() => {
     title();
-    t.assert(isListening());
+    expect(isListening()).toBeTruthy();
   });
-  t.end();
 });
 
-test('updates when the observable is set', function(t) {
+test("updates when the observable is set", () => {
   let title = o();
   let text;
   subscribe(() => (text = title()));
 
-  title('Welcome to Sinuous!');
-  t.equal(text, 'Welcome to Sinuous!');
+  title("Welcome to Sinuous!");
+  expect(text).toBe("Welcome to Sinuous!");
 
-  title('Groovy!');
-  t.equal(text, 'Groovy!');
-
-  t.end();
+  title("Groovy!");
+  expect(text).toBe("Groovy!");
 });
 
-test('observable unsubscribe', function(t) {
-  let title = o('Initial title');
+test("observable unsubscribe", () => {
+  let title = o("Initial title");
   let text;
   const unsubscribe = subscribe(() => (text = title()));
 
-  title('Welcome to Sinuous!');
-  t.equal(text, 'Welcome to Sinuous!');
+  title("Welcome to Sinuous!");
+  expect(text).toBe("Welcome to Sinuous!");
 
   unsubscribe();
 
-  title('Groovy!');
-  t.equal(text, 'Welcome to Sinuous!');
-
-  t.end();
+  title("Groovy!");
+  expect(text).toBe("Welcome to Sinuous!");
 });
 
-test('nested subscribe', function(t) {
-  let apple = o('apple');
-  let lemon = o('lemon');
-  let onion = o('onion');
+test("nested subscribe", () => {
+  let apple = o("apple");
+  let lemon = o("lemon");
+  let onion = o("onion");
   let tempApple;
   let tempLemon;
   let tempOnion;
 
   let veggieSpy;
-  const fruitSpy = spy();
-  fruitSpy.delegate = () => {
+  const fruitSpy = vi.fn();
+  fruitSpy.mockImplementation(() => {
     tempApple = apple();
 
-    veggieSpy = spy();
-    veggieSpy.delegate = () => {
+    veggieSpy = vi.fn();
+    veggieSpy.mockImplementation(() => {
       tempOnion = onion();
-    };
+    });
 
     subscribe(veggieSpy);
 
     tempLemon = lemon();
-  };
+  });
 
   subscribe(fruitSpy);
 
-  t.equal(tempApple, 'apple');
-  t.equal(tempLemon, 'lemon');
-  t.equal(tempOnion, 'onion');
-  t.equal(fruitSpy.callCount, 1);
-  t.equal(veggieSpy.callCount, 1);
+  expect(tempApple).toBe("apple");
+  expect(tempLemon).toBe("lemon");
+  expect(tempOnion).toBe("onion");
+  expect(fruitSpy.mock.calls.length).toBe(1);
+  expect(veggieSpy.mock.calls.length).toBe(1);
 
-  onion('peel');
-  t.equal(tempOnion, 'peel');
-  t.equal(fruitSpy.callCount, 1);
-  t.equal(veggieSpy.callCount, 2);
+  onion("peel");
+  expect(tempOnion).toBe("peel");
+  expect(fruitSpy.mock.calls.length).toBe(1);
+  expect(veggieSpy.mock.calls.length).toBe(2);
 
-  lemon('juice');
-  t.equal(tempLemon, 'juice');
-  t.equal(fruitSpy.callCount, 2);
+  lemon("juice");
+  expect(tempLemon).toBe("juice");
+  expect(fruitSpy.mock.calls.length).toBe(2);
   // this will be a new spy that was executed once
-  t.equal(veggieSpy.callCount, 1);
-
-  t.end();
+  expect(veggieSpy.mock.calls.length).toBe(1);
 });
 
-test('one level nested subscribe cleans up inner subscriptions', function(t) {
-  let apple = o('apple');
-  let lemon = o('lemon');
-  let grape = o('grape');
-  let onion = o('onion');
-  let bean = o('bean');
-  let carrot = o('carrot');
-  let onions = '';
-  let beans = '';
-  let carrots = '';
+test("one level nested subscribe cleans up inner subscriptions", () => {
+  let apple = o("apple");
+  let lemon = o("lemon");
+  let grape = o("grape");
+  let onion = o("onion");
+  let bean = o("bean");
+  let carrot = o("carrot");
+  let onions = "";
+  let beans = "";
+  let carrots = "";
 
   subscribe(() => {
     apple();
@@ -131,25 +114,24 @@ test('one level nested subscribe cleans up inner subscriptions', function(t) {
     lemon();
   });
 
-  apple('juice');
-  lemon('juice');
-  grape('juice');
+  apple("juice");
+  lemon("juice");
+  grape("juice");
 
-  bean('bean');
+  bean("bean");
 
-  t.equal(onions, 'onion'.repeat(4));
-  t.equal(beans, 'bean'.repeat(5));
-  t.end();
+  expect(onions).toBe("onion".repeat(4));
+  expect(beans).toBe("bean".repeat(5));
 });
 
-test('three level nested subscribe cleans up inner subscriptions', function(t) {
-  let apple = o('apple');
-  let lemon = o('lemon');
-  let grape = o('grape');
-  let onion = o('onion');
-  let bean = o('bean');
-  let carrot = o('carrot');
-  let peanut = o('peanut');
+test("three level nested subscribe cleans up inner subscriptions", () => {
+  let apple = o("apple");
+  let lemon = o("lemon");
+  let grape = o("grape");
+  let onion = o("onion");
+  let bean = o("bean");
+  let carrot = o("carrot");
+  let peanut = o("peanut");
   let onions = 0;
   let beans = 0;
   let carrots = 0;
@@ -171,98 +153,93 @@ test('three level nested subscribe cleans up inner subscriptions', function(t) {
     lemon();
   });
 
-  apple('juice');
-  lemon('juice');
-  grape('juice');
-  t.equal(beans, 4);
+  apple("juice");
+  lemon("juice");
+  grape("juice");
+  expect(beans).toBe(4);
 
-  bean('bean');
-  t.equal(beans, 5);
+  bean("bean");
+  expect(beans).toBe(5);
 
-  onion('onion');
-  onion('onion');
-  onion('onion');
-  t.equal(onions, 8);
+  onion("onion");
+  onion("onion");
+  onion("onion");
+  expect(onions).toBe(8);
 
-  peanut('peanut');
-  peanut('peanut');
-  t.equal(peanuts, 10);
+  peanut("peanut");
+  peanut("peanut");
+  expect(peanuts).toBe(10);
 
   unsubscribe();
 
-  apple('juice');
-  lemon('juice');
-  grape('juice');
+  apple("juice");
+  lemon("juice");
+  grape("juice");
 
-  bean('bean');
-  t.equal(beans, 5);
+  bean("bean");
+  expect(beans).toBe(5);
 
-  onion('onion');
-  onion('onion');
-  onion('onion');
-  t.equal(onions, 8);
+  onion("onion");
+  onion("onion");
+  onion("onion");
+  expect(onions).toBe(8);
 
-  peanut('peanut');
-  peanut('peanut');
-  t.equal(peanuts, 10);
-
-  t.end();
+  peanut("peanut");
+  peanut("peanut");
+  expect(peanuts).toBe(10);
 });
 
-test('standalone unsubscribe works', function(t) {
+test("standalone unsubscribe works", () => {
   let carrot = o();
-  const computed = spy();
-  computed.delegate = () => {
+  const computed = vi.fn();
+  computed.mockImplementation(() => {
     carrot();
-  };
+  });
   subscribe(computed);
-  carrot('juice');
+  carrot("juice");
 
   unsubscribe(computed);
-  carrot('juice');
+  carrot("juice");
 
-  t.equal(computed.callCount, 2);
-  t.end();
+  expect(computed.mock.calls.length).toBe(2);
 });
 
-test('cleanup cleans up on update', function(t) {
+test("cleanup cleans up on update", () => {
   let carrot = o();
-  let button = document.createElement('button');
+  let button = document.createElement("button");
   // IE11 requires the button to be in dom before `button.click()` works.
   document.body.appendChild(button);
   let count = 0;
 
-  const computed = spy();
-  computed.delegate = () => {
+  const computed = vi.fn();
+  computed.mockImplementation(() => {
     carrot();
     const onClick = () => (count += 1);
-    button.addEventListener('click', onClick);
-  };
+    button.addEventListener("click", onClick);
+  });
 
   const unsubscribe = subscribe(computed);
   carrot(9);
   carrot(10);
   button.click();
-  t.equal(count, 3);
+  expect(count).toBe(3);
   unsubscribe();
 
   count = 0;
-  button = document.createElement('button');
+  button = document.createElement("button");
   document.body.appendChild(button);
 
-  const computedWithCleanup = spy();
-  computedWithCleanup.delegate = () => {
+  const computedWithCleanup = vi.fn();
+  computedWithCleanup.mockImplementation(() => {
     carrot();
     const onClick = () => (count += 1);
-    button.addEventListener('click', onClick);
-    cleanup(() => button.removeEventListener('click', onClick));
-  };
+    button.addEventListener("click", onClick);
+    cleanup(() => button.removeEventListener("click", onClick));
+  });
 
   subscribe(computedWithCleanup);
   carrot(9);
   carrot(10);
   button.click();
-  t.equal(count, 1);
-
-  t.end();
+  expect(count).toBe(1);
 });

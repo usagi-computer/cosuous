@@ -1,28 +1,27 @@
-import test from 'tape';
-import { o, S, sample } from 'sinuous/observable';
+import { test, expect } from "vitest";
+import { o, S, sample } from "cosuous/observable";
 
-test('avoids a depdendency', function(t) {
+test("avoids a depdendency", () => {
   var a = o(1),
     b = o(2),
     c = o(3),
     d = 0;
 
-  S(function() {
+  S(function () {
     d++;
     a();
     sample(b);
     c();
   });
 
-  t.equal(d, 1);
+  expect(d).toBe(1);
 
   b(4);
 
-  t.equal(d, 1);
+  expect(d).toBe(1);
 
   a(5);
   c(6);
 
-  t.equal(d, 3);
-  t.end();
+  expect(d).toBe(3);
 });

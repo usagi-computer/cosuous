@@ -1,8 +1,8 @@
-import test from 'tape';
-import { o, h, html } from 'sinuous';
-import { insert } from '../../src/h.js';
+import { test, expect } from "vitest";
+import { o, h, html } from "cosuous";
+import { insert } from "../../src/h.js";
 
-const insertValue = val => {
+const insertValue = (val) => {
   const parent = container.cloneNode(true);
   insert(parent, val);
   return parent;
@@ -10,187 +10,154 @@ const insertValue = val => {
 
 // insert
 // <div>before<!-- insert -->after</div>
-const container = document.createElement('div');
+const container = document.createElement("div");
 
-test('inserts observable into simple text', t => {
-  let scratch = h('div');
+test("inserts observable into simple text", () => {
+  let scratch = h("div");
   h(document.body, scratch);
 
   const counter = o(0);
-  scratch.appendChild(html`
-    Here's a list of items: Count: ${counter}
-  `);
-  t.equal(scratch.innerHTML, `Here's a list of items: Count: 0`);
+  scratch.appendChild(html` Here's a list of items: Count: ${counter} `);
+  expect(scratch.innerHTML).toBe(`Here's a list of items: Count: 0`);
 
   counter(counter() + 1);
-  t.equal(scratch.innerHTML, `Here's a list of items: Count: 1`);
-
-  t.end();
+  expect(scratch.innerHTML).toBe(`Here's a list of items: Count: 1`);
 });
 
-test('inserts fragments', t => {
+test("inserts fragments", () => {
   const frag = o(html`
     <h1>Hello world</h1>
     <p>Bye bye</p>
   `);
-  const res = html`
-    <div>${frag}</div>
-  `;
-  t.equal(res.innerHTML, '<h1>Hello world</h1><p>Bye bye</p>');
-  t.equal(res.children.length, 2);
+  const res = html` <div>${frag}</div> `;
+  expect(res.innerHTML).toBe("<h1>Hello world</h1><p>Bye bye</p>");
+  expect(res.children.length).toBe(2);
 
-  frag(
-    html`
-      <h1>Cool</h1>
-      <p>Beans</p>
-    `
-  );
-  t.equal(res.innerHTML, '<h1>Cool</h1><p>Beans</p>');
-  t.equal(res.children.length, 2);
+  frag(html`
+    <h1>Cool</h1>
+    <p>Beans</p>
+  `);
+  expect(res.innerHTML).toBe("<h1>Cool</h1><p>Beans</p>");
+  expect(res.children.length).toBe(2);
 
-  frag('make it a string');
-  t.equal(res.innerHTML, 'make it a string');
-  t.equal(res.childNodes.length, 4);
+  frag("make it a string");
+  expect(res.innerHTML).toBe("make it a string");
+  expect(res.childNodes.length).toBe(4);
 
-  frag(
-    html`
-      <h1>Cool</h1>
-      <p>Beans</p>
-    `
-  );
-  t.equal(res.innerHTML, '<h1>Cool</h1><p>Beans</p>');
-  t.equal(res.children.length, 2);
-
-  t.end();
+  frag(html`
+    <h1>Cool</h1>
+    <p>Beans</p>
+  `);
+  expect(res.innerHTML).toBe("<h1>Cool</h1><p>Beans</p>");
+  expect(res.children.length).toBe(2);
 });
 
-test('inserts long fragments', t => {
+test("inserts long fragments", () => {
   const frag = o(html`
     <h1>Hello world</h1>
     <p>Bye bye</p>
     <p>Hello again</p>
   `);
-  const res = html`
-    <div>${frag}</div>
-  `;
-  t.equal(
-    res.innerHTML,
-    '<h1>Hello world</h1><p>Bye bye</p><p>Hello again</p>'
-  );
-  t.equal(res.children.length, 3);
+  const res = html` <div>${frag}</div> `;
+  expect(res.innerHTML).toBe("<h1>Hello world</h1><p>Bye bye</p><p>Hello again</p>");
+  expect(res.children.length).toBe(3);
 
   frag(html`
     <p>Hello again</p>
     <p>Bye bye</p>
     <h1>Hello world</h1>
   `);
-  t.equal(
-    res.innerHTML,
-    '<p>Hello again</p><p>Bye bye</p><h1>Hello world</h1>'
-  );
-  t.equal(res.children.length, 3);
-
-  t.end();
+  expect(res.innerHTML).toBe("<p>Hello again</p><p>Bye bye</p><h1>Hello world</h1>");
+  expect(res.children.length).toBe(3);
 });
 
-test('inserts nothing for null', t => {
+test("inserts nothing for null", () => {
   const res = insertValue(null);
-  t.equal(res.innerHTML, '');
-  t.equal(res.childNodes.length, 0);
-  t.end();
+  expect(res.innerHTML).toBe("");
+  expect(res.childNodes.length).toBe(0);
 });
 
-test('inserts nothing for undefined', t => {
+test("inserts nothing for undefined", () => {
   const res = insertValue(undefined);
-  t.equal(res.innerHTML, '');
-  t.equal(res.childNodes.length, 0);
-  t.end();
+  expect(res.innerHTML).toBe("");
+  expect(res.childNodes.length).toBe(0);
 });
 
-test('inserts nothing for false', t => {
+test("inserts nothing for false", () => {
   const res = insertValue(false);
-  t.equal(res.innerHTML, '');
-  t.equal(res.childNodes.length, 0);
-  t.end();
+  expect(res.innerHTML).toBe("");
+  expect(res.childNodes.length).toBe(0);
 });
 
-test('inserts nothing for true', t => {
+test("inserts nothing for true", () => {
   const res = insertValue(true);
-  t.equal(res.innerHTML, '');
-  t.equal(res.childNodes.length, 0);
-  t.end();
+  expect(res.innerHTML).toBe("");
+  expect(res.childNodes.length).toBe(0);
 });
 
-test('inserts nothing for null in array', t => {
-  const res = insertValue(['a', null, 'b']);
-  t.equal(res.innerHTML, 'ab');
-  t.equal(res.childNodes.length, 3);
-  t.end();
+test("inserts nothing for null in array", () => {
+  const res = insertValue(["a", null, "b"]);
+  expect(res.innerHTML).toBe("ab");
+  expect(res.childNodes.length).toBe(3);
 });
 
-test('inserts nothing for undefined in array', t => {
-  const res = insertValue(['a', undefined, 'b']);
-  t.equal(res.innerHTML, 'ab');
-  t.equal(res.childNodes.length, 3);
-  t.end();
+test("inserts nothing for undefined in array", () => {
+  const res = insertValue(["a", undefined, "b"]);
+  expect(res.innerHTML).toBe("ab");
+  expect(res.childNodes.length).toBe(3);
 });
 
-test('can insert stringable', t => {
-  let res = insertValue('foo');
-  t.equal(res.innerHTML, 'foo');
-  t.equal(res.childNodes.length, 1);
+test("can insert stringable", () => {
+  let res = insertValue("foo");
+  expect(res.innerHTML).toBe("foo");
+  expect(res.childNodes.length).toBe(1);
 
   res = insertValue(11206);
-  t.equal(res.innerHTML, '11206');
-  t.equal(res.childNodes.length, 1);
-  t.end();
+  expect(res.innerHTML).toBe("11206");
+  expect(res.childNodes.length).toBe(1);
 });
 
-test('can insert a node', t => {
-  const node = document.createElement('span');
-  node.textContent = 'foo';
-  t.equal(insertValue(node).innerHTML, '<span>foo</span>');
-  t.end();
+test("can insert a node", () => {
+  const node = document.createElement("span");
+  node.textContent = "foo";
+  expect(insertValue(node).innerHTML).toBe("<span>foo</span>");
 });
 
-test('can re-insert a node, thereby moving it', t => {
-  const node = document.createElement('span');
-  node.textContent = 'foo';
+test("can re-insert a node, thereby moving it", () => {
+  const node = document.createElement("span");
+  node.textContent = "foo";
 
   const first = insertValue(node),
     second = insertValue(node);
 
-  t.equal(first.innerHTML, '');
-  t.equal(second.innerHTML, '<span>foo</span>');
-  t.end();
+  expect(first.innerHTML).toBe("");
+  expect(second.innerHTML).toBe("<span>foo</span>");
 });
 
-test('can insert an array of strings', t => {
-  t.equal(insertValue(['foo', 'bar']).innerHTML, 'foobar', 'array of strings');
-  t.end();
+test("can insert an array of strings", () => {
+  expect(insertValue(["foo", "bar"]).innerHTML).toBe("foobar");
 });
 
-test('can insert an array of nodes', t => {
-  const nodes = [document.createElement('span'), document.createElement('div')];
-  nodes[0].textContent = 'foo';
-  nodes[1].textContent = 'bar';
-  t.equal(insertValue(nodes).innerHTML, '<span>foo</span><div>bar</div>');
-  t.end();
+test("can insert an array of nodes", () => {
+  const nodes = [document.createElement("span"), document.createElement("div")];
+  nodes[0].textContent = "foo";
+  nodes[1].textContent = "bar";
+  expect(insertValue(nodes).innerHTML).toBe("<span>foo</span><div>bar</div>");
 });
 
-test('can insert a changing array of nodes 1', t => {
-  var parent = document.createElement('div'),
-    current = '',
-    n1 = document.createElement('span'),
-    n2 = document.createElement('div'),
-    n3 = document.createElement('span'),
-    n4 = document.createElement('div'),
+test("can insert a changing array of nodes 1", () => {
+  var parent = document.createElement("div"),
+    current = "",
+    n1 = document.createElement("span"),
+    n2 = document.createElement("div"),
+    n3 = document.createElement("span"),
+    n4 = document.createElement("div"),
     orig = [n1, n2, n3, n4];
 
-  n1.textContent = '1';
-  n2.textContent = '2';
-  n3.textContent = '3';
-  n4.textContent = '4';
+  n1.textContent = "1";
+  n2.textContent = "2";
+  n3.textContent = "3";
+  n4.textContent = "4";
 
   var origExpected = expected(orig);
 
@@ -235,70 +202,64 @@ test('can insert a changing array of nodes 1', t => {
 
   function test(array) {
     current = insert(parent, array, undefined, current);
-    t.equal(parent.innerHTML, expected(array));
+    expect(parent.innerHTML).toBe(expected(array));
     current = insert(parent, orig, undefined, current);
-    t.equal(parent.innerHTML, origExpected);
+    expect(parent.innerHTML).toBe(origExpected);
   }
 
   function expected(array) {
-    return array.map(n => n.outerHTML).join('');
+    return array.map((n) => n.outerHTML).join("");
   }
-
-  t.end();
 });
 
-test('can insert nested arrays', t => {
-  let current = insertValue(['foo', ['bar', 'blech']]);
-  t.equal(current.innerHTML, 'foobarblech', 'array of array of strings');
-  t.end();
+test("can insert nested arrays", () => {
+  let current = insertValue(["foo", ["bar", "blech"]]);
+  expect(current.innerHTML).toBe("foobarblech");
 });
 
-test('can update text with node', t => {
+test("can update text with node", () => {
   const parent = container.cloneNode(true);
 
-  let current = insert(parent, '🧬');
-  t.equal(parent.innerHTML, '🧬', 'text dna');
+  let current = insert(parent, "🧬");
+  expect(parent.innerHTML).toBe("🧬");
 
-  insert(parent, h('h1', '⛄️'), undefined, current);
-  t.equal(parent.innerHTML, '<h1>⛄️</h1>');
-  t.end();
+  insert(parent, h("h1", "⛄️"), undefined, current);
+  expect(parent.innerHTML).toBe("<h1>⛄️</h1>");
 });
 
-test('can update content with text with marker', t => {
+test("can update content with text with marker", () => {
   const parent = container.cloneNode(true);
-  const marker = parent.appendChild(document.createTextNode(''));
+  const marker = parent.appendChild(document.createTextNode(""));
 
-  let current = insert(parent, h('h1', '⛄️'), marker);
-  t.equal(parent.innerHTML, '<h1>⛄️</h1>');
+  let current = insert(parent, h("h1", "⛄️"), marker);
+  expect(parent.innerHTML).toBe("<h1>⛄️</h1>");
 
-  insert(parent, '⛄️', marker, current);
-  t.equal(parent.innerHTML, '⛄️');
-  t.end();
+  insert(parent, "⛄️", marker, current);
+  expect(parent.innerHTML).toBe("⛄️");
 });
 
-test('can update content with text and observable with marker', t => {
+test("can update content with text and observable with marker", () => {
   const parent = container.cloneNode(true);
-  const marker = parent.appendChild(document.createTextNode(''));
+  const marker = parent.appendChild(document.createTextNode(""));
 
-  const reactive = o('reactive');
+  const reactive = o("reactive");
   const dynamic = o(99);
 
-  insert(parent, h('h1', reactive, '⛄️', dynamic), marker);
-  t.equal(parent.innerHTML, '<h1>reactive⛄️99</h1>');
+  insert(parent, h("h1", reactive, "⛄️", dynamic), marker);
+  expect(parent.innerHTML).toBe("<h1>reactive⛄️99</h1>");
 
   dynamic(77);
-  t.equal(parent.innerHTML, '<h1>reactive⛄️77</h1>');
+  expect(parent.innerHTML).toBe("<h1>reactive⛄️77</h1>");
 
   reactive(1);
-  t.equal(parent.innerHTML, '<h1>1⛄️77</h1>');
+  expect(parent.innerHTML).toBe("<h1>1⛄️77</h1>");
 
-  dynamic('');
-  t.equal(parent.innerHTML, '<h1>1⛄️</h1>');
+  dynamic("");
+  expect(parent.innerHTML).toBe("<h1>1⛄️</h1>");
 
-  reactive('');
-  t.equal(parent.innerHTML, '<h1>⛄️</h1>');
+  reactive("");
+  expect(parent.innerHTML).toBe("<h1>⛄️</h1>");
 
-  insert(parent, '⛄️', marker, parent.children[0]);
-  t.equal(parent.innerHTML, '⛄️');
-  t.end();
+  insert(parent, "⛄️", marker, parent.children[0]);
+  expect(parent.innerHTML).toBe("⛄️");
 });

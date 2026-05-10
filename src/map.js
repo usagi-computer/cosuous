@@ -1,10 +1,10 @@
 /* Adapted from Stage0 - The MIT License - Pavel Martynov */
 /* Adapted from DOM Expressions - The MIT License - Ryan Carniato */
-import { api } from './index.js';
+import { api } from "./index.js";
 
-export const GROUPING = '__g';
-export const FORWARD = 'nextSibling';
-export const BACKWARD = 'previousSibling';
+export const GROUPING = "__g";
+export const FORWARD = "nextSibling";
+export const BACKWARD = "previousSibling";
 
 /**
  * Map over a list of items that create DOM nodes.
@@ -21,8 +21,8 @@ export function map(items, expr, cleaning) {
   if (cleaning == null) cleaning = !expr.$t;
 
   let parent = document.createDocumentFragment();
-  const beforeNode = add(parent, '');
-  const afterNode = add(parent, '');
+  const beforeNode = add(parent, "");
+  const afterNode = add(parent, "");
   const disposers = new Map();
 
   const unsubscribe = subscribe((a) => {
@@ -35,8 +35,8 @@ export function map(items, expr, cleaning) {
         afterNode,
         createFn,
         cleaning && disposeAll,
-        cleaning && dispose
-      )
+        cleaning && dispose,
+      ),
     );
   });
 
@@ -77,15 +77,7 @@ export function map(items, expr, cleaning) {
 // And working with data directly from Stage0:
 // https://github.com/Freak613/stage0/blob/master/reconcile.js
 // This implementation is tailored for fine grained change detection and adds support for fragments
-export function reconcile(
-  a,
-  b,
-  beforeNode,
-  afterNode,
-  createFn,
-  onClear,
-  onRemove
-) {
+export function reconcile(a, b, beforeNode, afterNode, createFn, onClear, onRemove) {
   // When parent was a DocumentFragment, then items got appended to the DOM.
   const parent = afterNode.parentNode;
 
@@ -98,7 +90,7 @@ export function reconcile(
     if ((startMark && startMark.previousSibling) || afterNode.nextSibling) {
       removeNodes(parent, beforeNode.nextSibling, afterNode);
     } else {
-      parent.textContent = '';
+      parent.textContent = "";
       if (startMark) {
         parent.appendChild(startMark);
       }
@@ -196,7 +188,7 @@ export function reconcile(
       b,
       beforeNode,
       afterNode,
-      createFn
+      createFn,
     );
   }
 
@@ -242,18 +234,14 @@ let groupCounter = 0;
 function add(parent, value, endMark) {
   let mark;
 
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     value = document.createTextNode(value);
   } else if (!(value instanceof Node)) {
     // Passing an empty array creates a DocumentFragment.
     value = api.h([], value);
   }
 
-  if (
-    value.nodeType === 11 &&
-    (mark = value.firstChild) &&
-    mark !== value.lastChild
-  ) {
+  if (value.nodeType === 11 && (mark = value.firstChild) && mark !== value.lastChild) {
     mark[GROUPING] = value.lastChild[GROUPING] = ++groupCounter;
   }
 

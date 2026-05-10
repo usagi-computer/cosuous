@@ -42,37 +42,32 @@ const PROP_APPEND = MODE_PROP_APPEND;
 //    children: [ { tag: Z, props: [], children: [] } ]
 //  }
 export const treeify = (built, fields) => {
-  const _treeify = built => {
-    let tag = '';
+  const _treeify = (built) => {
+    let tag = "";
     let currentProps = null;
     const props = [];
     const children = [];
 
     for (let i = 1; i < built.length; i++) {
       const field = built[i++];
-      const value = typeof field === 'number' ? fields[field - 1] : field;
+      const value = typeof field === "number" ? fields[field - 1] : field;
 
       if (built[i] === TAG_SET) {
         tag = value;
-      }
-      else if (built[i] === PROPS_ASSIGN) {
+      } else if (built[i] === PROPS_ASSIGN) {
         props.push(value);
         currentProps = null;
-      }
-      else if (built[i] === PROP_SET) {
+      } else if (built[i] === PROP_SET) {
         if (!currentProps) {
           currentProps = Object.create(null);
           props.push(currentProps);
         }
         currentProps[built[++i]] = [value];
-      }
-      else if (built[i] === PROP_APPEND) {
+      } else if (built[i] === PROP_APPEND) {
         currentProps[built[++i]].push(value);
-      }
-      else if (built[i] === CHILD_RECURSE) {
+      } else if (built[i] === CHILD_RECURSE) {
         children.push(_treeify(value));
-      }
-      else if (built[i] === CHILD_APPEND) {
+      } else if (built[i] === CHILD_APPEND) {
         children.push(value);
       }
     }
@@ -83,35 +78,31 @@ export const treeify = (built, fields) => {
   return children.length > 1 ? children : children[0];
 };
 
-
 export const evaluate = (h, built, fields, args) => {
   let propBody = {};
   for (let i = 1; i < built.length; i++) {
     const field = built[i];
-    const value = typeof field === 'number' ? fields[field] : field;
+    const value = typeof field === "number" ? fields[field] : field;
     const type = built[++i];
 
     if (type === TAG_SET) {
       args[0] = value;
-    }
-    else if (type === PROPS_ASSIGN) {
+    } else if (type === PROPS_ASSIGN) {
       args[1] = Object.assign(args[1] || {}, value);
-    }
-    else if (type === PROP_SET) {
+    } else if (type === PROP_SET) {
       (args[1] = args[1] || {})[built[++i]] = value;
-    }
-    else if (type === PROP_APPEND) {
+    } else if (type === PROP_APPEND) {
       let key = built[++i];
       let prev = (args[1] = args[1] || {})[key];
       let parts = propBody[key];
 
-      if (!parts && (typeof value === 'function' || typeof prev === 'function')) {
+      if (!parts && (typeof value === "function" || typeof prev === "function")) {
         parts = (prev && [prev]) || [];
 
-        args[1][key] = function() {
-          let prop = '';
+        args[1][key] = function () {
+          let prop = "";
           for (var j = 0; j < parts.length; j++) {
-            prop += typeof parts[j] === 'function' ? parts[j].call(this) : parts[j];
+            prop += typeof parts[j] === "function" ? parts[j].call(this) : parts[j];
           }
           return prop;
         };
@@ -120,18 +111,16 @@ export const evaluate = (h, built, fields, args) => {
       if (parts) {
         parts.push(value);
       } else {
-        args[1][key] += (value + '');
+        args[1][key] += value + "";
       }
-    }
-    else if (type) {
+    } else if (type) {
       // code === CHILD_RECURSE
-      const result = () => h.apply(null, evaluate(h, value, fields, ['', null]));
+      const result = () => h.apply(null, evaluate(h, value, fields, ["", null]));
 
       // if it's a component we pass the children with closure so the
       // component is executed before the children of that component.
-      args.push(typeof args[0] === 'function' ? result : result());
-    }
-    else {
+      args.push(typeof args[0] === "function" ? result : result());
+    } else {
       // code === CHILD_APPEND
       args.push(value);
     }
@@ -140,61 +129,55 @@ export const evaluate = (h, built, fields, args) => {
   return args;
 };
 
-export const build = function(statics) {
+export const build = function (statics) {
   const fields = arguments;
   const h = this;
 
   let mode = MODE_TEXT;
-  let buffer = '';
-  let quote = '';
+  let buffer = "";
+  let quote = "";
   let current = [0];
   let char, propName;
 
-  const commit = field => {
-    if (mode === MODE_TEXT && (field || (buffer = buffer.replace(/^\s*\n\s*|\s*\n\s*$/g,'')))) {
+  const commit = (field) => {
+    if (mode === MODE_TEXT && (field || (buffer = buffer.replace(/^\s*\n\s*|\s*\n\s*$/g, "")))) {
       if (MINI) {
         current.push(field ? fields[field] : buffer);
-      }
-      else {
+      } else {
         current.push(field || buffer, CHILD_APPEND);
       }
-    }
-    else if (mode === MODE_TAGNAME && (field || buffer)) {
+    } else if (mode === MODE_TAGNAME && (field || buffer)) {
       if (MINI) {
         current[1] = field ? fields[field] : buffer;
-      }
-      else {
+      } else {
         current.push(field || buffer, TAG_SET);
       }
       mode = MODE_WHITESPACE;
-    }
-    else if (mode === MODE_WHITESPACE && buffer === '...' && field) {
+    } else if (mode === MODE_WHITESPACE && buffer === "..." && field) {
       if (MINI) {
         current[2] = Object.assign(current[2] || {}, fields[field]);
-      }
-      else {
+      } else {
         current.push(field, PROPS_ASSIGN);
       }
-    }
-    else if (mode === MODE_WHITESPACE && buffer && !field) {
+    } else if (mode === MODE_WHITESPACE && buffer && !field) {
       if (MINI) {
         (current[2] = current[2] || {})[buffer] = true;
-      }
-      else {
+      } else {
         current.push(true, PROP_SET, buffer);
       }
-    }
-    else if (mode >= MODE_PROP_SET) {
+    } else if (mode >= MODE_PROP_SET) {
       if (MINI) {
         if (mode === MODE_PROP_SET) {
-          (current[2] = current[2] || {})[propName] = field ? buffer ? (buffer + fields[field]) : fields[field] : buffer;
+          (current[2] = current[2] || {})[propName] = field
+            ? buffer
+              ? buffer + fields[field]
+              : fields[field]
+            : buffer;
           mode = MODE_PROP_APPEND;
-        }
-        else if (field || buffer) {
+        } else if (field || buffer) {
           current[2][propName] += field ? buffer + fields[field] : buffer;
         }
-      }
-      else {
+      } else {
         if (buffer || (!field && mode === MODE_PROP_SET)) {
           current.push(buffer, mode, propName);
           mode = MODE_PROP_APPEND;
@@ -206,10 +189,10 @@ export const build = function(statics) {
       }
     }
 
-    buffer = '';
+    buffer = "";
   };
 
-  for (let i=0; i<statics.length; i++) {
+  for (let i = 0; i < statics.length; i++) {
     if (i) {
       if (mode === MODE_TEXT) {
         commit();
@@ -217,59 +200,48 @@ export const build = function(statics) {
       commit(i);
     }
 
-    for (let j=0; j<statics[i].length;j++) {
+    for (let j = 0; j < statics[i].length; j++) {
       char = statics[i][j];
 
       if (mode === MODE_TEXT) {
-        if (char === '<') {
+        if (char === "<") {
           // commit buffer
           commit();
           if (MINI) {
-            current = [current, '', null];
-          }
-          else {
+            current = [current, "", null];
+          } else {
             current = [current];
           }
           mode = MODE_TAGNAME;
-        }
-        else {
+        } else {
           buffer += char;
         }
-      }
-      else if (mode === MODE_COMMENT) {
+      } else if (mode === MODE_COMMENT) {
         // Ignore everything until the last three characters are '-', '-' and '>'
-        if (buffer === '--' && char === '>') {
+        if (buffer === "--" && char === ">") {
           mode = MODE_TEXT;
-          buffer = '';
-        }
-        else {
+          buffer = "";
+        } else {
           buffer = char + buffer[0];
         }
-      }
-      else if (quote) {
+      } else if (quote) {
         if (char === quote) {
-          quote = '';
-        }
-        else {
+          quote = "";
+        } else {
           buffer += char;
         }
-      }
-      else if (char === '"' || char === "'") {
+      } else if (char === '"' || char === "'") {
         quote = char;
-      }
-      else if (char === '>') {
+      } else if (char === ">") {
         commit();
         mode = MODE_TEXT;
-      }
-      else if (!mode) {
+      } else if (!mode) {
         // Ignore everything until the tag ends
-      }
-      else if (char === '=') {
+      } else if (char === "=") {
         mode = MODE_PROP_SET;
         propName = buffer;
-        buffer = '';
-      }
-      else if (char === '/' && (mode < MODE_PROP_SET || statics[i][j+1] === '>')) {
+        buffer = "";
+      } else if (char === "/" && (mode < MODE_PROP_SET || statics[i][j + 1] === ">")) {
         commit();
         if (mode === MODE_TAGNAME) {
           current = current[0];
@@ -277,22 +249,19 @@ export const build = function(statics) {
         mode = current;
         if (MINI) {
           (current = current[0]).push(h.apply(null, mode.slice(1)));
-        }
-        else {
+        } else {
           (current = current[0]).push(mode, CHILD_RECURSE);
         }
         mode = MODE_SLASH;
-      }
-      else if (char === ' ' || char === '\t' || char === '\n' || char === '\r') {
+      } else if (char === " " || char === "\t" || char === "\n" || char === "\r") {
         // <a disabled>
         commit();
         mode = MODE_WHITESPACE;
-      }
-      else {
+      } else {
         buffer += char;
       }
 
-      if (mode === MODE_TAGNAME && buffer === '!--') {
+      if (mode === MODE_TAGNAME && buffer === "!--") {
         mode = MODE_COMMENT;
         current = current[0];
       }
@@ -308,28 +277,33 @@ export const build = function(statics) {
 
 const CACHES = new Map();
 
-const regular = function(statics) {
+const regular = function (statics) {
   let tmp = CACHES.get(this);
   if (!tmp) {
     tmp = new Map();
     CACHES.set(this, tmp);
   }
-  tmp = evaluate(this, tmp.get(statics) || (tmp.set(statics, tmp = build(statics)), tmp), arguments, []);
+  tmp = evaluate(
+    this,
+    tmp.get(statics) || (tmp.set(statics, (tmp = build(statics))), tmp),
+    arguments,
+    [],
+  );
   return tmp.length > 1 ? tmp : tmp[0];
 };
 
-const custom = function() {
+const custom = function () {
   const result = (MINI ? build : regular).apply(this, arguments);
   if (result) {
     return Array.isArray(result)
       ? this(result)
-      : typeof result === 'object'
-      ? result
-      : this([result]);
+      : typeof result === "object"
+        ? result
+        : this([result]);
   }
 };
 
-const wrapper = function() {
+const wrapper = function () {
   const h = custom.bind(this);
   return (this.wrap || h).apply(h, arguments);
 };

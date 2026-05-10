@@ -1,195 +1,170 @@
-import test from 'tape';
-import spy from 'ispy';
-import { o, h, hs } from 'sinuous';
+import { test, expect, vi } from "vitest";
+import { o, h, hs } from "cosuous";
 
-test('simple', function(t) {
-  t.equal(h('h1').outerHTML, '<h1></h1>');
-  t.equal(h('h1', 'hello world').outerHTML, '<h1>hello world</h1>');
-  t.end();
+test("simple", () => {
+  expect(h("h1").outerHTML).toBe("<h1></h1>");
+  expect(h("h1", "hello world").outerHTML).toBe("<h1>hello world</h1>");
 });
 
-test('nested', function(t) {
-  t.equal(
-    h('div', h('h1', 'Title'), h('p', 'Paragraph')).outerHTML,
-    '<div><h1>Title</h1><p>Paragraph</p></div>'
+test("nested", () => {
+  expect(h("div", h("h1", "Title"), h("p", "Paragraph")).outerHTML).toBe(
+    "<div><h1>Title</h1><p>Paragraph</p></div>",
   );
-  t.end();
 });
 
-test('arrays for nesting is ok', function(t) {
-  t.equal(
-    h('div', [h('h1', 'Title'), h('p', 'Paragraph')]).outerHTML,
-    '<div><h1>Title</h1><p>Paragraph</p></div>'
+test("arrays for nesting is ok", () => {
+  expect(h("div", [h("h1", "Title"), h("p", "Paragraph")]).outerHTML).toBe(
+    "<div><h1>Title</h1><p>Paragraph</p></div>",
   );
-  t.end();
 });
 
-test('can use namespace in name', function(t) {
-  t.equal(h('myns:mytag').outerHTML, '<myns:mytag></myns:mytag>');
-  t.end();
+test("can use namespace in name", () => {
+  expect(h("myns:mytag").outerHTML).toBe("<myns:mytag></myns:mytag>");
 });
 
-// test('can use id selector', function(t) {
-//   t.equal(h('div#frame').outerHTML, '<div id="frame"></div>');
-//   t.end();
+// test('can use id selector', () => {
+//   expect(h('div#frame').outerHTML).toBe('<div id="frame"></div>');
+//
 // });
 
-// test('can use class selector', function(t) {
-//   t.equal(h('div.panel').outerHTML, '<div class="panel"></div>');
-//   t.end();
+// test('can use class selector', () => {
+//   expect(h('div.panel').outerHTML).toBe('<div class="panel"></div>');
+//
 // });
 
-// test('can default element types', function(t) {
-//   t.equal(h('.panel').outerHTML, '<div class="panel"></div>');
-//   t.equal(h('#frame').outerHTML, '<div id="frame"></div>');
-//   t.end();
+// test('can default element types', () => {
+//   expect(h('.panel').outerHTML).toBe('<div class="panel"></div>');
+//   expect(h('#frame').outerHTML).toBe('<div id="frame"></div>');
+//
 // });
 
-test('can set properties', function(t) {
-  let a = h('a', { href: 'http://google.com' });
-  t.equal(a.href, 'http://google.com/');
-  let checkbox = h('input', { name: 'yes', type: 'checkbox' });
-  t.equal(checkbox.outerHTML, '<input name="yes" type="checkbox">');
-  t.end();
+test("can set properties", () => {
+  let a = h("a", { href: "http://google.com" });
+  expect(a.href).toBe("http://google.com/");
+  let checkbox = h("input", { name: "yes", type: "checkbox" });
+  expect(checkbox.outerHTML).toBe('<input name="yes" type="checkbox">');
 });
 
-test('(un)registers an event handler', function(t) {
+test("(un)registers an event handler", () => {
   // don't try the focus event, valid tests fail in IE11
 
-  let click = spy();
-  let btn = h('button', { onclick: click }, 'something');
+  let click = vi.fn();
+  let btn = h("button", { onclick: click }, "something");
   document.body.appendChild(btn);
 
   btn.click();
-  t.equal(click.callCount, 1, 'click called');
+  expect(click.mock.calls.length).toBe(1);
 
   h(btn, { onclick: false });
   btn.click();
-  t.equal(click.callCount, 1, 'click still called only once');
+  expect(click.mock.calls.length).toBe(1);
 
   btn.parentNode.removeChild(btn);
-  t.end();
 });
 
-test('(un)registers an observable event handler', function(t) {
+test("(un)registers an observable event handler", () => {
   // don't try the focus event, valid tests fail in IE11
 
-  let click = spy();
+  let click = vi.fn();
   let onclick = o(click);
-  let btn = h('button', { onclick }, 'something');
+  let btn = h("button", { onclick }, "something");
   document.body.appendChild(btn);
 
   btn.click();
-  t.equal(click.callCount, 1, 'click called');
+  expect(click.mock.calls.length).toBe(1);
 
   onclick(false);
   btn.click();
-  t.equal(click.callCount, 1, 'click still called only once');
+  expect(click.mock.calls.length).toBe(1);
 
   btn.parentNode.removeChild(btn);
-  t.end();
 });
 
-// test('registers event handlers', function(t) {
-//   let click = spy();
+// test('registers event handlers', () => {
+//   let click = vi.fn();
 //   let btn = h('button', { events: { click: () => click } }, 'something');
 //   document.body.appendChild(btn);
 
 //   btn.click();
-//   t.equal(click.callCount, 1, 'click called');
+//   expect(click.mock.calls.length).toBe(1);
 
 //   btn.parentNode.removeChild(btn);
-//   t.end();
+//
 // });
 
-// test('can use bindings', function(t) {
+// test('can use bindings', () => {
 //   h.bindings.innerHTML = (el, value) => (el.innerHTML = value);
 
 //   let el = h('div', { $innerHTML: '<b>look ma, no node value</b>' });
-//   t.equal(el.outerHTML, '<div><b>look ma, no node value</b></div>');
-//   t.end();
+//   expect(el.outerHTML).toBe('<div><b>look ma, no node value</b></div>');
+//
 // });
 
-test('sets styles', function(t) {
-  let div = h('div', { style: { color: 'red' } });
-  t.equal(div.style.color, 'red');
-  t.end();
+test("sets styles", () => {
+  let div = h("div", { style: { color: "red" } });
+  expect(div.style.color).toBe("red");
 });
 
-test('sets styles as text', function(t) {
-  let div = h('div', { style: 'color: red' });
-  t.equal(div.style.color, 'red');
-  t.end();
+test("sets styles as text", () => {
+  let div = h("div", { style: "color: red" });
+  expect(div.style.color).toBe("red");
 });
 
-// test('sets classes', function(t) {
+// test('sets classes', () => {
 //   let div = h('div', { classList: { play: true, pause: true } });
-//   t.assert(div.classList.contains('play'));
-//   t.assert(div.classList.contains('pause'));
-//   t.end();
+//   expect(div.classList.contains('play')).toBeTruthy();
+//   expect(div.classList.contains('pause')).toBeTruthy();
+//
 // });
 
-test('sets attributes', function(t) {
-  let div = h('div', { attrs: { checked: 'checked' } });
-  t.assert(div.hasAttribute('checked'));
-  t.end();
+test("sets attributes", () => {
+  let div = h("div", { attrs: { checked: "checked" } });
+  expect(div.hasAttribute("checked")).toBeTruthy();
 });
 
-test('sets data attributes', function(t) {
-  let div = h('div', { 'data-value': 5 });
-  t.equal(div.getAttribute('data-value'), '5'); // failing for IE9
-  t.end();
+test("sets data attributes", () => {
+  let div = h("div", { "data-value": 5 });
+  expect(div.getAttribute("data-value")).toBe("5"); // failing for IE9
 });
 
-test('sets aria attributes', function(t) {
-  let div = h('div', { 'aria-hidden': true });
-  t.equal(div.getAttribute('aria-hidden'), 'true');
-  t.end();
+test("sets aria attributes", () => {
+  let div = h("div", { "aria-hidden": true });
+  expect(div.getAttribute("aria-hidden")).toBe("true");
 });
 
-// test('sets refs', function(t) {
+// test('sets refs', () => {
 //   let ref;
 //   let div = h('div', { ref: el => (ref = el) });
-//   t.equal(div, ref);
-//   t.end();
+//   expect(div).toBe(ref);
+//
 // });
 
-test("boolean, number, get to-string'ed", function(t) {
-  let e = h('p', true, false, 4);
-  t.assert(e.outerHTML.match(/<p>truefalse4<\/p>/));
-  t.end();
+test("boolean, number, get to-string'ed", () => {
+  let e = h("p", true, false, 4);
+  expect(e.outerHTML.match(/<p>truefalse4<\/p>/)).toBeTruthy();
 });
 
-// test('unicode selectors', function(t) {
-//   t.equal(h('.⛄').outerHTML, '<div class="⛄"></div>');
-//   t.equal(h('span#⛄').outerHTML, '<span id="⛄"></span>');
-//   t.end();
+// test('unicode selectors', () => {
+//   expect(h('.⛄').outerHTML).toBe('<div class="⛄"></div>');
+//   expect(h('span#⛄').outerHTML).toBe('<span id="⛄"></span>');
+//
 // });
 
-test('can use fragments', function(t) {
-  const insertCat = () => 'cat';
-  let frag = h([h('div', 'First'), insertCat, h('div', 'Last')]);
+test("can use fragments", () => {
+  const insertCat = () => "cat";
+  let frag = h([h("div", "First"), insertCat, h("div", "Last")]);
 
-  const div = document.createElement('div');
+  const div = document.createElement("div");
   div.appendChild(frag);
-  t.equal(div.innerHTML, '<div>First</div>cat<div>Last</div>');
-  t.end();
+  expect(div.innerHTML).toBe("<div>First</div>cat<div>Last</div>");
 });
 
-test('can use components', function(t) {
-  const insertCat = ({ id, drink }) => h('div', { id, textContent: drink });
+test("can use components", () => {
+  const insertCat = ({ id, drink }) => h("div", { id, textContent: drink });
 
-  let frag = h([
-    h('div', 'First'),
-    h(insertCat, { id: 'cat', drink: 'milk' }),
-    h('div', 'Last')
-  ]);
+  let frag = h([h("div", "First"), h(insertCat, { id: "cat", drink: "milk" }), h("div", "Last")]);
 
-  const div = document.createElement('div');
+  const div = document.createElement("div");
   div.appendChild(frag);
-  t.equal(
-    div.innerHTML,
-    '<div>First</div><div id="cat">milk</div><div>Last</div>'
-  );
-  t.end();
+  expect(div.innerHTML).toBe('<div>First</div><div id="cat">milk</div><div>Last</div>');
 });

@@ -1,10 +1,10 @@
-import { Observable } from './observable';
+import { Observable } from "./observable";
 
 export namespace JSXInternal {
-  type OrObservable<T> = T | Observable<T>
-  type AllowObservable<Props> = { [K in keyof Props]: OrObservable<Props[K]> }
+  type OrObservable<T> = T | Observable<T>;
+  type AllowObservable<Props> = { [K in keyof Props]: OrObservable<Props[K]> };
 
-  type Element = HTMLElement | SVGElement | Node
+  type Element = HTMLElement | SVGElement | Node;
 
   interface ElementAttributesProperty {
     props: any;
@@ -14,32 +14,34 @@ export namespace JSXInternal {
     children: any;
   }
 
-  type SVGAttributes<Target extends EventTarget = SVGElement>
-    = AllowObservable<_SVGAttributes<Target>>
+  type SVGAttributes<Target extends EventTarget = SVGElement> = AllowObservable<
+    _SVGAttributes<Target>
+  >;
 
-  interface _SVGAttributes<Target extends EventTarget = SVGElement>
-    extends _HTMLAttributes<Target> {
+  interface _SVGAttributes<
+    Target extends EventTarget = SVGElement,
+  > extends _HTMLAttributes<Target> {
     accentHeight?: number | string;
-    accumulate?: 'none' | 'sum';
-    additive?: 'replace' | 'sum';
+    accumulate?: "none" | "sum";
+    additive?: "replace" | "sum";
     alignmentBaseline?:
-      | 'auto'
-      | 'baseline'
-      | 'before-edge'
-      | 'text-before-edge'
-      | 'middle'
-      | 'central'
-      | 'after-edge'
-      | 'text-after-edge'
-      | 'ideographic'
-      | 'alphabetic'
-      | 'hanging'
-      | 'mathematical'
-      | 'inherit';
-    allowReorder?: 'no' | 'yes';
+      | "auto"
+      | "baseline"
+      | "before-edge"
+      | "text-before-edge"
+      | "middle"
+      | "central"
+      | "after-edge"
+      | "text-after-edge"
+      | "ideographic"
+      | "alphabetic"
+      | "hanging"
+      | "mathematical"
+      | "inherit";
+    allowReorder?: "no" | "yes";
     alphabetic?: number | string;
     amplitude?: number | string;
-    arabicForm?: 'initial' | 'medial' | 'terminal' | 'isolated';
+    arabicForm?: "initial" | "medial" | "terminal" | "isolated";
     ascent?: number | string;
     attributeName?: string;
     attributeType?: string;
@@ -59,7 +61,7 @@ export namespace JSXInternal {
     clipPathUnits?: number | string;
     clipRule?: number | string;
     colorInterpolation?: number | string;
-    colorInterpolationFilters?: 'auto' | 'sRGB' | 'linearRGB' | 'inherit';
+    colorInterpolationFilters?: "auto" | "sRGB" | "linearRGB" | "inherit";
     colorProfile?: number | string;
     colorRendering?: number | string;
     contentScriptType?: number | string;
@@ -86,7 +88,7 @@ export namespace JSXInternal {
     externalResourcesRequired?: number | string;
     fill?: string;
     fillOpacity?: number | string;
-    fillRule?: 'nonzero' | 'evenodd' | 'inherit';
+    fillRule?: "nonzero" | "evenodd" | "inherit";
     filter?: string;
     filterRes?: number | string;
     filterUnits?: number | string;
@@ -208,8 +210,8 @@ export namespace JSXInternal {
     stroke?: string;
     strokeDasharray?: string | number;
     strokeDashoffset?: string | number;
-    strokeLinecap?: 'butt' | 'round' | 'square' | 'inherit';
-    strokeLinejoin?: 'miter' | 'round' | 'bevel' | 'inherit';
+    strokeLinecap?: "butt" | "round" | "square" | "inherit";
+    strokeLinejoin?: "miter" | "round" | "bevel" | "inherit";
     strokeMiterlimit?: string;
     strokeOpacity?: number | string;
     strokeWidth?: number | string;
@@ -279,59 +281,26 @@ export namespace JSXInternal {
 
   type TargetedEvent<
     Target extends EventTarget = EventTarget,
-    TypedEvent extends Event = Event
-  > = Omit<TypedEvent, 'currentTarget'> & {
+    TypedEvent extends Event = Event,
+  > = Omit<TypedEvent, "currentTarget"> & {
     readonly currentTarget: Target;
   };
 
-  type TargetedAnimationEvent<Target extends EventTarget> = TargetedEvent<
-    Target,
-    AnimationEvent
-  >;
-  type TargetedClipboardEvent<Target extends EventTarget> = TargetedEvent<
-    Target,
-    ClipboardEvent
-  >;
+  type TargetedAnimationEvent<Target extends EventTarget> = TargetedEvent<Target, AnimationEvent>;
+  type TargetedClipboardEvent<Target extends EventTarget> = TargetedEvent<Target, ClipboardEvent>;
   type TargetedCompositionEvent<Target extends EventTarget> = TargetedEvent<
     Target,
     CompositionEvent
   >;
-  type TargetedDragEvent<Target extends EventTarget> = TargetedEvent<
-    Target,
-    DragEvent
-  >;
-  type TargetedFocusEvent<Target extends EventTarget> = TargetedEvent<
-    Target,
-    FocusEvent
-  >;
-  type TargetedKeyboardEvent<Target extends EventTarget> = TargetedEvent<
-    Target,
-    KeyboardEvent
-  >;
-  type TargetedMouseEvent<Target extends EventTarget> = TargetedEvent<
-    Target,
-    MouseEvent
-  >;
-  type TargetedPointerEvent<Target extends EventTarget> = TargetedEvent<
-    Target,
-    PointerEvent
-  >;
-  type TargetedTouchEvent<Target extends EventTarget> = TargetedEvent<
-    Target,
-    TouchEvent
-  >;
-  type TargetedTransitionEvent<Target extends EventTarget> = TargetedEvent<
-    Target,
-    TransitionEvent
-  >;
-  type TargetedUIEvent<Target extends EventTarget> = TargetedEvent<
-    Target,
-    UIEvent
-  >;
-  type TargetedWheelEvent<Target extends EventTarget> = TargetedEvent<
-    Target,
-    WheelEvent
-  >;
+  type TargetedDragEvent<Target extends EventTarget> = TargetedEvent<Target, DragEvent>;
+  type TargetedFocusEvent<Target extends EventTarget> = TargetedEvent<Target, FocusEvent>;
+  type TargetedKeyboardEvent<Target extends EventTarget> = TargetedEvent<Target, KeyboardEvent>;
+  type TargetedMouseEvent<Target extends EventTarget> = TargetedEvent<Target, MouseEvent>;
+  type TargetedPointerEvent<Target extends EventTarget> = TargetedEvent<Target, PointerEvent>;
+  type TargetedTouchEvent<Target extends EventTarget> = TargetedEvent<Target, TouchEvent>;
+  type TargetedTransitionEvent<Target extends EventTarget> = TargetedEvent<Target, TransitionEvent>;
+  type TargetedUIEvent<Target extends EventTarget> = TargetedEvent<Target, UIEvent>;
+  type TargetedWheelEvent<Target extends EventTarget> = TargetedEvent<Target, WheelEvent>;
 
   interface EventHandler<E extends TargetedEvent> {
     (event: E): void;
@@ -346,36 +315,20 @@ export namespace JSXInternal {
   type CompositionEventHandler<Target extends EventTarget> = EventHandler<
     TargetedCompositionEvent<Target>
   >;
-  type DragEventHandler<Target extends EventTarget> = EventHandler<
-    TargetedDragEvent<Target>
-  >;
-  type FocusEventHandler<Target extends EventTarget> = EventHandler<
-    TargetedFocusEvent<Target>
-  >;
-  type GenericEventHandler<Target extends EventTarget> = EventHandler<
-    TargetedEvent<Target>
-  >;
+  type DragEventHandler<Target extends EventTarget> = EventHandler<TargetedDragEvent<Target>>;
+  type FocusEventHandler<Target extends EventTarget> = EventHandler<TargetedFocusEvent<Target>>;
+  type GenericEventHandler<Target extends EventTarget> = EventHandler<TargetedEvent<Target>>;
   type KeyboardEventHandler<Target extends EventTarget> = EventHandler<
     TargetedKeyboardEvent<Target>
   >;
-  type MouseEventHandler<Target extends EventTarget> = EventHandler<
-    TargetedMouseEvent<Target>
-  >;
-  type PointerEventHandler<Target extends EventTarget> = EventHandler<
-    TargetedPointerEvent<Target>
-  >;
-  type TouchEventHandler<Target extends EventTarget> = EventHandler<
-    TargetedTouchEvent<Target>
-  >;
+  type MouseEventHandler<Target extends EventTarget> = EventHandler<TargetedMouseEvent<Target>>;
+  type PointerEventHandler<Target extends EventTarget> = EventHandler<TargetedPointerEvent<Target>>;
+  type TouchEventHandler<Target extends EventTarget> = EventHandler<TargetedTouchEvent<Target>>;
   type TransitionEventHandler<Target extends EventTarget> = EventHandler<
     TargetedTransitionEvent<Target>
   >;
-  type UIEventHandler<Target extends EventTarget> = EventHandler<
-    TargetedUIEvent<Target>
-  >;
-  type WheelEventHandler<Target extends EventTarget> = EventHandler<
-    TargetedWheelEvent<Target>
-  >;
+  type UIEventHandler<Target extends EventTarget> = EventHandler<TargetedUIEvent<Target>>;
+  type WheelEventHandler<Target extends EventTarget> = EventHandler<TargetedWheelEvent<Target>>;
 
   interface DOMAttributes<Target extends EventTarget> {
     // Image Events
@@ -570,13 +523,15 @@ export namespace JSXInternal {
     onTransitionEndCapture?: TransitionEventHandler<Target>;
   }
 
-  type HTMLAttributes<RefType extends EventTarget = EventTarget>
-    = AllowObservable<_HTMLAttributes<RefType>>
+  type HTMLAttributes<RefType extends EventTarget = EventTarget> = AllowObservable<
+    _HTMLAttributes<RefType>
+  >;
 
-  interface _HTMLAttributes<RefType extends EventTarget = EventTarget>
-    extends DOMAttributes<RefType> {
-    // Sinuous properties
-    attrs?: Record<string, unknown>
+  interface _HTMLAttributes<
+    RefType extends EventTarget = EventTarget,
+  > extends DOMAttributes<RefType> {
+    // Cosuous properties
+    attrs?: Record<string, unknown>;
 
     // Standard HTML Attributes
     accept?: string;
@@ -616,7 +571,7 @@ export namespace JSXInternal {
     dateTime?: string;
     default?: boolean;
     defer?: boolean;
-    dir?: 'auto' | 'rtl' | 'ltr';
+    dir?: "auto" | "rtl" | "ltr";
     disabled?: boolean;
     disableRemotePlayback?: boolean;
     download?: any;
@@ -699,9 +654,7 @@ export namespace JSXInternal {
     srcSet?: string;
     start?: number;
     step?: number | string;
-    style?:
-      | string
-      | { [key: string]: OrObservable<string | number> };
+    style?: string | { [key: string]: OrObservable<string | number> };
     summary?: string;
     tabIndex?: number;
     target?: string;
