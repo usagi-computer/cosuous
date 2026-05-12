@@ -13,9 +13,9 @@ Cosuous Signal is a tiny reactive library, backed by [alien-signals](https://git
 - `signal(value)` -> `Signal<T>`
 - `computed(fn)` -> `Computed<T>`
 - `effect(fn)` -> `() => void`
-- `onCleanup(fn)` -> `typeof fn`
 - `untracked(fn)` -> `T`
 - `effectScope(fn)` -> `() => void`
+- `batch(fn)` -> `T`
 - `startBatch()` / `endBatch()` -> `void`
 - `isSignal(value)` / `isComputed(value)` -> `boolean`
 
@@ -59,22 +59,20 @@ count(1); // logs 1
 stop();
 ```
 
-### `onCleanup(fn): typeof fn`
-
-Registers a cleanup function that runs when the surrounding effect re-runs or is disposed.
+If `fn` returns a function, it's treated as a cleanup. The cleanup runs before the next re-run and on dispose:
 
 ```js
-import { effect, onCleanup } from "cosuous/signal";
+import { effect } from "cosuous/signal";
 
 effect(() => {
   const timer = setInterval(() => {}, 1000);
-  onCleanup(() => clearInterval(timer));
+  return () => clearInterval(timer);
 });
 ```
 
 ### `untracked(fn): T`
 
-Runs a function without tracking any signals read during its execution. Returns the function's return value. `onCleanup` calls inside `fn` still register against the surrounding scope.
+Runs a function without tracking any signals read during its execution. Returns the function's return value.
 
 ```js
 import { signal, effect, untracked } from "cosuous/signal";
@@ -84,7 +82,10 @@ const b = signal(0);
 
 effect(() => {
   // Re-runs when `a` changes, but not when `b` changes.
-  console.log(a(), untracked(() => b()));
+  console.log(
+    a(),
+    untracked(() => b()),
+  );
 });
 ```
 
@@ -96,29 +97,37 @@ Groups child effects for batched disposal. Returns a dispose function that tears
 import { effect, effectScope } from "cosuous/signal";
 
 const stop = effectScope(() => {
-  effect(() => {/* ... */});
-  effect(() => {/* ... */});
+  effect(() => {
+    /* ... */
+  });
+  effect(() => {
+    /* ... */
+  });
 });
 
 stop(); // disposes both inner effects at once
 ```
 
-### `startBatch()` / `endBatch()`: `void`
+### `batch(fn): T`
 
-Batches multiple signal updates so dependent effects re-run once at the end instead of after every set. Always pair them; nesting is safe.
+Brackets `startBatch()` / `endBatch()` around `fn`, coalescing signal updates so dependent effects re-run once after `fn` returns. Returns whatever `fn` returns.
 
 ```js
-import { signal, effect, startBatch, endBatch } from "cosuous/signal";
+import { signal, effect, batch } from "cosuous/signal";
 
 const x = signal(0);
 const y = signal(0);
 effect(() => console.log(x() + y()));
 
-startBatch();
-x(1);
-y(2);
-endBatch(); // logs 3 once, not twice
+batch(() => {
+  x(1);
+  y(2);
+}); // logs 3 once, not twice
 ```
+
+### `startBatch()` / `endBatch()`: `void`
+
+The lower-level pair behind `batch(fn)`. Always pair them; nesting is safe. Prefer `batch(fn)` unless you need to bracket updates across non-linear control flow.
 
 ### `isSignal(value)` / `isComputed(value)`: `boolean`
 
@@ -132,9 +141,9 @@ Type-checks an arbitrary value. Returns `true` for signals/computed signals crea
 | `computed(fn)`                 | `computed(fn)`                        | Unchanged.                                                            |
 | `subscribe(fn)`                | `effect(fn)`                          | Returns a dispose function.                                           |
 | `unsubscribe(observer)`        | call the dispose returned by `effect` | No standalone unsubscribe; capture and call it.                       |
-| `sample(fn)`                   | `untracked(fn)`                       | `untracked` still allows `onCleanup` registration; `sample` did not.  |
-| `cleanup(fn)`                  | `onCleanup(fn)`                       | Same semantics.                                                       |
-| `transaction(fn)`              | `startBatch()` / `endBatch()`         | No `batch(fn)` shorthand; bracket the updates manually.               |
+| `sample(fn)`                   | `untracked(fn)`                       | Returns `fn`'s value; reads inside `fn` don't track.                  |
+| `cleanup(fn)`                  | return a cleanup from `effect`        | `effect(() => { ...; return () => /* cleanup */ })`.                  |
+| `transaction(fn)`              | `batch(fn)`                           | Or `startBatch()` / `endBatch()` for non-linear control flow.         |
 | `root(fn)`                     | `effectScope(fn)`                     | Returns a dispose function that tears down child effects.             |
 | `on(obs, fn, seed, onchanges)` | `effect` + `untracked`                | Read tracked deps directly, wrap untracked reads in `untracked(...)`. |
 | `isListening()`                | (no equivalent)                       | Not exposed by alien-signals.                                         |

@@ -27,7 +27,7 @@ declare namespace cosuous {
   export import effect = _s.effect;
   export import effectScope = _s.effectScope;
   export import untracked = _s.untracked;
-  export import onCleanup = _s.onCleanup;
+  export import batch = _s.batch;
   export import startBatch = _s.startBatch;
   export import endBatch = _s.endBatch;
   export import trigger = _s.trigger;

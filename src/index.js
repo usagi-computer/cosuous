@@ -6,13 +6,13 @@
 import { api } from "./h.js";
 import htm from "./htm.js";
 import {
+  batch,
   computed,
   effect,
   effectScope,
   endBatch,
   isComputed,
   isSignal,
-  onCleanup,
   signal,
   startBatch,
   trigger,
@@ -20,9 +20,6 @@ import {
 } from "./signal.js";
 
 api.effect = effect;
-api.scope = effectScope;
-api.untracked = untracked;
-api.onCleanup = onCleanup;
 api.isSignal = isSignal;
 api.isComputed = isComputed;
 
@@ -48,13 +45,13 @@ export const svg = (...args) => htm.apply(hs, args);
 
 export {
   api,
+  batch,
   computed,
   effect,
   effectScope,
   endBatch,
   isComputed,
   isSignal,
-  onCleanup,
   signal,
   startBatch,
   trigger,

@@ -37,10 +37,7 @@ export interface HyperscriptApi {
   rm(parent: Node, startNode: Node, endMark: Node): void;
 
   // Reactive primitives (provided by index.js wiring signal.js)
-  effect(fn: () => void): () => void;
-  scope(fn: () => void): () => void;
-  untracked<T>(fn: () => T): T;
-  onCleanup<T extends () => unknown>(fn: T): T;
+  effect(fn: () => void | (() => void)): () => void;
   isSignal(value: unknown): boolean;
   isComputed(value: unknown): boolean;
 }

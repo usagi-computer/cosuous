@@ -14,12 +14,12 @@ A light, fast, reactive UI library. A fork of [Sinuous](https://github.com/luwes
 
 ### Add-ons
 
-| Size | Name                                    | Description                         |
-| ---- | --------------------------------------- | ----------------------------------- |
-| -    | [`cosuous/signal`](./src/signal.md)     | Signals _(included by default)_     |
-| -    | [`cosuous/map`](./src/map.js)           | Fast list renderer                  |
-| -    | [`cosuous/hydrate`](./src/hydrate.md)   | Hydrate static HTML                 |
-| -    | [`cosuous/template`](./src/template.md) | Pre-rendered Template               |
+| Size | Name                                    | Description                     |
+| ---- | --------------------------------------- | ------------------------------- |
+| -    | [`cosuous/signal`](./src/signal.md)     | Signals _(included by default)_ |
+| -    | [`cosuous/map`](./src/map.js)           | Fast list renderer              |
+| -    | [`cosuous/hydrate`](./src/hydrate.md)   | Hydrate static HTML             |
+| -    | [`cosuous/template`](./src/template.md) | Pre-rendered Template           |
 
 ### Community
 
@@ -115,7 +115,7 @@ length(4); // => logs 16
 
 #### Use a custom reactive library
 
-Cosuous can work with different signal/reactive libraries; S.js, MobX, hyperactiv. To swap in a different library, override the reactive primitives on the internal `api`: `effect`, `scope`, `untracked`, `onCleanup`, `isSignal`, and `isComputed`. See the upstream [Sinuous wiki](https://github.com/luwes/sinuous/wiki/Choose-your-own-reactive-library) for more info.
+Cosuous can work with different signal/reactive libraries; S.js, MobX, hyperactiv. To swap in a different library, override the reactive primitives on the internal `api`: `effect`, `isSignal`, and `isComputed`. The provided `effect` should accept a callback that may return a cleanup function. See the upstream [Sinuous wiki](https://github.com/luwes/sinuous/wiki/Choose-your-own-reactive-library) for more info.
 
 ## Hydration
 
@@ -166,10 +166,7 @@ These are defined in [cosuous/src](./src/index.js) and [cosuous/h](./src/h.js).
 - `property(el: Node, value: unknown, name: string, isAttr?: boolean, isCss?: boolean): void`
 - `add(parent: Node, value: Value | Value[], endMark?: Node): Node | Frag`
 - `rm(parent: Node, startNode: Node, endMark: Node): void`
-- `effect(fn: () => void): () => void`
-- `scope(fn: () => void): () => void`
-- `untracked<T>(fn: () => T): T`
-- `onCleanup<T extends () => unknown>(fn: T): T`
+- `effect(fn: () => void | (() => void)): () => void`
 - `isSignal(value: unknown): boolean`
 - `isComputed(value: unknown): boolean`
 

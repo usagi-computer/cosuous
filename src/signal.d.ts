@@ -10,10 +10,10 @@ export function signal<T>(): Signal<T | undefined>;
 export function signal<T>(initialValue: T): Signal<T>;
 export function computed<T>(getter: (previousValue?: T) => T): Computed<T>;
 
-export function effect(fn: () => void): () => void;
+export function effect(fn: () => void | (() => void)): () => void;
 export function effectScope(fn: () => void): () => void;
 export function untracked<T>(fn: () => T): T;
-export function onCleanup<T extends () => unknown>(fn: T): T;
+export function batch<T>(fn: () => T): T;
 
 export function startBatch(): void;
 export function endBatch(): void;

@@ -127,7 +127,7 @@ export default function htmBabelPlugin({ types: t }, options = {}) {
       );
     }
 
-    // Passing `{variableArity:false}` always produces `h(tag, props, children)` - where `children` is always an Array.
+    // Passing `{variableArity:false}` always produces `h(tag, props, children)`, where `children` is always an Array.
     // Otherwise, the default is `h(tag, props, ...children)`.
     if (options.variableArity !== false) {
       children = children.elements;

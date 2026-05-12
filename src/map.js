@@ -1,6 +1,7 @@
 /* Adapted from Stage0 - The MIT License - Pavel Martynov */
 /* Adapted from DOM Expressions - The MIT License - Ryan Carniato */
-import { api } from './index.js';
+import { api } from "./index.js";
+import { effect, effectScope, untracked, onCleanup } from "./signal.js";
 
 export const GROUPING = "__g";
 export const FORWARD = "nextSibling";
@@ -15,8 +16,6 @@ export const BACKWARD = "previousSibling";
  * @return {DocumentFragment}
  */
 export function map(items, expr, cleaning) {
-  const { effect, scope, untracked, onCleanup } = api;
-
   // Disable cleaning for templates by default.
   if (cleaning == null) cleaning = !expr.$t;
 
@@ -60,7 +59,7 @@ export function map(items, expr, cleaning) {
     // their parent's update cycle and be disposed individually.
     if (!cleaning) return add(parent, expr(item, i, data), afterNode);
     let node;
-    const disposeFn = scope(() => {
+    const disposeFn = effectScope(() => {
       node = add(parent, expr(item, i, data), afterNode);
     });
     disposers.set(node, disposeFn);

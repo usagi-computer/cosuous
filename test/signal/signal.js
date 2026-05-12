@@ -1,12 +1,12 @@
 import { test, expect, vi } from "vitest";
 import {
+  batch,
   computed,
   effect,
   effectScope,
   endBatch,
   isComputed,
   isSignal,
-  onCleanup,
   signal,
   startBatch,
   untracked,
@@ -79,12 +79,12 @@ test("startBatch/endBatch coalesces updates", () => {
   expect(seen).toEqual([3, 30]);
 });
 
-test("onCleanup runs before each effect re-run and on dispose", () => {
+test("returned cleanup runs before each effect re-run and on dispose", () => {
   const s = signal(0);
   const cleanups = [];
   const stop = effect(() => {
     const v = s();
-    onCleanup(() => cleanups.push(v));
+    return () => cleanups.push(v);
   });
   s(1);
   s(2);
@@ -92,16 +92,19 @@ test("onCleanup runs before each effect re-run and on dispose", () => {
   expect(cleanups).toEqual([0, 1, 2]);
 });
 
-test("onCleanup inside untracked still attaches to enclosing effect", () => {
-  const s = signal(0);
-  const cleanups = [];
-  const stop = effect(() => {
-    const v = s();
-    untracked(() => onCleanup(() => cleanups.push(v)));
+test("batch(fn) coalesces updates and returns fn's value", () => {
+  const a = signal(1);
+  const b = signal(2);
+  const seen = [];
+  effect(() => seen.push(a() + b()));
+  expect(seen).toEqual([3]);
+  const result = batch(() => {
+    a(10);
+    b(20);
+    return "done";
   });
-  s(1);
-  stop();
-  expect(cleanups).toEqual([0, 1]);
+  expect(seen).toEqual([3, 30]);
+  expect(result).toBe("done");
 });
 
 test("effectScope groups child effects for batched disposal", () => {

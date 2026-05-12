@@ -4,7 +4,6 @@ export namespace JSXInternal {
   type OrSignal<T> = T | Signal<T>;
   type AllowSignal<Props> = { [K in keyof Props]: OrSignal<Props[K]> };
 
-
   type Element = HTMLElement | SVGElement | Node;
 
   interface ElementAttributesProperty {
@@ -15,9 +14,7 @@ export namespace JSXInternal {
     children: any;
   }
 
-  type SVGAttributes<Target extends EventTarget = SVGElement> = AllowSignal<
-    _SVGAttributes<Target>
-  >;
+  type SVGAttributes<Target extends EventTarget = SVGElement> = AllowSignal<_SVGAttributes<Target>>;
 
   interface _SVGAttributes<
     Target extends EventTarget = SVGElement,
