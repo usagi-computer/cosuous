@@ -1,12 +1,12 @@
 - Investigate if it's even possible to replace the Signal library at this point, since we're assuming a lot about the usage of alien-signals
 - Run performance benchmarks
 - Run size benchmarks
-- Use library for Coop's website rebuild
-- Move repo to usagi-computer org once more mature
 - Switch to Deno for runtime
-- Publish to NPM/JSR (https://esm.sh/ supports both NPM and JSR)
-- Create documentation website (Using https://starlight.astro.build/ with js.org domain)
 - Possible changes/fixes:
   - _isHydrated reentrancy in hydrate.js (unconfirmed latent bug, refactor would be too big for this pass).
   - Stringly-typed nodeType/event-prefix/SVG-NS constants (low impact, adds a module for marginal readability).
   - api.hs try/finally for isSvg restoration (defensive coding for a near-zero-probability throw).
+- Move repo to usagi-computer org once more mature
+- Publish to NPM/JSR (https://esm.sh/ supports both NPM and JSR)
+- Use library for Coop's website rebuild
+- Create documentation website (Using https://starlight.astro.build/ with js.org domain)

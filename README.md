@@ -5,7 +5,7 @@ A light, fast, reactive UI library. A fork of [Sinuous](https://github.com/luwes
 [![Version](https://img.shields.io/npm/v/cosuous.svg?color=success&style=flat-square)](https://www.npmjs.com/package/cosuous)
 
 **npm**: `npm i cosuous`  
-**cdn**: https://cdn.jsdelivr.net/npm/cosuous/+esm
+**cdn**: <>
 
 - **Small.** hello world at `~1.4kB` gzip.
 - **Fast.** [top ranked](https://rawgit.com/krausest/js-framework-benchmark/master/webdriver-ts-results/table.html) of 80+ UI libs.
@@ -14,12 +14,12 @@ A light, fast, reactive UI library. A fork of [Sinuous](https://github.com/luwes
 
 ### Add-ons
 
-| Size | Name                                    | Description                     |
-| ---- | --------------------------------------- | ------------------------------- |
-| -    | [`cosuous/signal`](./src/signal.md)     | Signals _(included by default)_ |
-| -    | [`cosuous/map`](./src/map.js)           | Fast list renderer              |
-| -    | [`cosuous/hydrate`](./src/hydrate.md)   | Hydrate static HTML             |
-| -    | [`cosuous/template`](./src/template.md) | Pre-rendered Template           |
+| Size | Name                                    | Description                                          |
+| ---- | --------------------------------------- | ---------------------------------------------------- |
+| -    | [`cosuous/signal`](./src/signal.md)     | Signals with `alien-signals` _(included by default)_ |
+| -    | [`cosuous/map`](./src/map.js)           | Fast list renderer                                   |
+| -    | [`cosuous/hydrate`](./src/hydrate.md)   | Hydrate static HTML                                  |
+| -    | [`cosuous/template`](./src/template.md) | Pre-rendered Template                                |
 
 ### Community
 
