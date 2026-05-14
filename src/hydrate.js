@@ -1,5 +1,5 @@
-import { h, hs, api } from "./index.js";
 import htm from "./htm.js";
+import { api, h, hs } from "./index.js";
 
 export const d = context();
 export const ds = context(true);
@@ -112,11 +112,12 @@ export function hydrate(delta, root) {
       selector = "#";
     } else if (delta._props && (prop = delta._props.class)) {
       selector = ".";
-    } else if ((prop = delta.type)) {
-      // delta.type is truthy
     } else {
-      isRootFragment = true;
-      return delta._children && findRootSelector(delta._children[0]());
+      prop = delta.type;
+      if (!prop) {
+        isRootFragment = true;
+        return delta._children && findRootSelector(delta._children[0]());
+      }
     }
 
     return (

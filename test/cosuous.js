@@ -77,36 +77,16 @@ test("conditional lists without root", () => {
     return html`${() => (list() ? map(list, (item) => html`<i>${item}</i>`) : Spinner())}`;
   };
 
-  const log = (el, ...args) => {
-    console.warn(
-      Array.from(el.childNodes)
-        .map((c) => `${c}${c.__g ? "," + c.__g : ""}`)
-        .join(" — "),
-      ...args,
-    );
-    console.warn("");
-  };
-
-  const firstStory = Story(1);
-
-  console.warn("raw story 1 element");
-  log(firstStory);
-  const stories = [firstStory, Story(2), Story(3)];
+  const stories = [Story(1), Story(2), Story(3)];
 
   const div = html`<div>${() => stories[choice() - 1]}</div>`;
   document.body.appendChild(div);
-  log(div);
-
-  console.warn("story 1 - filler 1");
 
   filler(1);
   expect(div.children.length).toBe(2);
-  log(div);
 
-  console.warn("story 2 - filler 2");
   choice(2);
   expect(div.children.length).toBe(1);
-  log(div);
 
   filler(2);
   expect(div.children[0].innerText).toBe("a2");

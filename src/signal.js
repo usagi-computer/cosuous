@@ -1,9 +1,12 @@
 /*
  * Reactive core, backed by alien-signals.
  * Public surface is preact-signals-shaped: effect callbacks may return a
- * cleanup function, batch(fn) brackets startBatch/endBatch, untracked(fn)
- * suspends dependency tracking. onCleanup and effectScope remain available
- * as internal primitives consumed by src/map.js.
+ * cleanup function (handled natively by alien-signals), batch(fn) brackets
+ * startBatch/endBatch, untracked(fn) suspends dependency tracking. onCleanup
+ * and effectScope remain available as internal primitives consumed by
+ * src/map.js to cascade teardown through the scope graph, alien-signals'
+ * native cleanup fires on self-dispose only, not when an ancestor scope tears
+ * a node down via the graph.
  */
 
 import {
@@ -51,7 +54,7 @@ const runCleanups = (cleanups) => {
 
 /**
  * Reactive side effect. Re-runs when any read signal changes. If fn returns a
- * function, it's invoked before the next re-run and on dispose.
+ * function, alien-signals invokes it before each re-run and on dispose.
  * Returns a dispose function.
  * @param {Function} fn
  * @return {Function}
@@ -61,13 +64,14 @@ export function effect(fn) {
   const stop = _effect(() => {
     runCleanups(cleanups);
     const returned = withCleanups(cleanups, fn);
-    if (typeof returned === "function") cleanups.push(returned);
+    if (typeof returned === "function") return returned;
   });
-  // When the surrounding effect re-runs, alien-signals tears down this child
-  // effect via its node graph - but it doesn't know about our cleanup list.
-  // Register a callback on the parent's cleanup list so our cleanups also fire.
-  // We deliberately don't push the full dispose: alien-signals handles stopping.
-  if (activeCleanups) activeCleanups.push(() => runCleanups(cleanups));
+  if (activeCleanups) {
+    activeCleanups.push(() => {
+      runCleanups(cleanups);
+      stop();
+    });
+  }
   return () => {
     runCleanups(cleanups);
     stop();
@@ -125,4 +129,13 @@ export function batch(fn) {
   }
 }
 
-export { computed, endBatch, isComputed, isSignal, setActiveSub, signal, startBatch, trigger };
+export {
+  computed,
+  endBatch,
+  isComputed,
+  isSignal,
+  setActiveSub,
+  signal,
+  startBatch,
+  trigger,
+};

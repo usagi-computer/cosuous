@@ -57,6 +57,7 @@ export default defineConfig({
           name: "browser",
           include: ["test/**/*.js"],
           exclude: ["test/htm/**", "test/_*.js", "test/**/perf/**", "test/test.js"],
+          setupFiles: ["test/_setup.js"],
           browser: {
             enabled: true,
             provider: playwright(),

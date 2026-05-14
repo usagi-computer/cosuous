@@ -162,45 +162,45 @@ test("can insert a changing array of nodes 1", () => {
   var origExpected = expected(orig);
 
   // identity
-  test([n1, n2, n3, n4]);
+  check([n1, n2, n3, n4]);
 
   // 1 missing
-  test([n2, n3, n4]);
-  test([n1, n3, n4]);
-  test([n1, n2, n4]);
-  test([n1, n2, n3]);
+  check([n2, n3, n4]);
+  check([n1, n3, n4]);
+  check([n1, n2, n4]);
+  check([n1, n2, n3]);
 
   // 2 missing
-  test([n3, n4]);
-  test([n2, n4]);
-  test([n2, n3]);
-  test([n1, n4]);
-  test([n1, n3]);
-  test([n1, n2]);
+  check([n3, n4]);
+  check([n2, n4]);
+  check([n2, n3]);
+  check([n1, n4]);
+  check([n1, n3]);
+  check([n1, n2]);
 
   // 3 missing
-  test([n1]);
-  test([n2]);
-  test([n3]);
-  test([n4]);
+  check([n1]);
+  check([n2]);
+  check([n3]);
+  check([n4]);
 
   // all missing
-  test([]);
+  check([]);
 
   // swaps
-  test([n2, n1, n3, n4]);
-  test([n3, n2, n1, n4]);
-  test([n4, n2, n3, n1]);
+  check([n2, n1, n3, n4]);
+  check([n3, n2, n1, n4]);
+  check([n4, n2, n3, n1]);
 
   // rotations
-  test([n2, n3, n4, n1]);
-  test([n3, n4, n1, n2]);
-  test([n4, n1, n2, n3]);
+  check([n2, n3, n4, n1]);
+  check([n3, n4, n1, n2]);
+  check([n4, n1, n2, n3]);
 
   // reversal
-  test([n4, n3, n2, n1]);
+  check([n4, n3, n2, n1]);
 
-  function test(array) {
+  function check(array) {
     current = insert(parent, array, undefined, current);
     expect(parent.innerHTML).toBe(expected(array));
     current = insert(parent, orig, undefined, current);

@@ -74,7 +74,7 @@ export function map(items, expr, cleaning) {
 function clearList(parent, beforeNode, afterNode, onClear) {
   const startMark = beforeNode.previousSibling;
   if ((startMark && startMark.previousSibling) || afterNode.nextSibling) {
-    removeNodes(parent, beforeNode.nextSibling, afterNode);
+    api.rm(parent, beforeNode.nextSibling, afterNode);
   } else {
     parent.textContent = "";
     startMark && parent.appendChild(startMark);
@@ -142,7 +142,7 @@ export function reconcile(a, b, beforeNode, afterNode, createFn, onClear, onRemo
     while (aStart <= aEnd--) {
       tmp = step(aEndNode, BACKWARD, true);
       mark = tmp.previousSibling;
-      removeNodes(parent, tmp, aEndNode.nextSibling);
+      api.rm(parent, tmp, aEndNode.nextSibling);
       onRemove && onRemove(tmp);
       aEndNode = mark;
     }
@@ -203,7 +203,7 @@ export function reconcile(a, b, beforeNode, afterNode, createFn, onClear, onRemo
   for (i = 0; i < toRemove.length; i++) {
     let index = toRemove[i];
     tmp = nodes[index];
-    removeNodes(parent, tmp, step(tmp, FORWARD));
+    api.rm(parent, tmp, step(tmp, FORWARD));
     onRemove && onRemove(tmp);
   }
 
@@ -260,15 +260,6 @@ function step(node, direction, inner) {
     }
   }
   return inner ? node : node[direction];
-}
-
-function removeNodes(parent, node, end) {
-  let tmp;
-  while (node !== end) {
-    tmp = node.nextSibling;
-    parent.removeChild(node);
-    node = tmp;
-  }
 }
 
 function insertNodes(parent, node, end, target) {

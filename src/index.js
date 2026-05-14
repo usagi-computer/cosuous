@@ -32,10 +32,10 @@ api.hs = (...args) => {
 };
 
 // Makes it possible to intercept `h` calls and customize.
-export const h = (...args) => api.h.apply(api.h, args);
+export const h = (...args) => api.h(...args);
 
 // Makes it possible to intercept `hs` calls and customize.
-export const hs = (...args) => api.hs.apply(api.hs, args);
+export const hs = (...args) => api.hs(...args);
 
 // `export const html = htm.bind(h)` is not tree-shakeable!
 export const html = (...args) => htm.apply(h, args);

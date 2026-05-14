@@ -231,10 +231,8 @@ export const h = (...args) => {
   let onUnmountFn = null;
 
   const item = (/** @type {*} */ arg) => {
-    // @ts-ignore Allow empty if
-
-    if (arg == null);
-    else if (typeof arg === "string") {
+    if (arg == null) return;
+    if (typeof arg === "string") {
       if (el) {
         api.add(el, arg);
       } else {
@@ -254,24 +252,16 @@ export const h = (...args) => {
         el = arg;
       }
     } else if (typeof arg === "object") {
-      // Detect onMount
-      if (arg && typeof arg.onMount === "function") {
-        onMountFn = arg.onMount;
-        // eslint-disable-next-line no-unused-vars
-        const { onMount, ...rest } = arg;
-        api.property(el, rest, null, api.isSvg);
-      }
-      // Detect onUnmount
-      if (arg && typeof arg.onUnmount === "function") {
-        onUnmountFn = arg.onUnmount;
-        // eslint-disable-next-line no-unused-vars
-        const { onUnmount, ...rest } = arg;
-        api.property(el, rest, null, api.isSvg);
-      }
-      if (!("onMount" in arg) && !("onUnmount" in arg)) {
-        // @ts-ignore 0 | 1 is a boolean but can't type cast; they don't overlap
-        api.property(el, arg, null, api.isSvg);
-      }
+      // Strip lifecycle/ref keys before applying the remaining props, so a
+      // props object containing multiple of them is still applied once.
+      // ref fires synchronously with the created element; onMount/onUnmount
+      // are deferred until mount/unmount of `el`.
+      const { onMount, onUnmount, ref, ...rest } = arg;
+      if (typeof onMount === "function") onMountFn = onMount;
+      if (typeof onUnmount === "function") onUnmountFn = onUnmount;
+      if (typeof ref === "function") ref(el);
+      // @ts-ignore 0 | 1 is a boolean but can't type cast; they don't overlap
+      api.property(el, rest, null, api.isSvg);
     } else if (typeof arg === "function") {
       if (el) {
         // See note in add.js#frag() - This is a Text('') node
@@ -306,29 +296,31 @@ export const h = (...args) => {
   return el;
 };
 
-const observeUnmount = (el, onUnmountFn) => {
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((m) => {
-      m.removedNodes.forEach((node) => {
-        if (node === el) {
-          onUnmountFn(el);
-          observer.disconnect();
-        }
-      });
-    });
-  });
-  const start = () => observer.observe(el.parentNode, { childList: true });
-  if (el.parentNode) {
-    start();
-  } else {
-    // Not mounted yet; start observing once a parent appears.
-    const wait = setInterval(() => {
-      if (el.parentNode) {
-        start();
-        clearInterval(wait);
-      }
-    }, 20);
+// A single observer is shared across every element that registers an
+// onUnmount. The WeakMap allows never-mounted elements to be GC'd.
+const unmountCallbacks = /** @type {WeakMap<Element, (el: Element) => void>} */ (new WeakMap());
+let unmountObserver;
+
+const fireUnmount = (/** @type {Node} */ node) => {
+  const cb = node instanceof Element && unmountCallbacks.get(node);
+  if (cb) {
+    unmountCallbacks.delete(/** @type {Element} */ (node));
+    cb(/** @type {Element} */ (node));
   }
+  // A parent removal must still fire onUnmount on any descendants that
+  // registered for it, so walk the subtree.
+  if (node.childNodes) {
+    for (let i = 0; i < node.childNodes.length; i++) fireUnmount(node.childNodes[i]);
+  }
+};
+
+const observeUnmount = (el, onUnmountFn) => {
+  unmountCallbacks.set(el, onUnmountFn);
+  if (unmountObserver) return;
+  unmountObserver = new MutationObserver((mutations) => {
+    mutations.forEach((m) => m.removedNodes.forEach(fireUnmount));
+  });
+  unmountObserver.observe(document, { childList: true, subtree: true });
 };
 
 api.h = h;

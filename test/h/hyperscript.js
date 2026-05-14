@@ -22,22 +22,6 @@ test("can use namespace in name", () => {
   expect(h("myns:mytag").outerHTML).toBe("<myns:mytag></myns:mytag>");
 });
 
-// test('can use id selector', () => {
-//   expect(h('div#frame').outerHTML).toBe('<div id="frame"></div>');
-//
-// });
-
-// test('can use class selector', () => {
-//   expect(h('div.panel').outerHTML).toBe('<div class="panel"></div>');
-//
-// });
-
-// test('can default element types', () => {
-//   expect(h('.panel').outerHTML).toBe('<div class="panel"></div>');
-//   expect(h('#frame').outerHTML).toBe('<div id="frame"></div>');
-//
-// });
-
 test("can set properties", () => {
   let a = h("a", { href: "http://google.com" });
   expect(a.href).toBe("http://google.com/");
@@ -46,8 +30,6 @@ test("can set properties", () => {
 });
 
 test("(un)registers an event handler", () => {
-  // don't try the focus event, valid tests fail in IE11
-
   let click = vi.fn();
   let btn = h("button", { onclick: click }, "something");
   document.body.appendChild(btn);
@@ -58,13 +40,9 @@ test("(un)registers an event handler", () => {
   h(btn, { onclick: false });
   btn.click();
   expect(click.mock.calls.length).toBe(1);
-
-  btn.parentNode.removeChild(btn);
 });
 
 test("(un)registers a signal event handler", () => {
-  // don't try the focus event, valid tests fail in IE11
-
   let click = vi.fn();
   let onclick = signal(click);
   let btn = h("button", { onclick }, "something");
@@ -76,29 +54,7 @@ test("(un)registers a signal event handler", () => {
   onclick(false);
   btn.click();
   expect(click.mock.calls.length).toBe(1);
-
-  btn.parentNode.removeChild(btn);
 });
-
-// test('registers event handlers', () => {
-//   let click = vi.fn();
-//   let btn = h('button', { events: { click: () => click } }, 'something');
-//   document.body.appendChild(btn);
-
-//   btn.click();
-//   expect(click.mock.calls.length).toBe(1);
-
-//   btn.parentNode.removeChild(btn);
-//
-// });
-
-// test('can use bindings', () => {
-//   h.bindings.innerHTML = (el, value) => (el.innerHTML = value);
-
-//   let el = h('div', { $innerHTML: '<b>look ma, no node value</b>' });
-//   expect(el.outerHTML).toBe('<div><b>look ma, no node value</b></div>');
-//
-// });
 
 test("sets styles", () => {
   let div = h("div", { style: { color: "red" } });
@@ -109,13 +65,6 @@ test("sets styles as text", () => {
   let div = h("div", { style: "color: red" });
   expect(div.style.color).toBe("red");
 });
-
-// test('sets classes', () => {
-//   let div = h('div', { classList: { play: true, pause: true } });
-//   expect(div.classList.contains('play')).toBeTruthy();
-//   expect(div.classList.contains('pause')).toBeTruthy();
-//
-// });
 
 test("sets attributes", () => {
   let div = h("div", { attrs: { checked: "checked" } });
@@ -132,23 +81,16 @@ test("sets aria attributes", () => {
   expect(div.getAttribute("aria-hidden")).toBe("true");
 });
 
-// test('sets refs', () => {
-//   let ref;
-//   let div = h('div', { ref: el => (ref = el) });
-//   expect(div).toBe(ref);
-//
-// });
+test("sets refs", () => {
+  let ref;
+  let div = h("div", { ref: (el) => (ref = el) });
+  expect(div).toBe(ref);
+});
 
 test("boolean, number, get to-string'ed", () => {
   let e = h("p", true, false, 4);
   expect(e.outerHTML.match(/<p>truefalse4<\/p>/)).toBeTruthy();
 });
-
-// test('unicode selectors', () => {
-//   expect(h('.⛄').outerHTML).toBe('<div class="⛄"></div>');
-//   expect(h('span#⛄').outerHTML).toBe('<span id="⛄"></span>');
-//
-// });
 
 test("can use fragments", () => {
   const insertCat = () => "cat";

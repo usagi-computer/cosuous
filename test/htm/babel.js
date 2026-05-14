@@ -1,9 +1,9 @@
 import fs from "fs";
 import path from "path";
-import { test, expect, describe } from "vitest";
 import { fileURLToPath } from "url";
 
 import { transform } from "@babel/core";
+import { describe, test, expect } from "vitest";
 
 import htmBabelPlugin from "../../src/babel-plugin-htm.js";
 

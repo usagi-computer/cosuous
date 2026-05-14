@@ -1,4 +1,4 @@
-import { test, expect } from "vitest";
+import { test, expect, afterAll } from "vitest";
 import { effectScope, signal } from "cosuous/signal";
 import { h, html } from "cosuous";
 import { map } from "cosuous/map";
@@ -79,7 +79,7 @@ test("Basic map - update 5", () => {
   expect(div.innerHTML).toBe("<b></b><i></i><i></i><b></b>");
 });
 
-test("Basic map - dispose", () => {
+afterAll(() => {
   dispose();
 });
 

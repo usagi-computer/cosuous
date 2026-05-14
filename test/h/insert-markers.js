@@ -1,5 +1,5 @@
-import { test, expect } from "vitest";
-import { h } from "cosuous";
+import { expect, test } from "vitest";
+
 import { insert } from "../../src/h.js";
 
 // insert with Markers
@@ -129,7 +129,6 @@ test("can insert a changing array of nodes", () => {
   current = insert(container, [span3], marker, current);
   expect(container.innerHTML).toBe("<span>3</span>");
 
-  // eslint-disable-next-line no-unused-vars
   current = insert(container, [div2], marker, current);
   expect(container.innerHTML).toBe("<div>2</div>");
 });

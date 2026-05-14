@@ -97,6 +97,26 @@ document.body.append(view());
 setInterval(() => counter(counter() + 1), 1000);
 ```
 
+## Element refs
+
+Capture the created DOM element by passing a `ref` callback in the props object. The callback fires synchronously with the new element, before it is inserted into the document. Useful for focus, measurement, or wiring up imperative libraries.
+
+```js
+import { html } from "cosuous";
+
+let inputEl;
+const view = () => html`<input ref=${(el) => (inputEl = el)} />`;
+
+document.body.append(view());
+inputEl.focus();
+```
+
+Works the same way with `h(...)` and JSX:
+
+```jsx
+<input ref={(el) => (inputEl = el)} />
+```
+
 ## Reactivity
 
 The Cosuous [`signal`](./src/signal.md) module provides a mechanism to store and update the application state in a reactive way. It is backed by [alien-signals](https://github.com/stackblitz/alien-signals).

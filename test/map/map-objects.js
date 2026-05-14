@@ -1,4 +1,4 @@
-import { test, expect } from "vitest";
+import { test, expect, afterAll } from "vitest";
 import { effectScope, signal } from "cosuous/signal";
 import { html } from "cosuous";
 import { map } from "cosuous/map";
@@ -43,6 +43,6 @@ test("Object reference - clear", () => {
   expect(div.innerHTML).toBe("");
 });
 
-test("Object reference - dispose", () => {
+afterAll(() => {
   dispose();
 });

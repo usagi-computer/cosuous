@@ -2,8 +2,6 @@ import { test, expect } from "vitest";
 import { h } from "cosuous";
 import { add as addNode } from "../../src/h.js";
 
-let counter = 0;
-
 test("addNode inserts fragment", () => {
   const parent = document.createElement("div");
   parent.appendChild(document.createTextNode("test"));
@@ -23,7 +21,7 @@ test("addNode inserts fragment w/ marker", () => {
   const fragment = document.createDocumentFragment();
   fragment.appendChild(h("h1"));
   fragment.appendChild(h("h2"));
-  addNode(parent, fragment, marker, ++counter);
+  addNode(parent, fragment, marker);
 
   expect(parent.innerHTML).toBe("test<h1></h1><h2></h2><span></span>");
 });

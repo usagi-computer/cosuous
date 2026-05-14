@@ -1,4 +1,4 @@
-import { test, expect } from "vitest";
+import { test, expect, afterAll } from "vitest";
 import { effectScope, signal } from "cosuous/signal";
 import { h } from "cosuous";
 import { map } from "cosuous/map";
@@ -84,6 +84,6 @@ test("swap backward edge", () => {
   list(["chips", "bread", "cookie", "milk", "honey"]);
 });
 
-test("dispose", () => {
+afterAll(() => {
   dispose();
 });
