@@ -1,0 +1,70 @@
+{
+  "generatedAt": "2026-05-27T22:04:03.892Z",
+  "totals": {
+    "raw": 29656,
+    "gzip": 11919,
+    "brotli": 10750
+  },
+  "files": [
+    {
+      "file": "babel-plugin-htm.cjs",
+      "raw": 5106,
+      "gzip": 2100,
+      "brotli": 1910
+    },
+    {
+      "file": "chunks/h-DX7lI_rn.js",
+      "raw": 3667,
+      "gzip": 1549,
+      "brotli": 1380
+    },
+    {
+      "file": "chunks/signal-iQ8TqzPw.js",
+      "raw": 8113,
+      "gzip": 2474,
+      "brotli": 2243
+    },
+    {
+      "file": "h.js",
+      "raw": 169,
+      "gzip": 140,
+      "brotli": 123
+    },
+    {
+      "file": "htm.js",
+      "raw": 3056,
+      "gzip": 1284,
+      "brotli": 1172
+    },
+    {
+      "file": "hydrate.js",
+      "raw": 2907,
+      "gzip": 1257,
+      "brotli": 1143
+    },
+    {
+      "file": "index.js",
+      "raw": 752,
+      "gzip": 408,
+      "brotli": 359
+    },
+    {
+      "file": "map.js",
+      "raw": 3415,
+      "gzip": 1524,
+      "brotli": 1372
+    },
+    {
+      "file": "signal.js",
+      "raw": 356,
+      "gzip": 227,
+      "brotli": 193
+    },
+    {
+      "file": "template.js",
+      "raw": 2115,
+      "gzip": 956,
+      "brotli": 855
+    }
+  ]
+}

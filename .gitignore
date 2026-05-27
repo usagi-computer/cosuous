@@ -16,7 +16,8 @@ dist
 module
 !/bench/css/bootstrap/dist/
 
-/bench/results/results.json
+/bench/results/
+/bench/krausest/dist/
 /bench/yarn.lock
 /bench/trace.json
 

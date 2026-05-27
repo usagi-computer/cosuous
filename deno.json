@@ -1,0 +1,49 @@
+{
+  "name": "@usagi-computer/cosuous",
+  "version": "0.1.0",
+  "license": "MIT",
+  "exports": {
+    ".": "./dist/index.js",
+    "./h": "./dist/h.js",
+    "./babel-plugin-htm": "./dist/babel-plugin-htm.cjs",
+    "./htm": "./dist/htm.js",
+    "./hydrate": "./dist/hydrate.js",
+    "./map": "./dist/map.js",
+    "./signal": "./dist/signal.js",
+    "./template": "./dist/template.js"
+  },
+  "publish": {
+    "include": ["dist", "README.md", "CHANGELOG.md"]
+  },
+  "nodeModulesDir": "auto",
+  "imports": {
+    "@babel/core": "npm:@babel/core@^7.29.7",
+    "@vitest/browser": "npm:@vitest/browser@^4.1.7",
+    "@vitest/browser-playwright": "npm:@vitest/browser-playwright@^4.1.7",
+    "@vitest/coverage-v8": "npm:@vitest/coverage-v8@^4.1.7",
+    "alien-signals": "npm:alien-signals@^3.2.1",
+    "playwright": "npm:playwright@^1.60.0",
+    "typescript": "npm:typescript@^6.0.3",
+    "vite": "npm:vite@^8.0.14",
+    "vitest": "npm:vitest@^4.1.7"
+  },
+  "tasks": {
+    "lint": "deno run -A npm:oxlint src/*.js",
+    "fmt": "deno run -A npm:oxfmt",
+    "fmt:check": "deno run -A npm:oxfmt --check",
+    "test": "deno run -A npm:vitest run",
+    "test:watch": "deno run -A npm:vitest",
+    "test:coverage": "deno run -A npm:vitest run --coverage",
+    "build": "deno run -A npm:vite build && BUILD_TARGET=babel deno run -A npm:vite build",
+    "bench": "deno run -A npm:vitest bench --run",
+    "bench:size": "deno run -A bench/size.js",
+    "bench:size:update": "deno run -A bench/size.js --update",
+    "bench:size:ci": "deno run -A bench/size.js --ci",
+    "bench:krausest": "deno run -A npm:vite build --config bench/krausest/vite.config.js",
+    "playwright:install": "deno run -A npm:playwright install --with-deps chromium",
+    "smoke:dist": "deno run -A test/_smoke-dist.mjs",
+    "prepublish": "deno task lint && deno task build && deno task smoke:dist",
+    "publish:jsr": "deno task prepublish && deno publish"
+  },
+  "exclude": ["dist", "bench/krausest/dist", "bench/results", "coverage", "node_modules"]
+}

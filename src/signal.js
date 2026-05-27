@@ -129,13 +129,4 @@ export function batch(fn) {
   }
 }
 
-export {
-  computed,
-  endBatch,
-  isComputed,
-  isSignal,
-  setActiveSub,
-  signal,
-  startBatch,
-  trigger,
-};
+export { computed, endBatch, isComputed, isSignal, setActiveSub, signal, startBatch, trigger };

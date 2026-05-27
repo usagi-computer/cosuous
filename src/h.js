@@ -1,5 +1,7 @@
 /* Adapted from Hyper DOM Expressions - The MIT License - Ryan Carniato */
 
+import { EVENT_PREFIX_LEN, FRAGMENT_NODE, SVG_NS } from "./constants.js";
+
 /**
  * Internal API.
  * Consumer must provide a reactive effect at api.effect(fn: () => void).
@@ -43,7 +45,7 @@ const castNode = (value) => {
  */
 const frag = (value) => {
   const { childNodes } = value;
-  if (!childNodes || value.nodeType !== 11) return;
+  if (!childNodes || value.nodeType !== FRAGMENT_NODE) return;
   if (childNodes.length < 2) return childNodes[0];
   // For a fragment of 2 elements or more add a startMark. This is required for
   // multiple nested conditional computeds that return fragments.
@@ -145,7 +147,7 @@ function eventProxy(e) {
  * @type {(el: Node, name: string, value: (ev: Event?) => *) => void}
  */
 const handleEvent = (el, name, value) => {
-  name = name.slice(2).toLowerCase();
+  name = name.slice(EVENT_PREFIX_LEN).toLowerCase();
 
   if (value) {
     el.addEventListener(name, eventProxy);
@@ -236,9 +238,7 @@ export const h = (...args) => {
       if (el) {
         api.add(el, arg);
       } else {
-        el = api.isSvg
-          ? document.createElementNS("http://www.w3.org/2000/svg", arg)
-          : document.createElement(arg);
+        el = api.isSvg ? document.createElementNS(SVG_NS, arg) : document.createElement(arg);
       }
     } else if (Array.isArray(arg)) {
       // Support Fragments

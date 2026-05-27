@@ -1,7 +1,8 @@
+import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { defineConfig } from "vite";
 import { playwright } from "@vitest/browser-playwright";
+import { defineConfig } from "vite";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const src = (file) => path.resolve(__dirname, "src", file);
@@ -17,22 +18,78 @@ const cosuousAlias = [
   { find: /^cosuous$/, replacement: src("index.js") },
 ];
 
+// Each public entry of the library. alien-signals is intentionally NOT
+// listed as external; it gets inlined so consumers don't need a separate
+// runtime dependency.
+const libraryEntries = {
+  index: src("index.js"),
+  h: src("h.js"),
+  htm: src("htm.js"),
+  hydrate: src("hydrate.js"),
+  map: src("map.js"),
+  signal: src("signal.js"),
+  template: src("template.js"),
+};
+
+// Inline plugin: copy the hand-written .d.ts files from src/ to dist/ after
+// the library build so package.json#exports.<entry>.types still resolves.
+function copyDtsPlugin() {
+  return {
+    name: "cosuous-copy-dts",
+    async closeBundle() {
+      const srcDir = path.resolve(__dirname, "src");
+      const distDir = path.resolve(__dirname, "dist");
+      await fs.mkdir(distDir, { recursive: true });
+      const entries = await fs.readdir(srcDir);
+      for (const file of entries) {
+        if (file.endsWith(".d.ts")) {
+          await fs.copyFile(path.join(srcDir, file), path.join(distDir, file));
+        }
+      }
+    },
+  };
+}
+
+// Two build targets:
+//   default            -> library ESM bundles (index, h, htm, hydrate, map, signal, template)
+//   BUILD_TARGET=babel -> babel-plugin-htm.cjs (Node-only, externalizes @babel/*)
+const isBabelBuild = process.env.BUILD_TARGET === "babel";
+
+const libraryBuild = {
+  outDir: "dist",
+  emptyOutDir: true,
+  minify: "oxc",
+  sourcemap: true,
+  target: "es2020",
+  lib: {
+    entry: libraryEntries,
+    formats: ["es"],
+  },
+  rollupOptions: {
+    output: {
+      entryFileNames: "[name].js",
+      chunkFileNames: "chunks/[name]-[hash].js",
+    },
+  },
+};
+
+const babelBuild = {
+  outDir: "dist",
+  emptyOutDir: false,
+  lib: {
+    entry: src("babel-plugin-htm.js"),
+    formats: ["cjs"],
+    fileName: () => "babel-plugin-htm.cjs",
+  },
+  rollupOptions: {
+    external: ["@babel/core", "@babel/types"],
+  },
+};
+
 export default defineConfig({
-  resolve: {
-    alias: cosuousAlias,
-  },
-  build: {
-    lib: {
-      entry: src("babel-plugin-htm.js"),
-      formats: ["cjs"],
-      fileName: () => "babel-plugin-htm.cjs",
-    },
-    outDir: "dist",
-    emptyOutDir: true,
-    rollupOptions: {
-      external: ["@babel/core", "@babel/types"],
-    },
-  },
+  resolve: { alias: cosuousAlias },
+  plugins: isBabelBuild ? [] : [copyDtsPlugin()],
+  build: isBabelBuild ? babelBuild : libraryBuild,
   test: {
     coverage: {
       provider: "v8",
@@ -48,6 +105,8 @@ export default defineConfig({
           name: "node",
           environment: "node",
           include: ["test/htm/**/*.js"],
+          // Don't sweep bench files into this project; they have their own.
+          benchmark: { include: [] },
         },
       },
       {
@@ -56,7 +115,10 @@ export default defineConfig({
         test: {
           name: "browser",
           include: ["test/**/*.js"],
-          exclude: ["test/htm/**", "test/_*.js", "test/**/perf/**", "test/test.js"],
+          exclude: ["test/htm/**", "test/_*.js", "test/_*.mjs", "test/**/perf/**", "test/test.js"],
+          benchmark: {
+            include: ["bench/h.bench.js", "bench/map.bench.js"],
+          },
           setupFiles: ["test/_setup.js"],
           browser: {
             enabled: true,
@@ -64,6 +126,16 @@ export default defineConfig({
             headless: true,
             instances: [{ browser: "chromium" }],
           },
+        },
+      },
+      {
+        extends: true,
+        resolve: { alias: cosuousAlias },
+        test: {
+          name: "bench-node",
+          environment: "node",
+          // No `include` - this project only contributes to `vitest bench`.
+          benchmark: { include: ["bench/signal.bench.js"] },
         },
       },
     ],

@@ -26,9 +26,13 @@ api.isComputed = isComputed;
 api.hs = (...args) => {
   const prevIsSvg = api.isSvg;
   api.isSvg = true;
-  const el = h(...args);
-  api.isSvg = prevIsSvg;
-  return el;
+  try {
+    return h(...args);
+  } finally {
+    // Restore even if h() throws, so a nested hs() error doesn't leave
+    // api.isSvg stuck on true for subsequent HTML-mode h() calls.
+    api.isSvg = prevIsSvg;
+  }
 };
 
 // Makes it possible to intercept `h` calls and customize.

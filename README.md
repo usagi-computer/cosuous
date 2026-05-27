@@ -2,10 +2,10 @@
 
 A light, fast, reactive UI library. A fork of [Sinuous](https://github.com/luwes/sinuous) by Wesley Luyten.
 
-[![Version](https://img.shields.io/npm/v/cosuous.svg?color=success&style=flat-square)](https://www.npmjs.com/package/cosuous)
+[![JSR](https://jsr.io/badges/@usagi-computer/cosuous)](https://jsr.io/@usagi-computer/cosuous)
 
-**npm**: `npm i cosuous`  
-**cdn**: <>
+**jsr**: `deno add jsr:@usagi-computer/cosuous` (or `npx jsr add @usagi-computer/cosuous` from npm-based projects)  
+**cdn**: `https://esm.sh/jsr/@usagi-computer/cosuous`
 
 - **Small.** hello world at `~1.4kB` gzip.
 - **Fast.** [top ranked](https://rawgit.com/krausest/js-framework-benchmark/master/webdriver-ts-results/table.html) of 80+ UI libs.
@@ -132,10 +132,6 @@ const squared = computed(() => Math.pow(length(), 2));
 effect(() => console.log(squared()));
 length(4); // => logs 16
 ```
-
-#### Use a custom reactive library
-
-Cosuous can work with different signal/reactive libraries; S.js, MobX, hyperactiv. To swap in a different library, override the reactive primitives on the internal `api`: `effect`, `isSignal`, and `isComputed`. The provided `effect` should accept a callback that may return a cleanup function. See the upstream [Sinuous wiki](https://github.com/luwes/sinuous/wiki/Choose-your-own-reactive-library) for more info.
 
 ## Hydration
 

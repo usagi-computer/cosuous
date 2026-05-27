@@ -1,3 +1,4 @@
+import { TEXT_NODE } from "./constants.js";
 import htm from "./htm.js";
 import { api, h, hs } from "./index.js";
 
@@ -168,7 +169,7 @@ export function hydrate(delta, root) {
         if (arg === _) {
           el._index++;
         } else if (typeof arg === "object") {
-          if (arg.type === null && target.nodeType === 3) {
+          if (arg.type === null && target.nodeType === TEXT_NODE) {
             // This is a text vnode, add noskip so spaces don't get skipped.
             target._noskip = true;
             updateText(arg._props);
@@ -246,6 +247,6 @@ export function hydrate(delta, root) {
  */
 function filterChildNodes(parent) {
   return Array.from(parent.childNodes).filter(
-    (el) => el.nodeType !== 3 || el.data.trim() || el._noskip,
+    (el) => el.nodeType !== TEXT_NODE || el.data.trim() || el._noskip,
   );
 }

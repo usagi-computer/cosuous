@@ -2,10 +2,11 @@
 /* Adapted from DOM Expressions - The MIT License - Ryan Carniato */
 import { api } from "./index.js";
 import { effect, effectScope, untracked, onCleanup } from "./signal.js";
+import { BACKWARD, FORWARD, FRAGMENT_NODE, GROUPING } from "./constants.js";
 
-export const GROUPING = "__g";
-export const FORWARD = "nextSibling";
-export const BACKWARD = "previousSibling";
+// Re-exported for backward compatibility with any consumer importing these
+// names from "cosuous/map" directly.
+export { BACKWARD, FORWARD, GROUPING };
 
 /**
  * Map over a list of items that create DOM nodes.
@@ -240,7 +241,7 @@ function add(parent, value, endMark) {
     value = api.h([], value);
   }
 
-  if (value.nodeType === 11 && (mark = value.firstChild) && mark !== value.lastChild) {
+  if (value.nodeType === FRAGMENT_NODE && (mark = value.firstChild) && mark !== value.lastChild) {
     mark[GROUPING] = value.lastChild[GROUPING] = ++groupCounter;
   }
 
