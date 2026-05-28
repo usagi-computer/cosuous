@@ -1,4 +1,4 @@
-# Cosuous
+# <a href="https://github.com/usagi-computer/cosuous"><img width="300" height="48" alt="cosuous" src="https://github.com/user-attachments/assets/687a8106-5334-46ee-957a-ef6c49a37865" /></a>
 
 [![JSR](https://jsr.io/badges/@usagi-computer/cosuous)](https://jsr.io/@usagi-computer/cosuous) [![JSR Score](https://jsr.io/badges/@usagi-computer/cosuous/score)](https://jsr.io/@usagi-computer/cosuous)
 
