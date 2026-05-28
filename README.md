@@ -1,6 +1,6 @@
 # Cosuous
 
-[![JSR](https://jsr.io/badges/@usagi-computer/cosuous)](https://jsr.io/@usagi-computer/cosuous) [![JSR Score](https://jsr.io/badges//@usagi-computer/cosuous/score)](https://jsr.io//@usagi-computer/cosuous)
+[![JSR](https://jsr.io/badges/@usagi-computer/cosuous)](https://jsr.io/@usagi-computer/cosuous) [![JSR Score](https://jsr.io/badges/@usagi-computer/cosuous/score)](https://jsr.io/@usagi-computer/cosuous)
 
 A light, fast, reactive UI library. A fork of [Sinuous](https://github.com/luwes/sinuous) by Wesley Luyten.
 
