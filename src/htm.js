@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-export const MINI = false;
+const MINI = false;
 
 const MODE_SLASH = 0;
 const MODE_TEXT = 1;
@@ -28,57 +28,7 @@ const PROPS_ASSIGN = 3;
 const PROP_SET = MODE_PROP_SET;
 const PROP_APPEND = MODE_PROP_APPEND;
 
-// Turn a result of a build(...) call into a tree that is more
-// convenient to analyze and transform (e.g. Babel plugins).
-// For example:
-//  treeify(
-//    build'<div href="1${a}" ...${b}><${x} /></div>`,
-//    [X, Y, Z]
-//  )
-// returns:
-//  {
-//    tag: 'div',
-//    props: [ { href: ["1", X] },  Y ],
-//    children: [ { tag: Z, props: [], children: [] } ]
-//  }
-export const treeify = (built, fields) => {
-  const _treeify = (built) => {
-    let tag = "";
-    let currentProps = null;
-    const props = [];
-    const children = [];
-
-    for (let i = 1; i < built.length; i++) {
-      const field = built[i++];
-      const value = typeof field === "number" ? fields[field - 1] : field;
-
-      if (built[i] === TAG_SET) {
-        tag = value;
-      } else if (built[i] === PROPS_ASSIGN) {
-        props.push(value);
-        currentProps = null;
-      } else if (built[i] === PROP_SET) {
-        if (!currentProps) {
-          currentProps = Object.create(null);
-          props.push(currentProps);
-        }
-        currentProps[built[++i]] = [value];
-      } else if (built[i] === PROP_APPEND) {
-        currentProps[built[++i]].push(value);
-      } else if (built[i] === CHILD_RECURSE) {
-        children.push(_treeify(value));
-      } else if (built[i] === CHILD_APPEND) {
-        children.push(value);
-      }
-    }
-
-    return { tag, props, children };
-  };
-  const { children } = _treeify(built);
-  return children.length > 1 ? children : children[0];
-};
-
-export const evaluate = (h, built, fields, args) => {
+const evaluate = (h, built, fields, args) => {
   let propBody = {};
   for (let i = 1; i < built.length; i++) {
     const field = built[i];
@@ -129,7 +79,7 @@ export const evaluate = (h, built, fields, args) => {
   return args;
 };
 
-export const build = function (statics) {
+const build = function (statics) {
   const fields = arguments;
   const h = this;
 
