@@ -1,22 +1,25 @@
-import { Signal } from "./signal";
+import type { Signal } from "./signal.ts";
+import type { ElementChildren } from "./shared.ts";
 
 export namespace JSXInternal {
   type OrSignal<T> = T | Signal<T>;
   type AllowSignal<Props> = { [K in keyof Props]: OrSignal<Props[K]> };
 
-  type Element = HTMLElement | SVGElement | Node;
+  export type Element = HTMLElement | SVGElement | Node;
 
-  interface ElementAttributesProperty {
+  export interface ElementAttributesProperty {
     props: any;
   }
 
-  interface ElementChildrenAttribute {
+  export interface ElementChildrenAttribute {
     children: any;
   }
 
-  type SVGAttributes<Target extends EventTarget = SVGElement> = AllowSignal<_SVGAttributes<Target>>;
+  export type SVGAttributes<Target extends EventTarget = SVGElement> = AllowSignal<
+    _SVGAttributes<Target>
+  >;
 
-  interface _SVGAttributes<
+  export interface _SVGAttributes<
     Target extends EventTarget = SVGElement,
   > extends _HTMLAttributes<Target> {
     accentHeight?: number | string;
@@ -273,62 +276,94 @@ export namespace JSXInternal {
     zoomAndPan?: string;
   }
 
-  interface PathAttributes {
+  export interface PathAttributes {
     d: string;
   }
 
-  type TargetedEvent<
+  export type TargetedEvent<
     Target extends EventTarget = EventTarget,
     TypedEvent extends Event = Event,
   > = Omit<TypedEvent, "currentTarget"> & {
     readonly currentTarget: Target;
   };
 
-  type TargetedAnimationEvent<Target extends EventTarget> = TargetedEvent<Target, AnimationEvent>;
-  type TargetedClipboardEvent<Target extends EventTarget> = TargetedEvent<Target, ClipboardEvent>;
-  type TargetedCompositionEvent<Target extends EventTarget> = TargetedEvent<
+  export type TargetedAnimationEvent<Target extends EventTarget> = TargetedEvent<
+    Target,
+    AnimationEvent
+  >;
+  export type TargetedClipboardEvent<Target extends EventTarget> = TargetedEvent<
+    Target,
+    ClipboardEvent
+  >;
+  export type TargetedCompositionEvent<Target extends EventTarget> = TargetedEvent<
     Target,
     CompositionEvent
   >;
-  type TargetedDragEvent<Target extends EventTarget> = TargetedEvent<Target, DragEvent>;
-  type TargetedFocusEvent<Target extends EventTarget> = TargetedEvent<Target, FocusEvent>;
-  type TargetedKeyboardEvent<Target extends EventTarget> = TargetedEvent<Target, KeyboardEvent>;
-  type TargetedMouseEvent<Target extends EventTarget> = TargetedEvent<Target, MouseEvent>;
-  type TargetedPointerEvent<Target extends EventTarget> = TargetedEvent<Target, PointerEvent>;
-  type TargetedTouchEvent<Target extends EventTarget> = TargetedEvent<Target, TouchEvent>;
-  type TargetedTransitionEvent<Target extends EventTarget> = TargetedEvent<Target, TransitionEvent>;
-  type TargetedUIEvent<Target extends EventTarget> = TargetedEvent<Target, UIEvent>;
-  type TargetedWheelEvent<Target extends EventTarget> = TargetedEvent<Target, WheelEvent>;
+  export type TargetedDragEvent<Target extends EventTarget> = TargetedEvent<Target, DragEvent>;
+  export type TargetedFocusEvent<Target extends EventTarget> = TargetedEvent<Target, FocusEvent>;
+  export type TargetedKeyboardEvent<Target extends EventTarget> = TargetedEvent<
+    Target,
+    KeyboardEvent
+  >;
+  export type TargetedMouseEvent<Target extends EventTarget> = TargetedEvent<Target, MouseEvent>;
+  export type TargetedPointerEvent<Target extends EventTarget> = TargetedEvent<
+    Target,
+    PointerEvent
+  >;
+  export type TargetedTouchEvent<Target extends EventTarget> = TargetedEvent<Target, TouchEvent>;
+  export type TargetedTransitionEvent<Target extends EventTarget> = TargetedEvent<
+    Target,
+    TransitionEvent
+  >;
+  export type TargetedUIEvent<Target extends EventTarget> = TargetedEvent<Target, UIEvent>;
+  export type TargetedWheelEvent<Target extends EventTarget> = TargetedEvent<Target, WheelEvent>;
 
-  interface EventHandler<E extends TargetedEvent> {
+  export interface EventHandler<E extends TargetedEvent> {
     (event: E): void;
   }
 
-  type AnimationEventHandler<Target extends EventTarget> = EventHandler<
+  export type AnimationEventHandler<Target extends EventTarget> = EventHandler<
     TargetedAnimationEvent<Target>
   >;
-  type ClipboardEventHandler<Target extends EventTarget> = EventHandler<
+  export type ClipboardEventHandler<Target extends EventTarget> = EventHandler<
     TargetedClipboardEvent<Target>
   >;
-  type CompositionEventHandler<Target extends EventTarget> = EventHandler<
+  export type CompositionEventHandler<Target extends EventTarget> = EventHandler<
     TargetedCompositionEvent<Target>
   >;
-  type DragEventHandler<Target extends EventTarget> = EventHandler<TargetedDragEvent<Target>>;
-  type FocusEventHandler<Target extends EventTarget> = EventHandler<TargetedFocusEvent<Target>>;
-  type GenericEventHandler<Target extends EventTarget> = EventHandler<TargetedEvent<Target>>;
-  type KeyboardEventHandler<Target extends EventTarget> = EventHandler<
+  export type DragEventHandler<Target extends EventTarget> = EventHandler<
+    TargetedDragEvent<Target>
+  >;
+  export type FocusEventHandler<Target extends EventTarget> = EventHandler<
+    TargetedFocusEvent<Target>
+  >;
+  export type GenericEventHandler<Target extends EventTarget> = EventHandler<TargetedEvent<Target>>;
+  export type KeyboardEventHandler<Target extends EventTarget> = EventHandler<
     TargetedKeyboardEvent<Target>
   >;
-  type MouseEventHandler<Target extends EventTarget> = EventHandler<TargetedMouseEvent<Target>>;
-  type PointerEventHandler<Target extends EventTarget> = EventHandler<TargetedPointerEvent<Target>>;
-  type TouchEventHandler<Target extends EventTarget> = EventHandler<TargetedTouchEvent<Target>>;
-  type TransitionEventHandler<Target extends EventTarget> = EventHandler<
+  export type MouseEventHandler<Target extends EventTarget> = EventHandler<
+    TargetedMouseEvent<Target>
+  >;
+  export type PointerEventHandler<Target extends EventTarget> = EventHandler<
+    TargetedPointerEvent<Target>
+  >;
+  export type TouchEventHandler<Target extends EventTarget> = EventHandler<
+    TargetedTouchEvent<Target>
+  >;
+  export type TransitionEventHandler<Target extends EventTarget> = EventHandler<
     TargetedTransitionEvent<Target>
   >;
-  type UIEventHandler<Target extends EventTarget> = EventHandler<TargetedUIEvent<Target>>;
-  type WheelEventHandler<Target extends EventTarget> = EventHandler<TargetedWheelEvent<Target>>;
+  export type UIEventHandler<Target extends EventTarget> = EventHandler<TargetedUIEvent<Target>>;
+  export type WheelEventHandler<Target extends EventTarget> = EventHandler<
+    TargetedWheelEvent<Target>
+  >;
 
-  interface DOMAttributes<Target extends EventTarget> {
+  export interface DOMAttributes<Target extends EventTarget> {
+    // Inlined from the old `declare module "cosuous/jsx"` augmentation in
+    // index.d.ts; no longer needs module augmentation now that JSX lives in
+    // src/.
+    children?: ElementChildren;
+
     // Image Events
     onLoad?: GenericEventHandler<Target>;
     onLoadCapture?: GenericEventHandler<Target>;
@@ -521,11 +556,11 @@ export namespace JSXInternal {
     onTransitionEndCapture?: TransitionEventHandler<Target>;
   }
 
-  type HTMLAttributes<RefType extends EventTarget = EventTarget> = AllowSignal<
+  export type HTMLAttributes<RefType extends EventTarget = EventTarget> = AllowSignal<
     _HTMLAttributes<RefType>
   >;
 
-  interface _HTMLAttributes<
+  export interface _HTMLAttributes<
     RefType extends EventTarget = EventTarget,
   > extends DOMAttributes<RefType> {
     // Cosuous properties
@@ -683,7 +718,7 @@ export namespace JSXInternal {
     itemRef?: string;
   }
 
-  interface IntrinsicElements {
+  export interface IntrinsicElements {
     // HTML
     a: HTMLAttributes<HTMLAnchorElement>;
     abbr: HTMLAttributes<HTMLElement>;

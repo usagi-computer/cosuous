@@ -1,6 +1,6 @@
-import { Signal } from "./signal";
+import type { Signal } from "./signal.ts";
 
-type ElementChild =
+export type ElementChild =
   | Node
   | Function
   | Signal<unknown>
@@ -10,7 +10,8 @@ type ElementChild =
   | boolean
   | null
   | undefined;
-type ElementChildren = ElementChild[] | ElementChild;
+
+export type ElementChildren = ElementChild[] | ElementChild;
 
 export interface FunctionComponent {
   (props: object, ...children: ElementChildren[]): Node;

@@ -7,7 +7,7 @@ A light, fast, reactive UI library. A fork of [Sinuous](https://github.com/luwes
 **jsr**: `deno add jsr:@usagi-computer/cosuous` (or `npx jsr add @usagi-computer/cosuous` from npm-based projects)  
 **cdn**: `https://esm.sh/jsr/@usagi-computer/cosuous`
 
-- **Small.** hello world counter at <!-- size:hello:start -->`~3.7kB`<!-- size:hello:end --> gzip.
+- **Small.** hello world counter at <!-- size:hello:start -->`~3.8kB`<!-- size:hello:end --> gzip.
 - **Fast.** fine-grained reactive DOM updates; ships a [js-framework-benchmark harness](./bench) to measure against.
 - **Truly reactive.** automatically derived from the app state.
 - **DevEx.** no compile step needed, choose your [view syntax](#view-syntax).
@@ -20,9 +20,9 @@ _Sizes are marginal gzip, what each module adds to an app already importing `cos
 | Size | Name | Description |
 | --- | --- | --- |
 | ~0.2kB | [`cosuous/signal`](./src/signal.md) | Signals with `alien-signals` _(included by default)_ |
-| ~1.5kB | [`cosuous/map`](./src/map.js) | Fast list renderer |
-| ~1.2kB | [`cosuous/hydrate`](./src/hydrate.md) | Hydrate static HTML |
-| ~0.9kB | [`cosuous/template`](./src/template.md) | Pre-rendered Template |
+| ~1.5kB | [`cosuous/map`](./src/map.ts) | Fast list renderer |
+| ~1.3kB | [`cosuous/hydrate`](./src/hydrate.md) | Hydrate static HTML |
+| ~1.0kB | [`cosuous/template`](./src/template.md) | Pre-rendered Template |
 <!-- size:addons:end -->
 
 ### Examples
@@ -54,7 +54,7 @@ at build time with [`babel-plugin-htm`](https://github.com/developit/htm/tree/ma
 
 **JSX** needs to be transformed at build time first with [`babel-plugin-transform-jsx-to-htm`](https://github.com/developit/htm/tree/master/packages/babel-plugin-transform-jsx-to-htm) and after with [`babel-plugin-htm`](https://github.com/developit/htm/tree/master/packages/babel-plugin-htm).
 
-**Counter Example (<!-- size:hello:start -->`~3.7kB`<!-- size:hello:end --> gzip) ([Codesandbox](https://codesandbox.io/s/sinuous-counter-z6k71))**
+**Counter Example (<!-- size:hello:start -->`~3.8kB`<!-- size:hello:end --> gzip) ([Codesandbox](https://codesandbox.io/s/sinuous-counter-z6k71))**
 
 #### Tagged template (recommended)
 
@@ -169,7 +169,7 @@ api.h = (...args) => {
 
 ### Methods
 
-These are defined in [cosuous/src](./src/index.js) and [cosuous/h](./src/h.js).
+These are defined in [cosuous/src](./src/index.ts) and [cosuous/h](./src/h.ts).
 
 - `h(type: string, props: object | null, ...children: ElementChildren[]): HTMLElement | SVGElement`
 - `hs(type: string, props: object | null, ...children: ElementChildren[]): SVGElement`

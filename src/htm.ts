@@ -9,6 +9,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Vendored from htm. Carries the Sinuous-era patch in `evaluate()` that
+ * defers component children behind a closure (`args.push(... ? result : result())`)
+ * so component parents see lazy children. See memory project_htm_vendored.
+ *
+ * Internally untyped beyond the boundary: the parser's IR is a packed mixed
+ * array of strings, numbers (field indices), child arrays, and small integer
+ * opcodes; layering exact types on it costs clarity without buying safety.
  */
 
 const MINI = false;
@@ -28,8 +36,15 @@ const PROPS_ASSIGN = 3;
 const PROP_SET = MODE_PROP_SET;
 const PROP_APPEND = MODE_PROP_APPEND;
 
-const evaluate = (h, built, fields, args) => {
-  let propBody = {};
+type HFn = (...args: unknown[]) => unknown;
+type Built = unknown[];
+// ArrayLike so both IArguments (build's `arguments`) and unknown[] (regular's
+// `arguments` after the spread call site) flow through uniformly without
+// requiring lossy IArguments-to-Array casts at every index access.
+type Fields = ArrayLike<unknown>;
+
+const evaluate = (h: HFn, built: Built, fields: Fields, args: unknown[]): unknown[] => {
+  const propBody: Record<string, unknown[]> = {};
   for (let i = 1; i < built.length; i++) {
     const field = built[i];
     const value = typeof field === "number" ? fields[field] : field;
@@ -38,21 +53,31 @@ const evaluate = (h, built, fields, args) => {
     if (type === TAG_SET) {
       args[0] = value;
     } else if (type === PROPS_ASSIGN) {
-      args[1] = Object.assign(args[1] || {}, value);
+      args[1] = Object.assign((args[1] as object) || {}, value as object);
     } else if (type === PROP_SET) {
-      (args[1] = args[1] || {})[built[++i]] = value;
+      ((args[1] = (args[1] as Record<string, unknown>) || {}) as Record<string, unknown>)[
+        built[++i] as string
+      ] = value;
     } else if (type === PROP_APPEND) {
-      let key = built[++i];
-      let prev = (args[1] = args[1] || {})[key];
+      const key = built[++i] as string;
+      const argsObj = (args[1] = (args[1] as Record<string, unknown>) || {}) as Record<
+        string,
+        unknown
+      >;
+      const prev = argsObj[key];
       let parts = propBody[key];
 
       if (!parts && (typeof value === "function" || typeof prev === "function")) {
-        parts = (prev && [prev]) || [];
+        parts = (prev !== undefined && [prev]) || [];
+        propBody[key] = parts;
 
-        args[1][key] = function () {
+        argsObj[key] = function (this: unknown): string {
           let prop = "";
-          for (var j = 0; j < parts.length; j++) {
-            prop += typeof parts[j] === "function" ? parts[j].call(this) : parts[j];
+          for (let j = 0; j < parts!.length; j++) {
+            prop +=
+              typeof parts![j] === "function"
+                ? (parts![j] as (this: unknown) => unknown).call(this)
+                : parts![j];
           }
           return prop;
         };
@@ -61,14 +86,18 @@ const evaluate = (h, built, fields, args) => {
       if (parts) {
         parts.push(value);
       } else {
-        args[1][key] += value + "";
+        // Force the new value to string FIRST, then concat - matches the
+        // original `args[1][key] += value + ""` precedence so number + number
+        // stays string-concatenation, not numeric addition.
+        argsObj[key] = (argsObj[key] as string) + (value + "");
       }
     } else if (type) {
       // code === CHILD_RECURSE
-      const result = () => h.apply(null, evaluate(h, value, fields, ["", null]));
+      const result = (): unknown => h.apply(null, evaluate(h, value as Built, fields, ["", null]));
 
-      // if it's a component we pass the children with closure so the
-      // component is executed before the children of that component.
+      // Sinuous-era patch: if it's a component we pass the children with
+      // closure so the component is executed before the children of that
+      // component.
       args.push(typeof args[0] === "function" ? result : result());
     } else {
       // code === CHILD_APPEND
@@ -79,17 +108,19 @@ const evaluate = (h, built, fields, args) => {
   return args;
 };
 
-const build = function (statics) {
-  const fields = arguments;
-  const h = this;
+function build(this: HFn, statics: TemplateStringsArray): unknown {
+  // `arguments` is IArguments here; treat it as ArrayLike so it flows into
+  // evaluate's Fields without per-site casts.
+  const fields = arguments as unknown as ArrayLike<unknown>;
 
   let mode = MODE_TEXT;
   let buffer = "";
   let quote = "";
-  let current = [0];
-  let char, propName;
+  let current: unknown[] = [0];
+  let char: string;
+  let propName: string = "";
 
-  const commit = (field) => {
+  const commit = (field?: number): void => {
     if (mode === MODE_TEXT && (field || (buffer = buffer.replace(/^\s*\n\s*|\s*\n\s*$/g, "")))) {
       if (MINI) {
         current.push(field ? fields[field] : buffer);
@@ -105,27 +136,29 @@ const build = function (statics) {
       mode = MODE_WHITESPACE;
     } else if (mode === MODE_WHITESPACE && buffer === "..." && field) {
       if (MINI) {
-        current[2] = Object.assign(current[2] || {}, fields[field]);
+        current[2] = Object.assign((current[2] as object) || {}, fields[field] as object);
       } else {
         current.push(field, PROPS_ASSIGN);
       }
     } else if (mode === MODE_WHITESPACE && buffer && !field) {
       if (MINI) {
-        (current[2] = current[2] || {})[buffer] = true;
+        ((current[2] = (current[2] as Record<string, unknown>) || {}) as Record<string, unknown>)[
+          buffer
+        ] = true;
       } else {
         current.push(true, PROP_SET, buffer);
       }
     } else if (mode >= MODE_PROP_SET) {
       if (MINI) {
         if (mode === MODE_PROP_SET) {
-          (current[2] = current[2] || {})[propName] = field
-            ? buffer
-              ? buffer + fields[field]
-              : fields[field]
-            : buffer;
+          ((current[2] = (current[2] as Record<string, unknown>) || {}) as Record<string, unknown>)[
+            propName
+          ] = field ? (buffer ? buffer + fields[field] : fields[field]) : buffer;
           mode = MODE_PROP_APPEND;
         } else if (field || buffer) {
-          current[2][propName] += field ? buffer + fields[field] : buffer;
+          (current[2] as Record<string, unknown>)[propName] =
+            (((current[2] as Record<string, unknown>)[propName] as string) || "") +
+            (field ? buffer + fields[field] : buffer);
         }
       } else {
         if (buffer || (!field && mode === MODE_PROP_SET)) {
@@ -150,8 +183,9 @@ const build = function (statics) {
       commit(i);
     }
 
-    for (let j = 0; j < statics[i].length; j++) {
-      char = statics[i][j];
+    const staticI = statics[i]!;
+    for (let j = 0; j < staticI.length; j++) {
+      char = staticI[j]!;
 
       if (mode === MODE_TEXT) {
         if (char === "<") {
@@ -191,16 +225,16 @@ const build = function (statics) {
         mode = MODE_PROP_SET;
         propName = buffer;
         buffer = "";
-      } else if (char === "/" && (mode < MODE_PROP_SET || statics[i][j + 1] === ">")) {
+      } else if (char === "/" && (mode < MODE_PROP_SET || staticI[j + 1] === ">")) {
         commit();
         if (mode === MODE_TAGNAME) {
-          current = current[0];
+          current = current[0] as unknown[];
         }
-        mode = current;
+        const closed = current;
         if (MINI) {
-          (current = current[0]).push(h.apply(null, mode.slice(1)));
+          (current = current[0] as unknown[]).push(this.apply(null, closed.slice(1)));
         } else {
-          (current = current[0]).push(mode, CHILD_RECURSE);
+          (current = current[0] as unknown[]).push(closed, CHILD_RECURSE);
         }
         mode = MODE_SLASH;
       } else if (char === " " || char === "\t" || char === "\n" || char === "\r") {
@@ -213,7 +247,7 @@ const build = function (statics) {
 
       if (mode === MODE_TAGNAME && buffer === "!--") {
         mode = MODE_COMMENT;
-        current = current[0];
+        current = current[0] as unknown[];
       }
     }
   }
@@ -223,27 +257,30 @@ const build = function (statics) {
     return current.length > 2 ? current.slice(1) : current[1];
   }
   return current;
-};
+}
 
-const CACHES = new Map();
+const CACHES = new WeakMap<HFn, Map<TemplateStringsArray, unknown>>();
 
-const regular = function (statics) {
-  let tmp = CACHES.get(this);
-  if (!tmp) {
-    tmp = new Map();
-    CACHES.set(this, tmp);
+function regular(this: HFn, statics: TemplateStringsArray): unknown {
+  let cache = CACHES.get(this);
+  if (!cache) {
+    cache = new Map();
+    CACHES.set(this, cache);
   }
-  tmp = evaluate(
-    this,
-    tmp.get(statics) || (tmp.set(statics, (tmp = build(statics))), tmp),
-    arguments,
-    [],
-  );
-  return tmp.length > 1 ? tmp : tmp[0];
-};
+  let built = cache.get(statics);
+  if (!built) {
+    built = build.apply(this, arguments as unknown as [TemplateStringsArray]);
+    cache.set(statics, built);
+  }
+  const out = evaluate(this, built as Built, arguments as unknown as ArrayLike<unknown>, []);
+  return out.length > 1 ? out : out[0];
+}
 
-const custom = function () {
-  const result = (MINI ? build : regular).apply(this, arguments);
+function custom(this: HFn): unknown {
+  const result = (MINI ? build : regular).apply(
+    this,
+    arguments as unknown as [TemplateStringsArray],
+  );
   if (result) {
     return Array.isArray(result)
       ? this(result)
@@ -251,11 +288,15 @@ const custom = function () {
         ? result
         : this([result]);
   }
-};
+}
 
-const wrapper = function () {
+const wrapper = function (this: HFn & { wrap?: HFn }): unknown {
   const h = custom.bind(this);
-  return (this.wrap || h).apply(h, arguments);
+  return (this.wrap || h).apply(h, arguments as unknown as [TemplateStringsArray]);
 };
 
-export default wrapper;
+export default wrapper as (
+  this: unknown,
+  strings: TemplateStringsArray,
+  ...values: unknown[]
+) => unknown;

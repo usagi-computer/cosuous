@@ -71,7 +71,7 @@
   },
   "overrides": [
     {
-      "files": ["src/*.js"],
+      "files": ["src/*.ts"],
       "rules": {
         "import/no-named-as-default": "warn",
         "import/no-named-as-default-member": "warn",

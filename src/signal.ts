@@ -4,40 +4,66 @@
  * cleanup function (handled natively by alien-signals), batch(fn) brackets
  * startBatch/endBatch, untracked(fn) suspends dependency tracking. onCleanup
  * and effectScope remain available as internal primitives consumed by
- * src/map.js to cascade teardown through the scope graph, alien-signals'
+ * src/map.ts to cascade teardown through the scope graph, alien-signals'
  * native cleanup fires on self-dispose only, not when an ancestor scope tears
  * a node down via the graph.
  */
 
 import {
-  computed,
+  computed as _computed,
   effect as _effect,
   effectScope as _effectScope,
   endBatch,
   isComputed,
   isSignal,
   setActiveSub,
-  signal,
+  signal as _signal,
   startBatch,
   trigger,
 } from "alien-signals";
 
-let activeCleanups;
+export interface Signal<T> {
+  (): T;
+  (nextValue: T): void;
+}
+
+export interface Computed<T> {
+  (): T;
+}
+
+// Re-export under cosuous's preferred shape. alien-signals' own signature is
+// runtime-compatible but uses a different generic shape; the double cast keeps
+// the value identity while presenting the documented overloads to consumers.
+export const signal: {
+  <T>(): Signal<T | undefined>;
+  <T>(initialValue: T): Signal<T>;
+} = _signal as unknown as {
+  <T>(): Signal<T | undefined>;
+  <T>(initialValue: T): Signal<T>;
+};
+
+export const computed: <T>(getter: (previousValue?: T) => T) => Computed<T> =
+  _computed as unknown as <T>(getter: (previousValue?: T) => T) => Computed<T>;
+
+export { endBatch, isComputed, isSignal, startBatch, trigger };
+
+type CleanupFn = () => void;
+type EffectBody = () => void | CleanupFn;
+
+let activeCleanups: CleanupFn[] | undefined;
 
 /**
- * Internal cleanup primitive used by src/map.js so the map's bookkeeping
+ * Internal cleanup primitive used by src/map.ts so the map's bookkeeping
  * tears down with the surrounding effect/scope rather than the inner map
  * effect. Not part of the public API; user-facing effects should return a
  * cleanup function instead.
- * @param {Function} fn
- * @return {Function}
  */
-export function onCleanup(fn) {
+export function onCleanup(fn: CleanupFn): CleanupFn {
   if (activeCleanups) activeCleanups.push(fn);
   return fn;
 }
 
-const withCleanups = (cleanups, fn) => {
+function withCleanups<T>(cleanups: CleanupFn[], fn: () => T): T {
   const prev = activeCleanups;
   activeCleanups = cleanups;
   try {
@@ -45,22 +71,20 @@ const withCleanups = (cleanups, fn) => {
   } finally {
     activeCleanups = prev;
   }
-};
+}
 
-const runCleanups = (cleanups) => {
-  for (let i = cleanups.length; i--; ) cleanups[i]();
+function runCleanups(cleanups: CleanupFn[]): void {
+  for (let i = cleanups.length; i--; ) cleanups[i]!();
   cleanups.length = 0;
-};
+}
 
 /**
  * Reactive side effect. Re-runs when any read signal changes. If fn returns a
  * function, alien-signals invokes it before each re-run and on dispose.
  * Returns a dispose function.
- * @param {Function} fn
- * @return {Function}
  */
-export function effect(fn) {
-  const cleanups = [];
+export function effect(fn: EffectBody): CleanupFn {
+  const cleanups: CleanupFn[] = [];
   const stop = _effect(() => {
     runCleanups(cleanups);
     const returned = withCleanups(cleanups, fn);
@@ -83,12 +107,10 @@ export function effect(fn) {
  * effectScope manages its own lifetime, the caller is expected to invoke the
  * returned dispose explicitly. We do NOT auto-propagate to a surrounding
  * effect's cleanups, because re-running the parent effect should not tear
- * down explicitly-scoped children (e.g. map.js's per-item scopes).
- * @param {Function} fn
- * @return {Function}
+ * down explicitly-scoped children (e.g. map.ts's per-item scopes).
  */
-export function effectScope(fn) {
-  const cleanups = [];
+export function effectScope(fn: () => void): CleanupFn {
+  const cleanups: CleanupFn[] = [];
   const stop = _effectScope(() => {
     withCleanups(cleanups, fn);
   });
@@ -101,10 +123,8 @@ export function effectScope(fn) {
 /**
  * Run fn without tracking any read signals as dependencies of the surrounding
  * effect.
- * @param {Function} fn
- * @return {*}
  */
-export function untracked(fn) {
+export function untracked<T>(fn: () => T): T {
   const prev = setActiveSub(undefined);
   try {
     return fn();
@@ -116,11 +136,8 @@ export function untracked(fn) {
 /**
  * Run fn with signal updates coalesced; dependent effects re-run once after
  * fn returns.
- * @template T
- * @param {() => T} fn
- * @return {T}
  */
-export function batch(fn) {
+export function batch<T>(fn: () => T): T {
   startBatch();
   try {
     return fn();
@@ -128,5 +145,3 @@ export function batch(fn) {
     endBatch();
   }
 }
-
-export { computed, endBatch, isComputed, isSignal, setActiveSub, signal, startBatch, trigger };

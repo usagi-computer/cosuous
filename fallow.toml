@@ -2,12 +2,12 @@
 # library mode, vitest benchmarks, the size script, and the smoke test.
 entry = [
   # Library public entries (deno.json `exports` + vite.config.js libraryEntries).
-  "src/index.js",
-  "src/h.js",
-  "src/hydrate.js",
-  "src/map.js",
-  "src/signal.js",
-  "src/template.js",
+  "src/index.ts",
+  "src/h.ts",
+  "src/hydrate.ts",
+  "src/map.ts",
+  "src/signal.ts",
+  "src/template.ts",
   # Tests.
   "test/**/*.js",
   "test/**/*.mjs",

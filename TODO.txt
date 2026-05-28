@@ -1,4 +1,3 @@
-- Move repo to usagi-computer org once more mature
 - Publish to JSR (https://esm.sh/ supports JSR)
 - Use library for Coop's website rebuild
 - Create documentation website (Using https://starlight.astro.build/ with js.org domain in a monorepo)

@@ -68,8 +68,12 @@ const ADDONS = [
     file: "signal.js",
     desc: "Signals with `alien-signals` _(included by default)_",
   },
-  { name: "[`cosuous/map`](./src/map.js)", file: "map.js", desc: "Fast list renderer" },
-  { name: "[`cosuous/hydrate`](./src/hydrate.md)", file: "hydrate.js", desc: "Hydrate static HTML" },
+  { name: "[`cosuous/map`](./src/map.ts)", file: "map.js", desc: "Fast list renderer" },
+  {
+    name: "[`cosuous/hydrate`](./src/hydrate.md)",
+    file: "hydrate.js",
+    desc: "Hydrate static HTML",
+  },
   {
     name: "[`cosuous/template`](./src/template.md)",
     file: "template.js",

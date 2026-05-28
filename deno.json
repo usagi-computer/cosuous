@@ -3,16 +3,15 @@
   "version": "0.1.0",
   "license": "MIT",
   "exports": {
-    ".": "./dist/index.js",
-    "./h": "./dist/h.js",
-    "./hydrate": "./dist/hydrate.js",
-    "./map": "./dist/map.js",
-    "./signal": "./dist/signal.js",
-    "./template": "./dist/template.js"
+    ".": "./src/index.ts",
+    "./h": "./src/h.ts",
+    "./hydrate": "./src/hydrate.ts",
+    "./map": "./src/map.ts",
+    "./signal": "./src/signal.ts",
+    "./template": "./src/template.ts"
   },
   "publish": {
-    "include": ["dist", "README.md", "CHANGELOG.md"],
-    "exclude": ["!dist"]
+    "include": ["src", "README.md", "CHANGELOG.md"]
   },
   "nodeModulesDir": "auto",
   "imports": {
@@ -20,14 +19,15 @@
     "@vitest/browser-playwright": "npm:@vitest/browser-playwright@^4.1.7",
     "@vitest/coverage-v8": "npm:@vitest/coverage-v8@^4.1.7",
     "alien-signals": "npm:alien-signals@^3.2.1",
-    "rolldown": "npm:rolldown@^1.0.2",
+    "rolldown": "npm:rolldown@^1.0.3",
     "playwright": "npm:playwright@^1.60.0",
     "typescript": "npm:typescript@^6.0.3",
     "vite": "npm:vite@^8.0.14",
     "vitest": "npm:vitest@^4.1.7"
   },
   "tasks": {
-    "lint": "deno run -A npm:oxlint src/*.js",
+    "lint": "deno run -A npm:oxlint src/*.ts",
+    "typecheck": "deno run -A npm:typescript/tsc --noEmit -p tsconfig.json",
     "fmt": "deno run -A npm:oxfmt",
     "fmt:check": "deno run -A npm:oxfmt --check",
     "test": "deno run -A npm:vitest run",
@@ -42,8 +42,8 @@
     "bench:krausest": "deno run -A npm:vite build --config bench/krausest/vite.config.js",
     "playwright:install": "deno run -A npm:playwright install --with-deps chromium",
     "smoke:dist": "deno run -A test/_smoke-dist.mjs",
-    "prepublish": "deno task lint && deno task build && deno task bench:size:readme && deno task smoke:dist",
-    "publish:jsr": "deno task prepublish && deno publish --allow-slow-types"
+    "prepublish": "deno task lint && deno task typecheck && deno task build && deno task bench:size:readme && deno task smoke:dist",
+    "publish:jsr": "deno task prepublish && deno publish"
   },
   "exclude": ["dist", "bench/krausest/dist", "bench/results", "coverage", "node_modules"]
 }

@@ -1,4 +1,3 @@
-import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { playwright } from "@vitest/browser-playwright";
@@ -9,49 +8,29 @@ const src = (file) => path.resolve(__dirname, "src", file);
 
 // Array form so we control ordering: longest prefix first.
 const cosuousAlias = [
-  { find: "cosuous/h", replacement: src("h.js") },
-  { find: "cosuous/signal", replacement: src("signal.js") },
-  { find: "cosuous/template", replacement: src("template.js") },
-  { find: "cosuous/hydrate", replacement: src("hydrate.js") },
-  { find: "cosuous/map", replacement: src("map.js") },
-  { find: /^cosuous$/, replacement: src("index.js") },
+  { find: "cosuous/h", replacement: src("h.ts") },
+  { find: "cosuous/signal", replacement: src("signal.ts") },
+  { find: "cosuous/template", replacement: src("template.ts") },
+  { find: "cosuous/hydrate", replacement: src("hydrate.ts") },
+  { find: "cosuous/map", replacement: src("map.ts") },
+  { find: /^cosuous$/, replacement: src("index.ts") },
 ];
 
 // Each public entry of the library. alien-signals is intentionally NOT
 // listed as external; it gets inlined so consumers don't need a separate
-// runtime dependency. htm is vendored in-tree (see src/htm.js for the
+// runtime dependency. htm is vendored in-tree (see src/htm.ts for the
 // Sinuous-era patches we depend on).
 const libraryEntries = {
-  index: src("index.js"),
-  h: src("h.js"),
-  hydrate: src("hydrate.js"),
-  map: src("map.js"),
-  signal: src("signal.js"),
-  template: src("template.js"),
+  index: src("index.ts"),
+  h: src("h.ts"),
+  hydrate: src("hydrate.ts"),
+  map: src("map.ts"),
+  signal: src("signal.ts"),
+  template: src("template.ts"),
 };
-
-// Inline plugin: copy the hand-written .d.ts files from src/ to dist/ after
-// the library build so package.json#exports.<entry>.types still resolves.
-function copyDtsPlugin() {
-  return {
-    name: "cosuous-copy-dts",
-    async closeBundle() {
-      const srcDir = path.resolve(__dirname, "src");
-      const distDir = path.resolve(__dirname, "dist");
-      await fs.mkdir(distDir, { recursive: true });
-      const entries = await fs.readdir(srcDir);
-      for (const file of entries) {
-        if (file.endsWith(".d.ts")) {
-          await fs.copyFile(path.join(srcDir, file), path.join(distDir, file));
-        }
-      }
-    },
-  };
-}
 
 export default defineConfig({
   resolve: { alias: cosuousAlias },
-  plugins: [copyDtsPlugin()],
   build: {
     outDir: "dist",
     emptyOutDir: true,
@@ -69,7 +48,7 @@ export default defineConfig({
         // Name the shared htm chunk explicitly; otherwise Rolldown falls back
         // to a generic "src-…" name based on the source directory.
         manualChunks(id) {
-          if (id.endsWith("/src/htm.js")) return "htm";
+          if (id.endsWith("/src/htm.ts")) return "htm";
         },
       },
     },
@@ -77,7 +56,7 @@ export default defineConfig({
   test: {
     coverage: {
       provider: "v8",
-      include: ["src/**/*.js"],
+      include: ["src/**/*.ts"],
       reporter: ["text", "html", "lcov"],
     },
     projects: [

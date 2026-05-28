@@ -1,64 +1,64 @@
 {
-  "generatedAt": "2026-05-28T03:38:25.327Z",
+  "generatedAt": "2026-05-28T07:26:46.692Z",
   "totals": {
-    "raw": 24014,
-    "gzip": 9628,
-    "brotli": 8658
+    "raw": 24951,
+    "gzip": 9942,
+    "brotli": 8944
   },
   "files": [
     {
-      "file": "chunks/h-DX7lI_rn.js",
-      "raw": 3667,
-      "gzip": 1549,
-      "brotli": 1380
+      "file": "chunks/h-h7Pw5sjS.js",
+      "raw": 3896,
+      "gzip": 1620,
+      "brotli": 1438
     },
     {
-      "file": "chunks/htm-CpX-Tt86.js",
-      "raw": 2480,
-      "gzip": 1077,
-      "brotli": 984
+      "file": "chunks/htm-IRrUvgJk.js",
+      "raw": 2661,
+      "gzip": 1143,
+      "brotli": 1033
     },
     {
-      "file": "chunks/signal-iQ8TqzPw.js",
-      "raw": 8113,
-      "gzip": 2474,
-      "brotli": 2243
+      "file": "chunks/signal-DUJNE5S9.js",
+      "raw": 8119,
+      "gzip": 2473,
+      "brotli": 2233
     },
     {
       "file": "h.js",
       "raw": 169,
       "gzip": 140,
-      "brotli": 123
+      "brotli": 121
     },
     {
       "file": "hydrate.js",
-      "raw": 2927,
-      "gzip": 1265,
-      "brotli": 1147
+      "raw": 3191,
+      "gzip": 1358,
+      "brotli": 1226
     },
     {
       "file": "index.js",
-      "raw": 772,
-      "gzip": 416,
-      "brotli": 361
+      "raw": 805,
+      "gzip": 432,
+      "brotli": 379
     },
     {
       "file": "map.js",
-      "raw": 3415,
-      "gzip": 1524,
-      "brotli": 1372
+      "raw": 3517,
+      "gzip": 1564,
+      "brotli": 1424
     },
     {
       "file": "signal.js",
-      "raw": 356,
-      "gzip": 227,
-      "brotli": 193
+      "raw": 329,
+      "gzip": 216,
+      "brotli": 195
     },
     {
       "file": "template.js",
-      "raw": 2115,
-      "gzip": 956,
-      "brotli": 855
+      "raw": 2264,
+      "gzip": 996,
+      "brotli": 895
     }
   ]
 }
