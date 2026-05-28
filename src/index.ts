@@ -22,38 +22,60 @@
  * @module cosuous
  */
 
-import { api } from "./h.ts";
+import { api as _api } from "./h.ts";
 import htm from "./htm.ts";
 import {
-  batch,
-  computed,
-  effect,
-  effectScope,
-  endBatch,
-  isComputed,
-  isSignal,
-  signal,
-  startBatch,
-  trigger,
-  untracked,
+  batch as _batch,
+  computed as _computed,
+  effect as _effect,
+  effectScope as _effectScope,
+  endBatch as _endBatch,
+  isComputed as _isComputed,
+  isSignal as _isSignal,
+  signal as _signal,
+  startBatch as _startBatch,
+  trigger as _trigger,
+  untracked as _untracked,
 } from "./signal.ts";
-import type { Hyperscript } from "./h.ts";
+import type { Computed as _Computed, Signal as _Signal } from "./signal.ts";
+import type {
+  ElementChild as _ElementChild,
+  ElementChildren as _ElementChildren,
+  FunctionComponent as _FunctionComponent,
+} from "./shared.ts";
+import type {
+  Frag as _Frag,
+  Hyperscript as _Hyperscript,
+  HyperscriptApi as _HyperscriptApi,
+  Value as _Value,
+} from "./h.ts";
+import type { JSXInternal as _JSXInternal } from "./jsx.ts";
+
+/** Shared mutable hyperscript surface. See {@link HyperscriptApi}. */
+export const api: typeof _api = _api;
+
+/** Reactive side effect. Re-runs when any read signal changes. */
+export const effect: typeof _effect = _effect;
+/** Predicate: is `value` an alien-signals signal? */
+export const isSignal: typeof _isSignal = _isSignal;
+/** Predicate: is `value` an alien-signals computed? */
+export const isComputed: typeof _isComputed = _isComputed;
 
 api.effect = effect;
 api.isSignal = isSignal;
 api.isComputed = isComputed;
 
-api.hs = function hs(...args: unknown[]): ReturnType<Hyperscript> {
+api.hs = function hs(...args: unknown[]): ReturnType<_Hyperscript> {
   const prevIsSvg = api.isSvg;
   api.isSvg = true;
   try {
-    return (api.h as (...a: unknown[]) => ReturnType<Hyperscript>)(...args);
+    return (api.h as (...a: unknown[]) => ReturnType<_Hyperscript>)(...args);
   } finally {
     // Restore even if h() throws, so a nested hs() error doesn't leave
     // api.isSvg stuck on true for subsequent HTML-mode h() calls.
     api.isSvg = prevIsSvg;
   }
-} as Hyperscript;
+} as _Hyperscript;
 
 /**
  * Build a DOM element, component subtree, or document fragment.
@@ -62,16 +84,16 @@ api.hs = function hs(...args: unknown[]): ReturnType<Hyperscript> {
  * observable through this export. For the un-delegated implementation,
  * import from `cosuous/h` instead.
  */
-export const h: Hyperscript = ((...args: unknown[]) =>
-  (api.h as (...a: unknown[]) => ReturnType<Hyperscript>)(...args)) as Hyperscript;
+export const h: _Hyperscript = ((...args: unknown[]) =>
+  (api.h as (...a: unknown[]) => ReturnType<_Hyperscript>)(...args)) as _Hyperscript;
 
 /**
  * SVG-mode counterpart of {@link h}. Builds elements in the SVG
  * namespace; otherwise identical. Same delegator-over-`api.hs`
  * pattern.
  */
-export const hs: Hyperscript = ((...args: unknown[]) =>
-  (api.hs as (...a: unknown[]) => ReturnType<Hyperscript>)(...args)) as Hyperscript;
+export const hs: _Hyperscript = ((...args: unknown[]) =>
+  (api.hs as (...a: unknown[]) => ReturnType<_Hyperscript>)(...args)) as _Hyperscript;
 
 /**
  * Tagged-template form of {@link h}, powered by the vendored `htm`
@@ -102,25 +124,52 @@ export function svg(
   return htm.apply(hs, [strings, ...values]) as SVGElement | DocumentFragment;
 }
 
-export {
-  api,
-  batch,
-  computed,
-  effect,
-  effectScope,
-  endBatch,
-  isComputed,
-  isSignal,
-  signal,
-  startBatch,
-  trigger,
-  untracked,
-};
+// Per-symbol re-exports so each carries its own JSDoc at the package root,
+// instead of producing bare "reference" nodes that JSR's doc-coverage
+// check sees as undocumented. `api`, `effect`, `isSignal`, `isComputed`
+// are exported earlier so they can be assigned onto `api`.
+
+/** Batch signal updates so dependent effects re-run once at the end. */
+export const batch: typeof _batch = _batch;
+/** Derive a memoised {@link Computed} from one or more signals. */
+export const computed: typeof _computed = _computed;
+/** Grouped lifetime for child effects; disposes them together. */
+export const effectScope: typeof _effectScope = _effectScope;
+/** Close a batch started by {@link startBatch}. */
+export const endBatch: typeof _endBatch = _endBatch;
+/** Create a reactive {@link Signal}. */
+export const signal: typeof _signal = _signal;
+/** Open a batch; pair with {@link endBatch}. */
+export const startBatch: typeof _startBatch = _startBatch;
+/** Manually fire a reactive trigger (alien-signals primitive). */
+export const trigger: typeof _trigger = _trigger;
+/** Run a function without registering dependencies on read signals. */
+export const untracked: typeof _untracked = _untracked;
 
 // Public type surface. Consumers do `import type { JSX } from "cosuous"` etc.
 // Replaces the old `export = cosuous; export as namespace cosuous;` pattern
 // (which was incompatible with native ESM / JSR fast-types).
-export type { Computed, Signal } from "./signal.ts";
-export type { ElementChild, ElementChildren, FunctionComponent } from "./shared.ts";
-export type { Frag, Hyperscript, HyperscriptApi, Value } from "./h.ts";
-export type { JSXInternal as JSX } from "./jsx.ts";
+
+/** Reactive value with a memoised getter. */
+export type Computed<T> = _Computed<T>;
+/** Reactive value: callable getter/setter. */
+export type Signal<T> = _Signal<T>;
+
+/** Any value accepted in an `h` child slot. */
+export type ElementChild = _ElementChild;
+/** One {@link ElementChild} or an array of them. */
+export type ElementChildren = _ElementChildren;
+/** Callable shape for cosuous components. */
+export type FunctionComponent = _FunctionComponent;
+
+/** Multi-child fragment marker pair. */
+export type Frag = _Frag;
+/** Overloaded `h` call signature. */
+export type Hyperscript = _Hyperscript;
+/** Shared mutable surface populated across the package. */
+export type HyperscriptApi = _HyperscriptApi;
+/** Any value `api.add` accepts directly. */
+export type Value = _Value;
+
+/** JSX type surface for tsc; see the `JSXInternal` namespace. */
+export type { _JSXInternal as JSX };

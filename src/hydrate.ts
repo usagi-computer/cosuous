@@ -24,6 +24,7 @@ import { TEXT_NODE } from "./constants.ts";
 import htm from "./htm.ts";
 import { api, h, hs } from "./index.ts";
 import type { FunctionComponent } from "./shared.ts";
+import type { JSXInternal as _JSXInternal } from "./jsx.ts";
 
 /**
  * Loose virtual-node shape produced by {@link d} / {@link ds} during
@@ -338,7 +339,12 @@ function filterChildNodes(parent: Node): Array<Node & { data?: string; _noskip?:
   }) as Array<Node & { data?: string; _noskip?: boolean }>;
 }
 
-// JSX namespace re-exports for typed JSX use under d / ds.
-// Module-level instead of `namespace d { import JSX = JSXInternal }` so the
-// declaration remains erasable under tsconfig's `erasableSyntaxOnly`.
-export type { JSXInternal as JSX } from "./jsx.ts";
+/**
+ * JSX type surface for typed JSX use under `d` / `ds`. Re-exports the
+ * `JSXInternal` namespace as `JSX`. Module-level instead of
+ * `namespace d { import JSX = ... }` so the declaration remains
+ * erasable under tsconfig's `erasableSyntaxOnly`. Deno doc resolves
+ * this reference to the underlying namespace declaration in `jsx.ts`,
+ * where the JSDoc lives.
+ */
+export type { _JSXInternal as JSX };

@@ -65,6 +65,7 @@ export type Value = Node | DocumentFragment | string | number;
  *    are appended as children, returns a `DocumentFragment`.
  */
 export interface Hyperscript {
+  /** Element overload: tag name string, optional props, variadic children. */
   (
     type: string,
     props:
@@ -72,6 +73,7 @@ export interface Hyperscript {
       | null,
     ...children: ElementChildren[]
   ): HTMLElement | SVGElement;
+  /** Component overload: function returns whatever its body produces. */
   (
     type: FunctionComponent,
     props:
@@ -79,6 +81,7 @@ export interface Hyperscript {
       | null,
     ...children: ElementChildren[]
   ): HTMLElement | SVGElement | DocumentFragment;
+  /** Fragment overload: array-first call yields a `DocumentFragment`. */
   (tag: ElementChildren[] | [], ...children: ElementChildren[]): DocumentFragment;
 }
 
