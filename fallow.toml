@@ -1,4 +1,21 @@
-entry = ["test/**/*.js"]
+# Entry points fallow can't discover on its own: JSR subpath exports, vite
+# library mode, vitest benchmarks, the size script, and the smoke test.
+entry = [
+  # Library public entries (deno.json `exports` + vite.config.js libraryEntries).
+  "src/index.js",
+  "src/h.js",
+  "src/hydrate.js",
+  "src/map.js",
+  "src/signal.js",
+  "src/template.js",
+  # Tests.
+  "test/**/*.js",
+  "test/**/*.mjs",
+  # Benchmarks (`deno task bench`, `bench:size*`, `bench:krausest`).
+  "bench/**/*.bench.js",
+  "bench/size.js",
+  "bench/krausest/src/main.js",
+]
 
 [duplicates]
 ignoreDefaults = true
