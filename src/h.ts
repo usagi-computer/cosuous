@@ -1,4 +1,21 @@
-/* Adapted from Hyper DOM Expressions - The MIT License - Ryan Carniato */
+/**
+ * Hyperscript core. Exposes the `h` function that builds DOM elements
+ * (or document fragments) from a tag, a props object, and a variadic
+ * child list, plus the low-level `add` / `insert` / `property` /
+ * `removeNodes` primitives that the rest of cosuous calls through the
+ * shared {@link HyperscriptApi} surface (`api`).
+ *
+ * Most consumers should import from the package root (`cosuous`) rather
+ * than this module - the root entry wires `api.effect` / `api.isSignal`
+ * / `api.isComputed` from `./signal.ts` and adds the SVG-mode `hs`
+ * wrapper. Importing `cosuous/h` directly gets the un-delegated `h`
+ * implementation, which is useful for ahead-of-time tools but skips
+ * the runtime hooks the package root attaches.
+ *
+ * Adapted from Hyper DOM Expressions - The MIT License - Ryan Carniato.
+ *
+ * @module h
+ */
 
 import { EVENT_PREFIX_LEN, FRAGMENT_NODE, SVG_NS } from "./constants.ts";
 import type { JSXInternal } from "./jsx.ts";
@@ -11,13 +28,37 @@ type NodeWithListeners = Node & {
   _listeners?: Record<string, (ev: Event) => unknown>;
 };
 
+/**
+ * Marker pair representing a fragment of two or more children. The
+ * `_startMark` Text node is inserted before the fragment's first child
+ * so siblings can be located after the fragment's contents have been
+ * hoisted into the parent element.
+ */
 export interface Frag {
   _startMark: Text;
 }
 
+/**
+ * Any value `api.add` knows how to insert directly: a DOM node, a
+ * document fragment, or a primitive that will be coerced to a text
+ * node.
+ */
 export type Value = Node | DocumentFragment | string | number;
 
-/** Single h-call signature, used as the type of `api.h`. */
+/**
+ * Overloaded `h` call signature. Used as the type of {@link api}'s `h`
+ * and `hs` fields, the package-root exports of the same names, and any
+ * intercepting wrapper a consumer might install on `api.h`.
+ *
+ * Three overloads match the three call shapes JSX and the `html`
+ * tagged template emit:
+ *
+ * 1. Element by tag name, optional props, optional children.
+ * 2. Component (a function), optional props, optional children -
+ *    returns whatever the component returns.
+ * 3. Fragment - first arg is an array (typically `[]`), remaining args
+ *    are appended as children, returns a `DocumentFragment`.
+ */
 export interface Hyperscript {
   (
     type: string,
@@ -73,8 +114,11 @@ export interface HyperscriptApi {
 }
 
 /**
- * Internal action callable, as recorded by src/template.ts. Carries metadata
- * fields used by api.action; treated as opaque here.
+ * Recorded template action, produced by `src/template.ts` when a `t` /
+ * `s` tag is encountered during a template's first render. The
+ * extra `_*` fields are bookkeeping used by `api.action` at clone
+ * time; they aren't part of the documented public contract but are
+ * exposed because cross-module assignments need a shared type.
  */
 export interface TemplateAction {
   (element: Node, endMark: Node | null, propName: string | null, value: unknown): void;
@@ -92,9 +136,19 @@ export interface TemplateAction {
 }
 
 /**
- * Internal API surface. Populated by index.ts (effect/isSignal/isComputed,
- * hs) and template.ts (action). Empty at module init - the cast names the
- * contract callers can rely on once index.ts has run.
+ * The shared {@link HyperscriptApi} surface used across the package.
+ *
+ * Populated incrementally at module load: `h.ts` assigns
+ * `h` / `insert` / `property` / `add` / `rm`; `index.ts` assigns
+ * `effect` / `isSignal` / `isComputed` and the SVG-mode `hs` wrapper;
+ * `template.ts` assigns `action` if it's imported. Empty at the
+ * declaration site - the cast names the contract callers can rely on
+ * once `index.ts` has run.
+ *
+ * Monkey-patching `api.h` (or any other field) at runtime is the
+ * supported extension point: the package-root `h` / `hs` exports are
+ * thin delegators over `api.h` / `api.hs`, so replacing the field is
+ * observed by every downstream call site.
  */
 export const api = {} as HyperscriptApi;
 
@@ -127,7 +181,11 @@ const frag = (value: Text | Node | DocumentFragment): Node | Frag | undefined =>
 };
 
 /**
- * Add a string or node before a reference node or at the end.
+ * Insert `value` into `parent` before `endMark`, or at the end if
+ * `endMark` is null/undefined. Strings are wrapped in a Text node;
+ * arrays are wrapped in a DocumentFragment. Returns the resulting
+ * node (or a {@link Frag} pair for multi-child fragments so the
+ * caller can track the fragment's boundary).
  */
 export const add = (parent: Node, value: Value | Value[], endMark?: Node | null): Node | Frag => {
   const node = castNode(value);
@@ -180,6 +238,13 @@ const insertNode = (
   return value && value !== true ? api.add(el, value as Value, endMark) : null;
 };
 
+/**
+ * Reactively place `value` into `el`, replacing whatever was there
+ * (`current`) up to but not including `endMark`. If `value` is a
+ * function, it's wrapped in an effect so the slot stays in sync with
+ * any signals it reads. Returns the new "current" value, which the
+ * caller should pass back on the next update.
+ */
 export const insert = <T>(
   el: Node,
   value: T,
@@ -245,6 +310,13 @@ const handleEvent = (
   (target._listeners || (target._listeners = {}))[name] = value as (ev: Event) => unknown;
 };
 
+/**
+ * Apply `value` to `el` as a prop, attribute, style, or event handler.
+ * Dispatch order: `null`-name (or `attrs`) recurses over every key in
+ * `value`; `on*` names install event listeners through a shared
+ * `eventProxy`; functions are wrapped in an effect; everything else
+ * is set as a DOM property or HTML attribute depending on the name.
+ */
 export const property = (
   el: Node,
   value: unknown,
@@ -313,8 +385,13 @@ export const removeNodes = (parent: Node, startNode: Node | null, endMark: Node)
   }
 };
 
-// Public overload signatures for `h`. The implementation signature below is
-// intentionally loose; consumers see the narrow overloads.
+/**
+ * Build a DOM element, document fragment, or component subtree.
+ *
+ * Public overload signatures match the three call shapes JSX and the
+ * `html` tagged template emit. The implementation signature below is
+ * intentionally loose; consumers see the narrow overloads.
+ */
 export function h(
   type: string,
   props:

@@ -1,3 +1,25 @@
+/**
+ * Pre-rendered templates. {@link template} captures a one-shot element
+ * factory and replays it with prop bindings; {@link t} and {@link s}
+ * mark prop / child slots that resolve against the `props` object at
+ * clone time.
+ *
+ * Use this when the same shape renders many times and the reactive
+ * cost of `h` per item is observable - the reconciler in
+ * `cosuous/map` pairs well with it.
+ *
+ * @example
+ * ```ts
+ * import { template, t } from "@usagi-computer/cosuous/template";
+ * import { h } from "@usagi-computer/cosuous";
+ *
+ * const row = template(() => h("li", null, t("label")));
+ * document.body.append(row({ label: "hello" }));
+ * ```
+ *
+ * @module template
+ */
+
 import { api } from "./index.ts";
 import type { TemplateAction } from "./h.ts";
 
@@ -11,6 +33,13 @@ type TagContext = { el: Node; name?: string | null; endMark?: Node | null };
  */
 export type TemplateTag = ((this: TagContext) => void) & { $s: number };
 
+/**
+ * The function returned by {@link template}. Clones the captured
+ * element and binds the supplied `props` against the recorded `t` /
+ * `s` slots. Pass `forceNoClone: true` to bind in place rather than
+ * cloning. Carries a `$t: true` marker so other modules (notably
+ * {@link map}) can detect templates and skip per-item cleanup.
+ */
 export interface CloneFunction {
   (props: Record<string, unknown>, forceNoClone?: boolean): Node;
   $t: true;
@@ -21,14 +50,26 @@ type RecordedActionList = TemplateAction[];
 let recordedActions: RecordedActionList | undefined;
 
 /**
- * Signal template tag.
+ * Signal-aware template slot. Like {@link t} but marks the binding as
+ * `observed`, so the cloned template installs a getter/setter on
+ * `props[key]` that re-runs the action whenever the prop is reassigned.
  */
 export function s(key: string): TemplateTag {
   return t(key, true);
 }
 
 /**
- * Template tag.
+ * Template slot. Returns a {@link TemplateTag} that records itself
+ * against `key` when the surrounding {@link template} factory runs;
+ * at clone time, the recorded action reads `props[key]` and writes
+ * it back into the slot.
+ *
+ * @param key - Name of the field on the `props` object to bind to.
+ * @param observed - If true, install a getter/setter on `props[key]`
+ *   so reassignments re-fire the binding. Used by {@link s}.
+ * @param bind - If true, the getter returns the live DOM target /
+ *   property value instead of the last-written value; useful for
+ *   two-way bindings against input elements.
  */
 export function t(key: string, observed?: boolean, bind?: boolean): TemplateTag {
   const tag = function (this: TagContext): void {
@@ -80,7 +121,22 @@ export function t(key: string, observed?: boolean, bind?: boolean): TemplateTag 
 }
 
 /**
- * Creates a template function.
+ * Capture a one-shot element factory and return a {@link CloneFunction}
+ * that replays it with new props. `elementRef` runs exactly once;
+ * any `t` / `s` calls inside it are recorded by reference and rebound
+ * against `props` at clone time.
+ *
+ * Pass `noClone: true` to bind in place rather than cloning - useful
+ * when the template is the only consumer of the underlying fragment.
+ *
+ * @example
+ * ```ts
+ * import { template, t } from "@usagi-computer/cosuous/template";
+ * import { h } from "@usagi-computer/cosuous";
+ *
+ * const row = template(() => h("li", { class: t("cls") }, t("text")));
+ * document.body.append(row({ cls: "x", text: "hello" }));
+ * ```
  */
 export function template(elementRef: () => Node, noClone?: boolean): CloneFunction {
   const prevRecordedActions = recordedActions;

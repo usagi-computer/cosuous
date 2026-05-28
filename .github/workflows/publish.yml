@@ -1,0 +1,74 @@
+name: Publish to JSR
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+# Prevent two tag pushes (or a tag + manual dispatch) from racing to publish
+# the same version. JSR rejects duplicate publishes anyway, but serialising
+# here avoids noisy second-job failures in the Actions UI.
+concurrency:
+  group: publish-jsr
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      # Check out the tagged commit.
+      contents: read
+      # Mint an OIDC token for this run; `deno publish` reads it from the
+      # ACTIONS_ID_TOKEN_REQUEST_* env vars that GitHub injects when this
+      # permission is granted, and JSR's transparency log records the
+      # workflow run as the package's provenance.
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      # Fail fast (before deno install / build) when the tag doesn't match
+      # deno.json's version - prevents accidentally publishing 0.1.0 when
+      # you meant to tag 0.2.0 (deno publish would just hit a JSR
+      # "duplicate version" 5+ minutes later).
+      # Only runs on tag pushes; workflow_dispatch bypasses this check.
+      - name: Verify tag matches deno.json version
+        if: github.event_name == 'push'
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          VERSION="$(jq -r .version deno.json)"
+          if [ "$TAG" != "$VERSION" ]; then
+            echo "::error::Tag ${GITHUB_REF_NAME} does not match deno.json version ${VERSION}. Bump deno.json or retag."
+            exit 1
+          fi
+          echo "Tag ${GITHUB_REF_NAME} matches deno.json version ${VERSION}."
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Install dependencies (frozen lockfile)
+        run: deno install --frozen
+
+      # Same gates as `deno task prepublish` minus bench:size:readme, which
+      # mutates README; the publish must ship exactly what's at the tag.
+      # `deno task test` is deliberately not here - ci.yml runs the full
+      # suite (node + Playwright browser) on every push, including the
+      # commit you tagged.
+      - name: Lint
+        run: deno task lint
+
+      - name: Typecheck
+        run: deno task typecheck
+
+      - name: Build dist
+        run: deno task build
+
+      - name: Smoke-test built dist
+        run: deno task smoke:dist
+
+      # Version is read from deno.json - tag is convention, not config. Make
+      # sure deno.json's `version` matches the tag before pushing it; JSR
+      # will reject a duplicate.
+      - name: Publish to JSR
+        run: deno publish

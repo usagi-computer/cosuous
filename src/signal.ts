@@ -1,12 +1,34 @@
-/*
- * Reactive core, backed by alien-signals.
- * Public surface is preact-signals-shaped: effect callbacks may return a
- * cleanup function (handled natively by alien-signals), batch(fn) brackets
- * startBatch/endBatch, untracked(fn) suspends dependency tracking. onCleanup
- * and effectScope remain available as internal primitives consumed by
- * src/map.ts to cascade teardown through the scope graph, alien-signals'
- * native cleanup fires on self-dispose only, not when an ancestor scope tears
- * a node down via the graph.
+/**
+ * Reactive primitives backed by alien-signals. The public surface is
+ * shaped like preact-signals:
+ *
+ * - {@link signal} returns a callable getter/setter pair.
+ * - {@link computed} memoises a derivation.
+ * - {@link effect} runs a side-effect; returning a function from its
+ *   body registers it as a cleanup, and calling the returned disposer
+ *   tears everything down.
+ * - {@link batch} brackets startBatch/endBatch so dependent effects
+ *   re-run once at the end.
+ * - {@link untracked} suspends dependency tracking for the duration of
+ *   the callback.
+ *
+ * `effectScope` and `onCleanup` remain available as the lower-level
+ * primitives consumed by `src/map.ts` to cascade teardown through the
+ * scope graph - alien-signals' native cleanup fires only on
+ * self-dispose, not when an ancestor scope tears a node down via the
+ * graph.
+ *
+ * @example
+ * ```ts
+ * import { effect, signal } from "@usagi-computer/cosuous/signal";
+ *
+ * const count = signal(0);
+ * const stop = effect(() => console.log("count is", count()));
+ * count(1); // logs "count is 1"
+ * stop();
+ * ```
+ *
+ * @module signal
  */
 
 import {
@@ -22,18 +44,34 @@ import {
   trigger,
 } from "alien-signals";
 
+/**
+ * A reactive value. Calling it with no arguments reads the current
+ * value (and registers a dependency in any surrounding effect);
+ * calling it with one argument writes a new value.
+ */
 export interface Signal<T> {
   (): T;
   (nextValue: T): void;
 }
 
+/**
+ * A read-only reactive value derived from one or more signals via
+ * {@link computed}. Calling it returns the current memoised value.
+ */
 export interface Computed<T> {
   (): T;
 }
 
-// Re-export under cosuous's preferred shape. alien-signals' own signature is
-// runtime-compatible but uses a different generic shape; the double cast keeps
-// the value identity while presenting the documented overloads to consumers.
+/**
+ * Create a {@link Signal}. Two overloads:
+ *
+ * - `signal<T>()` returns a `Signal<T | undefined>` that starts unset.
+ * - `signal(initialValue)` returns a `Signal<T>` typed from the value.
+ *
+ * Re-exported from alien-signals under cosuous's preferred shape -
+ * the runtime is alien-signals, but the public type matches the
+ * preact-signals overload pair.
+ */
 export const signal: {
   <T>(): Signal<T | undefined>;
   <T>(initialValue: T): Signal<T>;
@@ -42,6 +80,11 @@ export const signal: {
   <T>(initialValue: T): Signal<T>;
 };
 
+/**
+ * Create a {@link Computed}. The getter receives the previous result
+ * (or `undefined` on first run) so derivations can do incremental
+ * updates without a separate cache.
+ */
 export const computed: <T>(getter: (previousValue?: T) => T) => Computed<T> =
   _computed as unknown as <T>(getter: (previousValue?: T) => T) => Computed<T>;
 

@@ -1,6 +1,25 @@
-/*
- * Cosuous by Dania Rifki (@Kaleidosium), forked from Sinuous by Wesley Luyten (@luwes).
- * Really ties all the packages together.
+/**
+ * Cosuous - a small reactive view library forked from Sinuous.
+ *
+ * This is the package's main entrypoint. It wires the hyperscript core
+ * (`./h.ts`) to the reactive primitives (`./signal.ts`) and the `htm`
+ * template-literal parser (`./htm.ts`), then re-exports the everyday
+ * surface: `h` / `hs` for elements, `html` / `svg` for tagged templates,
+ * and the full set of signal primitives.
+ *
+ * @example Basic counter
+ * ```ts
+ * import { html, signal } from "@usagi-computer/cosuous";
+ *
+ * const count = signal(0);
+ * const view = () => html`<button onclick=${() => count(count() + 1)}>${count}</button>`;
+ * document.body.append(view());
+ * ```
+ *
+ * Originally forked from Sinuous by Wesley Luyten (@luwes); maintained
+ * by Dania Rifki (@Kaleidosium / usagi-computer).
+ *
+ * @module cosuous
  */
 
 import { api } from "./h.ts";
@@ -36,25 +55,45 @@ api.hs = function hs(...args: unknown[]): ReturnType<Hyperscript> {
   }
 } as Hyperscript;
 
-// Makes it possible to intercept `h` calls and customize.
-// Note: this is a delegator over `api.h`, so monkey-patching `api.h` at
-// runtime is observable here. The direct `h` impl is exported from
-// "cosuous/h" for callers who want the un-delegated implementation.
+/**
+ * Build a DOM element, component subtree, or document fragment.
+ *
+ * Delegator over `api.h`; monkey-patching `api.h` at runtime is
+ * observable through this export. For the un-delegated implementation,
+ * import from `cosuous/h` instead.
+ */
 export const h: Hyperscript = ((...args: unknown[]) =>
   (api.h as (...a: unknown[]) => ReturnType<Hyperscript>)(...args)) as Hyperscript;
 
-// Makes it possible to intercept `hs` calls and customize.
+/**
+ * SVG-mode counterpart of {@link h}. Builds elements in the SVG
+ * namespace; otherwise identical. Same delegator-over-`api.hs`
+ * pattern.
+ */
 export const hs: Hyperscript = ((...args: unknown[]) =>
   (api.hs as (...a: unknown[]) => ReturnType<Hyperscript>)(...args)) as Hyperscript;
 
-// `export const html = htm.bind(h)` is not tree-shakeable!
+/**
+ * Tagged-template form of {@link h}, powered by the vendored `htm`
+ * parser. Returns the same shape as a single `h(...)` call (either an
+ * `HTMLElement` or a `DocumentFragment` for multi-root templates).
+ *
+ * Not written as `htm.bind(h)` because that form isn't tree-shakeable.
+ *
+ * @example
+ * ```ts
+ * const view = html`<div class="row">${child}</div>`;
+ * ```
+ */
 export const html: (
   strings: TemplateStringsArray,
   ...values: unknown[]
 ) => HTMLElement | DocumentFragment = (strings, ...values) =>
   htm.apply(h, [strings, ...values]) as HTMLElement | DocumentFragment;
 
-// `export const svg = htm.bind(hs)` is not tree-shakeable!
+/**
+ * SVG-mode tagged template; the SVG counterpart of {@link html}.
+ */
 export const svg: (
   strings: TemplateStringsArray,
   ...values: unknown[]

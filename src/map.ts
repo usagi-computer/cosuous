@@ -1,5 +1,25 @@
-/* Adapted from Stage0 - The MIT License - Pavel Martynov */
-/* Adapted from DOM Expressions - The MIT License - Ryan Carniato */
+/**
+ * Fine-grained list renderer. Drop-in for `array.map(fn)` when each
+ * item should mount as its own DOM subtree with its own reactive
+ * lifetime; the underlying reconciler (an ivi-style longest-increasing
+ * -subsequence algorithm) moves existing nodes rather than recreating
+ * them across updates.
+ *
+ * @example
+ * ```ts
+ * import { html, signal } from "@usagi-computer/cosuous";
+ * import { map } from "@usagi-computer/cosuous/map";
+ *
+ * const items = signal([1, 2, 3]);
+ * const view = html`<ul>${map(items, (n) => html`<li>${n}</li>`)}</ul>`;
+ * ```
+ *
+ * Adapted from Stage0 (MIT, Pavel Martynov) and DOM Expressions (MIT,
+ * Ryan Carniato).
+ *
+ * @module map
+ */
+
 import { api } from "./index.ts";
 import { effect, effectScope, onCleanup, untracked } from "./signal.ts";
 import type { Signal } from "./signal.ts";
@@ -15,7 +35,26 @@ type ItemsFn<T> = (() => T[]) | Signal<T[]>;
 type ExprFn<T> = ((item: T, i: number, items: T[]) => Node) & { $t?: boolean };
 
 /**
- * Map over a list of items that create DOM nodes.
+ * Render a reactive list of items as DOM nodes.
+ *
+ * `items` is either a `Signal<T[]>` or a zero-arg function returning
+ * `T[]`; whenever it changes, `map` runs the reconciler to move,
+ * insert, or remove only the affected children. `expr(item, i, list)`
+ * builds the node for each item.
+ *
+ * Set `cleaning` to control whether each item gets its own
+ * {@link effectScope} for fine-grained teardown. Defaults to `true`
+ * for regular `expr`s, `false` for templates (where the template
+ * itself owns the lifetime).
+ *
+ * @example
+ * ```ts
+ * import { signal, html } from "@usagi-computer/cosuous";
+ * import { map } from "@usagi-computer/cosuous/map";
+ *
+ * const items = signal(["a", "b"]);
+ * document.body.append(html`<ul>${map(items, (x) => html`<li>${x}</li>`)}</ul>`);
+ * ```
  */
 export function map<T>(items: ItemsFn<T>, expr: ExprFn<T>, cleaning?: boolean): DocumentFragment {
   // Disable cleaning for templates by default.
@@ -91,14 +130,20 @@ function clearList(
   if (onClear) onClear();
 }
 
-// This is almost straightforward implementation of reconcillation algorithm
-// based on ivi documentation:
-// https://github.com/localvoid/ivi/blob/2c81ead934b9128e092cc2a5ef2d3cabc73cb5dd/packages/ivi/src/vdom/implementation.ts#L1366
-// With some fast paths from Surplus implementation:
-// https://github.com/adamhaile/surplus/blob/master/src/runtime/content.ts#L86
-// And working with data directly from Stage0:
-// https://github.com/Freak613/stage0/blob/master/reconcile.js
-// This implementation is tailored for fine grained change detection and adds support for fragments
+/**
+ * Reconcile DOM children between two arrays, moving / inserting /
+ * removing the minimum number of nodes. The keyed algorithm follows
+ * ivi's documentation, borrows the head/tail fast paths from Surplus,
+ * and the direct-data style from Stage0, with extensions for the
+ * fragment grouping that {@link map} produces.
+ *
+ * Exposed for advanced consumers; in normal use {@link map} drives
+ * this internally.
+ *
+ * @see https://github.com/localvoid/ivi/blob/2c81ead934b9128e092cc2a5ef2d3cabc73cb5dd/packages/ivi/src/vdom/implementation.ts#L1366
+ * @see https://github.com/adamhaile/surplus/blob/master/src/runtime/content.ts#L86
+ * @see https://github.com/Freak613/stage0/blob/master/reconcile.js
+ */
 export function reconcile<T>(
   a: T[],
   b: T[],

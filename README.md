@@ -1,8 +1,8 @@
 # Cosuous
 
-A light, fast, reactive UI library. A fork of [Sinuous](https://github.com/luwes/sinuous) by Wesley Luyten.
+[![JSR](https://jsr.io/badges/@usagi-computer/cosuous)](https://jsr.io/@usagi-computer/cosuous) [![JSR Score](https://jsr.io/badges//@usagi-computer/cosuous/score)](https://jsr.io//@usagi-computer/cosuous)
 
-[![JSR](https://jsr.io/badges/@usagi-computer/cosuous)](https://jsr.io/@usagi-computer/cosuous)
+A light, fast, reactive UI library. A fork of [Sinuous](https://github.com/luwes/sinuous) by Wesley Luyten.
 
 **jsr**: `deno add jsr:@usagi-computer/cosuous` (or `npx jsr add @usagi-computer/cosuous` from npm-based projects)  
 **cdn**: `https://esm.sh/jsr/@usagi-computer/cosuous`

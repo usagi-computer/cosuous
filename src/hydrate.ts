@@ -1,11 +1,36 @@
+/**
+ * Hydration entry. Walks a virtual-node tree against pre-rendered HTML
+ * and attaches reactive bindings to the existing DOM nodes instead of
+ * recreating them.
+ *
+ * Pair `d` / `ds` (or their tagged-template forms `dhtml` / `dsvg`)
+ * with `hydrate(root)` to describe the expected tree, then let the
+ * library walk the live DOM. Effects subscribe to signals on first
+ * pass; subsequent passes call back through the regular `h` / `hs`
+ * path for newly created subtrees.
+ *
+ * @example
+ * ```ts
+ * import { hydrate, dhtml, signal } from "@usagi-computer/cosuous/hydrate";
+ * const count = signal(0);
+ * const view = dhtml`<button onclick=${() => count(count() + 1)}>${count}</button>`;
+ * hydrate(view);
+ * ```
+ *
+ * @module hydrate
+ */
+
 import { TEXT_NODE } from "./constants.ts";
 import htm from "./htm.ts";
 import { api, h, hs } from "./index.ts";
 import type { FunctionComponent } from "./shared.ts";
 
-// Hydration uses a loose vnode shape; fields are populated incrementally as
-// the tree is built. Marking each as optional reflects the runtime contract
-// honestly without forcing callers to construct fully-formed VNodes.
+/**
+ * Loose virtual-node shape produced by {@link d} / {@link ds} during
+ * the first hydration pass. Fields are populated incrementally as the
+ * tree is built; every field is optional so partial nodes are valid
+ * intermediate values during construction.
+ */
 export interface VNode {
   type?: string | FunctionComponent | null;
   _props?: unknown;
@@ -17,25 +42,51 @@ export interface VNode {
 type DResult = VNode | VNode[];
 type DTreeify = (...args: unknown[]) => DResult | HTMLElement | SVGElement | DocumentFragment;
 
+/**
+ * HTML-mode treeify. Build a {@link VNode} tree to hand to
+ * {@link hydrate}. After the first hydration pass, subsequent calls
+ * fall through to the regular `h` path so live updates create real
+ * DOM nodes.
+ */
 export const d: DTreeify = context();
+
+/**
+ * SVG-mode treeify; the SVG counterpart of {@link d}. Tags built
+ * through `ds` are created in the SVG namespace once the tree is
+ * rendered.
+ */
 export const ds: DTreeify = context(true);
 
-// `export const html = htm.bind(h)` is not tree-shakeable!
+/**
+ * Tagged-template form of {@link d} - same role, but takes a template
+ * literal instead of nested calls. Not tree-shakeable from the
+ * declaration; the function form preserves the binding so consumers
+ * can drop unused entries during bundling.
+ */
 export function dhtml(strings: TemplateStringsArray, ...values: unknown[]): DResult {
   return htm.apply(d, [strings, ...values]) as DResult;
 }
 
-// `export const svg = htm.bind(hs)` is not tree-shakeable!
+/**
+ * Tagged-template form of {@link ds} for SVG content.
+ */
 export function dsvg(strings: TemplateStringsArray, ...values: unknown[]): DResult {
   return htm.apply(ds, [strings, ...values]) as DResult;
 }
 
+/**
+ * Placeholder sentinel for `d` / `ds` calls. Pass `_` to skip a
+ * position in the tree without binding anything to the matching DOM
+ * node.
+ */
 export const _: object = {};
 
 let isHydrated: boolean | undefined;
 
 /**
- * Create a cosuous `treeify` function.
+ * Build a treeify function. Pass `isSvg: true` to construct the SVG
+ * counterpart. Exposed mainly so callers can build per-namespace
+ * variants without going through the package's pre-bound `d` / `ds`.
  */
 export function context(
   isSvg?: boolean,
@@ -43,10 +94,7 @@ export function context(
   return function () {
     if (isHydrated) {
       // Hydrate on first pass, create on the rest.
-      return (isSvg ? hs : h).apply(
-        null,
-        arguments as unknown as Parameters<typeof h>,
-      );
+      return (isSvg ? hs : h).apply(null, arguments as unknown as Parameters<typeof h>);
     }
 
     let vnode: VNode | undefined;
