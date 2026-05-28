@@ -1,4 +1,5 @@
-- Publish to JSR (https://esm.sh/ supports JSR)
+- Migrate all the example code to cosuous
 - Use library for Coop's website rebuild
+- Use library for Peter's website
 - Create documentation website (Using https://starlight.astro.build/ with js.org domain in a monorepo)
     - Update the README import examples to use @usagi-computer/cosuous
