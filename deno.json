@@ -1,6 +1,6 @@
 {
   "name": "@usagi-computer/cosuous",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "license": "MIT",
   "exports": {
     ".": "./src/index.ts",
@@ -45,11 +45,5 @@
     "prepublish": "deno task lint && deno task typecheck && deno task build && deno task bench:size:readme && deno task smoke:dist",
     "publish:jsr": "deno task prepublish && deno publish"
   },
-  "exclude": [
-    "dist",
-    "bench/krausest/dist",
-    "bench/results",
-    "coverage",
-    "node_modules"
-  ]
+  "exclude": ["dist", "bench/krausest/dist", "bench/results", "coverage", "node_modules"]
 }
