@@ -1,6 +1,6 @@
 {
   "name": "@usagi-computer/cosuous",
-  "version": "0.1.4",
+  "version": "0.1.3",
   "license": "MIT",
   "exports": {
     ".": "./src/index.ts",
