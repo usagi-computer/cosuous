@@ -5,7 +5,6 @@
   "exports": {
     ".": "./dist/index.js",
     "./h": "./dist/h.js",
-    "./htm": "./dist/htm.js",
     "./hydrate": "./dist/hydrate.js",
     "./map": "./dist/map.js",
     "./signal": "./dist/signal.js",

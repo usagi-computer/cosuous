@@ -8,6 +8,7 @@
     "npm:playwright@^1.60.0": "1.60.0",
     "npm:rolldown@^1.0.2": "1.0.2",
     "npm:typescript@^6.0.3": "6.0.3",
+    "npm:vite@*": "8.0.14",
     "npm:vite@^8.0.14": "8.0.14",
     "npm:vitest@*": "4.1.7_@vitest+browser-playwright@4.1.7_@vitest+coverage-v8@4.1.7_vite@8.0.14_@vitest+browser@4.1.7_playwright@1.60.0",
     "npm:vitest@^4.1.7": "4.1.7_@vitest+browser-playwright@4.1.7_@vitest+coverage-v8@4.1.7_vite@8.0.14_@vitest+browser@4.1.7_playwright@1.60.0"

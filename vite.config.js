@@ -10,7 +10,6 @@ const src = (file) => path.resolve(__dirname, "src", file);
 // Array form so we control ordering: longest prefix first.
 const cosuousAlias = [
   { find: "cosuous/h", replacement: src("h.js") },
-  { find: "cosuous/htm", replacement: src("htm.js") },
   { find: "cosuous/signal", replacement: src("signal.js") },
   { find: "cosuous/template", replacement: src("template.js") },
   { find: "cosuous/hydrate", replacement: src("hydrate.js") },
@@ -20,11 +19,11 @@ const cosuousAlias = [
 
 // Each public entry of the library. alien-signals is intentionally NOT
 // listed as external; it gets inlined so consumers don't need a separate
-// runtime dependency.
+// runtime dependency. htm is vendored in-tree (see src/htm.js for the
+// Sinuous-era patches we depend on).
 const libraryEntries = {
   index: src("index.js"),
   h: src("h.js"),
-  htm: src("htm.js"),
   hydrate: src("hydrate.js"),
   map: src("map.js"),
   signal: src("signal.js"),
@@ -67,6 +66,11 @@ export default defineConfig({
       output: {
         entryFileNames: "[name].js",
         chunkFileNames: "chunks/[name]-[hash].js",
+        // Name the shared htm chunk explicitly; otherwise Rolldown falls back
+        // to a generic "src-…" name based on the source directory.
+        manualChunks(id) {
+          if (id.endsWith("/src/htm.js")) return "htm";
+        },
       },
     },
   },
