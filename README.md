@@ -17,12 +17,14 @@ A light, fast, reactive UI library. A fork of [Sinuous](https://github.com/luwes
 _Sizes are marginal gzip, what each module adds to an app already importing `cosuous`._
 
 <!-- size:addons:start -->
-| Size | Name | Description |
-| --- | --- | --- |
-| ~0.2kB | [`cosuous/signal`](./src/signal.md) | Signals with `alien-signals` _(included by default)_ |
-| ~1.5kB | [`cosuous/map`](./src/map.ts) | Fast list renderer |
-| ~1.3kB | [`cosuous/hydrate`](./src/hydrate.md) | Hydrate static HTML |
-| ~1.0kB | [`cosuous/template`](./src/template.md) | Pre-rendered Template |
+
+| Size   | Name                                    | Description                                          |
+| ------ | --------------------------------------- | ---------------------------------------------------- |
+| ~0.2kB | [`cosuous/signal`](./src/signal.md)     | Signals with `alien-signals` _(included by default)_ |
+| ~1.5kB | [`cosuous/map`](./src/map.ts)           | Fast list renderer                                   |
+| ~1.3kB | [`cosuous/hydrate`](./src/hydrate.md)   | Hydrate static HTML                                  |
+| ~1.0kB | [`cosuous/template`](./src/template.md) | Pre-rendered Template                                |
+
 <!-- size:addons:end -->
 
 ### Examples
