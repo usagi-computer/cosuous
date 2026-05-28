@@ -12,7 +12,8 @@
     "./template": "./dist/template.js"
   },
   "publish": {
-    "include": ["dist", "README.md", "CHANGELOG.md"]
+    "include": ["dist", "README.md", "CHANGELOG.md"],
+    "exclude": ["!dist"]
   },
   "nodeModulesDir": "auto",
   "imports": {
@@ -43,7 +44,7 @@
     "playwright:install": "deno run -A npm:playwright install --with-deps chromium",
     "smoke:dist": "deno run -A test/_smoke-dist.mjs",
     "prepublish": "deno task lint && deno task build && deno task bench:size:readme && deno task smoke:dist",
-    "publish:jsr": "deno task prepublish && deno publish"
+    "publish:jsr": "deno task prepublish && deno publish --allow-slow-types"
   },
   "exclude": ["dist", "bench/krausest/dist", "bench/results", "coverage", "node_modules"]
 }
