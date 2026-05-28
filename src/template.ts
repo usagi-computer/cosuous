@@ -23,7 +23,12 @@
 import { api } from "./index.ts";
 import type { TemplateAction } from "./h.ts";
 
-type TagContext = { el: Node; name?: string | null; endMark?: Node | null };
+/**
+ * `this`-context the runtime supplies when invoking a {@link TemplateTag}:
+ * the target element, the prop name (for prop slots) or end-mark node
+ * (for content slots).
+ */
+export type TagContext = { el: Node; name?: string | null; endMark?: Node | null };
 
 /**
  * Template tag returned by `t` / `s`. The runtime invokes it via
@@ -41,7 +46,9 @@ export type TemplateTag = ((this: TagContext) => void) & { $s: number };
  * {@link map}) can detect templates and skip per-item cleanup.
  */
 export interface CloneFunction {
+  /** Clone the captured template and bind `props` against its recorded slots. */
   (props: Record<string, unknown>, forceNoClone?: boolean): Node;
+  /** Marker so {@link map} can detect templates and skip per-item cleanup. */
   $t: true;
 }
 

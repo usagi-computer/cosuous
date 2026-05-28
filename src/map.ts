@@ -29,10 +29,30 @@ import { BACKWARD, FORWARD, FRAGMENT_NODE, GROUPING } from "./constants.ts";
 // names from "cosuous/map" directly.
 export { BACKWARD, FORWARD, GROUPING };
 
-type CreateFn<T> = (parent: Node, item: T, i: number, data: T[], afterNode: Node | null) => Node;
+/**
+ * Per-item DOM factory called by {@link reconcile}; inserts a node for
+ * `item` before `afterNode`. {@link map} supplies this internally.
+ */
+export type CreateFn<T> = (
+  parent: Node,
+  item: T,
+  i: number,
+  data: T[],
+  afterNode: Node | null,
+) => Node;
 
-type ItemsFn<T> = (() => T[]) | Signal<T[]>;
-type ExprFn<T> = ((item: T, i: number, items: T[]) => Node) & { $t?: boolean };
+/** Source of items for {@link map}: a `Signal<T[]>` or a zero-arg function. */
+export type ItemsFn<T> = (() => T[]) | Signal<T[]>;
+
+/**
+ * Per-item view expression for {@link map}. Returns the node for one
+ * item; the optional `$t: true` marker (carried by templates) signals
+ * that per-item effect-scope cleanup can be skipped.
+ */
+export type ExprFn<T> = ((item: T, i: number, items: T[]) => Node) & {
+  /** Marker set by {@link template}'s CloneFunction so `map` defaults `cleaning` to false. */
+  $t?: boolean;
+};
 
 /**
  * Render a reactive list of items as DOM nodes.

@@ -85,20 +85,22 @@ export const hs: Hyperscript = ((...args: unknown[]) =>
  * const view = html`<div class="row">${child}</div>`;
  * ```
  */
-export const html: (
+export function html(
   strings: TemplateStringsArray,
   ...values: unknown[]
-) => HTMLElement | DocumentFragment = (strings, ...values) =>
-  htm.apply(h, [strings, ...values]) as HTMLElement | DocumentFragment;
+): HTMLElement | DocumentFragment {
+  return htm.apply(h, [strings, ...values]) as HTMLElement | DocumentFragment;
+}
 
 /**
  * SVG-mode tagged template; the SVG counterpart of {@link html}.
  */
-export const svg: (
+export function svg(
   strings: TemplateStringsArray,
   ...values: unknown[]
-) => SVGElement | DocumentFragment = (strings, ...values) =>
-  htm.apply(hs, [strings, ...values]) as SVGElement | DocumentFragment;
+): SVGElement | DocumentFragment {
+  return htm.apply(hs, [strings, ...values]) as SVGElement | DocumentFragment;
+}
 
 export {
   api,

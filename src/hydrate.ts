@@ -32,15 +32,29 @@ import type { FunctionComponent } from "./shared.ts";
  * intermediate values during construction.
  */
 export interface VNode {
+  /** Element tag name, component function, or `null` for text vnodes. */
   type?: string | FunctionComponent | null;
+  /** Props object for this node, or the raw string for text vnodes. */
   _props?: unknown;
+  /** Child vnodes, populated as the tree is built. */
   _children?: VNode[];
+  /** True when this subtree was constructed in SVG mode (via `ds`). */
   _isSvg?: boolean;
+  /** Back-pointer to the containing vnode; set when added as a child. */
   _parent?: VNode;
 }
 
-type DResult = VNode | VNode[];
-type DTreeify = (...args: unknown[]) => DResult | HTMLElement | SVGElement | DocumentFragment;
+/** What `d` / `ds` and the tagged-template helpers return: a single vnode or an array of them. */
+export type DResult = VNode | VNode[];
+
+/**
+ * Callable shape of `d` / `ds`. Returns a {@link DResult} during the
+ * first hydration pass, or a real DOM node when hydration has
+ * already completed (subsequent calls fall through to `h` / `hs`).
+ */
+export type DTreeify = (
+  ...args: unknown[]
+) => DResult | HTMLElement | SVGElement | DocumentFragment;
 
 /**
  * HTML-mode treeify. Build a {@link VNode} tree to hand to

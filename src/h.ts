@@ -35,6 +35,11 @@ type NodeWithListeners = Node & {
  * hoisted into the parent element.
  */
 export interface Frag {
+  /**
+   * Text node inserted just before the fragment's first child so the
+   * fragment's range can be located after its contents have been
+   * hoisted into the parent element.
+   */
   _startMark: Text;
 }
 
@@ -83,12 +88,14 @@ export interface Hyperscript {
  * Declared as a single interface so cross-module assignments stay typed.
  */
 export interface HyperscriptApi {
-  // Hyperscript
+  /** Build an HTML element / component / fragment - the main hyperscript call. */
   h: Hyperscript;
+  /** SVG-mode variant of {@link h}. */
   hs: Hyperscript;
+  /** Mode flag: `true` while inside an `hs(...)` call so descendants build in SVG namespace. */
   isSvg: boolean;
 
-  // DOM I/O
+  /** Reactively place `value` into `el`; see the standalone {@link insert} export. */
   insert<T>(
     el: Node,
     value: T,
@@ -96,16 +103,21 @@ export interface HyperscriptApi {
     current?: T | Frag,
     startNode?: Node | null,
   ): T | Frag;
+  /** Apply `value` to `el` as a prop / attribute / style / event; see the standalone {@link property} export. */
   property(el: Node, value: unknown, name: string | null, isAttr?: boolean, isCss?: boolean): void;
+  /** Insert a node before an end marker or at the end; see the standalone {@link add} export. */
   add(parent: Node, value: Value | Value[], endMark?: Node | null): Node | Frag;
+  /** Remove nodes between two boundaries; see the standalone {@link removeNodes} export. */
   rm(parent: Node, startNode: Node, endMark: Node): void;
 
-  // Reactive primitives (wired in src/index.ts).
+  /** Reactive effect primitive (wired in `index.ts` from `signal.ts`'s `effect`). */
   effect(fn: () => void | (() => void)): () => void;
+  /** Predicate: is `value` an alien-signals signal? Wired in `index.ts`. */
   isSignal(value: unknown): boolean;
+  /** Predicate: is `value` an alien-signals computed? Wired in `index.ts`. */
   isComputed(value: unknown): boolean;
 
-  // Template binding (wired in src/template.ts when that entry is imported).
+  /** Template binding hook, present only when `cosuous/template` has been imported. */
   action?: (
     action: TemplateAction,
     props: Record<string, unknown>,
@@ -121,17 +133,29 @@ export interface HyperscriptApi {
  * exposed because cross-module assignments need a shared type.
  */
 export interface TemplateAction {
+  /** Invoke the action against a resolved (target, endMark, prop, value) tuple. */
   (element: Node, endMark: Node | null, propName: string | null, value: unknown): void;
+  /** Element this action was recorded against during the template's first render. */
   _el?: Node;
+  /** End-mark node, if the action targets a content slot rather than a prop. */
   _endMark?: Node | null;
+  /** Name of the prop this action sets, or `null` for content slots. */
   _propName?: string | null;
+  /** Key in the `props` object the action reads from at clone time. */
   _key?: string;
+  /** Whether to install a getter/setter on `props[_key]` for reactive updates. */
   _observed?: boolean;
+  /** Whether the getter returns the live DOM value (two-way bind) or last-set value. */
   _bind?: boolean;
+  /** Resolved DOM target at clone time (set by api.action before invocation). */
   _target?: Node;
+  /** Resolved end-mark target at clone time. */
   _endMarkTarget?: Node | null;
+  /** Child-index path from the cloned root to `_target`. */
   _paths?: number[];
+  /** Child-index path from `_target` to `_endMarkTarget`, if any. */
   _endMarkPath?: number[] | null;
+  /** Marker so `src/h.ts` (property()) treats this as a template binding, not an event handler. */
   $s?: number;
 }
 
@@ -399,6 +423,7 @@ export function h(
     | null,
   ...children: ElementChildren[]
 ): HTMLElement | SVGElement;
+/** Component overload of {@link h}: returns whatever the component returns. */
 export function h(
   type: FunctionComponent,
   props:
@@ -406,6 +431,7 @@ export function h(
     | null,
   ...children: ElementChildren[]
 ): HTMLElement | SVGElement | DocumentFragment;
+/** Fragment overload of {@link h}: an array-first call yields a `DocumentFragment`. */
 export function h(tag: ElementChildren[] | [], ...children: ElementChildren[]): DocumentFragment;
 export function h(...args: unknown[]): HTMLElement | SVGElement | DocumentFragment {
   let el: HTMLElement | SVGElement | DocumentFragment | undefined;

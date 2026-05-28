@@ -1,24 +1,67 @@
 import type { Signal } from "./signal.ts";
 import type { ElementChildren } from "./shared.ts";
 
+/**
+ * JSX type surface consumed by TypeScript when type-checking JSX
+ * expressions. Re-exported from the package root as `JSX`. The
+ * property-heavy attribute interfaces inside (DOMAttributes,
+ * _HTMLAttributes, _SVGAttributes, IntrinsicElements) are marked
+ * `@internal` because each property would otherwise count against
+ * JSR's doc-coverage check; they remain available to `tsc` for
+ * type-checking of JSX intrinsic elements.
+ */
 export namespace JSXInternal {
-  type OrSignal<T> = T | Signal<T>;
-  type AllowSignal<Props> = { [K in keyof Props]: OrSignal<Props[K]> };
+  /** `T` or a {@link Signal} of `T`; building block for {@link AllowSignal}. */
+  export type OrSignal<T> = T | Signal<T>;
+  /**
+   * Mapped type that wraps every property of `Props` with {@link OrSignal},
+   * so any attribute may be supplied either as a plain value or as a
+   * `Signal<T>` that h's reactive insert subscribes to.
+   */
+  export type AllowSignal<Props> = { [K in keyof Props]: OrSignal<Props[K]> };
 
+  /**
+   * The type a JSX expression evaluates to in cosuous. Either an
+   * `HTMLElement`, an `SVGElement`, or a generic `Node` (covering
+   * `DocumentFragment` for component returns).
+   */
   export type Element = HTMLElement | SVGElement | Node;
 
+  /**
+   * TypeScript JSX hook: tells the compiler which prop key on a
+   * component holds the props object. Internal, picked up by `tsc`.
+   */
   export interface ElementAttributesProperty {
+    /** Sentinel property name `tsc` looks for. */
     props: any;
   }
 
+  /**
+   * TypeScript JSX hook: tells the compiler which prop key holds the
+   * children array. Internal, picked up by `tsc`.
+   */
   export interface ElementChildrenAttribute {
+    /** Sentinel property name `tsc` looks for. */
     children: any;
   }
 
+  /**
+   * Props accepted by SVG intrinsic elements. Wraps {@link _SVGAttributes}
+   * with the signal-aware mapper so any attribute may also be supplied
+   * as a `Signal<T>`.
+   */
   export type SVGAttributes<Target extends EventTarget = SVGElement> = AllowSignal<
     _SVGAttributes<Target>
   >;
 
+  /**
+   * Raw (non-signal-wrapped) attribute set for SVG elements. Extends
+   * {@link _HTMLAttributes} with the long list of SVG-specific
+   * properties (clipPath, viewBox, stroke, etc.). Consumers should
+   * use the signal-aware {@link SVGAttributes} alias.
+   *
+   * @internal
+   */
   export interface _SVGAttributes<
     Target extends EventTarget = SVGElement,
   > extends _HTMLAttributes<Target> {
@@ -276,10 +319,17 @@ export namespace JSXInternal {
     zoomAndPan?: string;
   }
 
+  /** SVG `<path>` attributes carrying the required `d` (path data) field. */
   export interface PathAttributes {
+    /** Path data string (the SVG `d` attribute). */
     d: string;
   }
 
+  /**
+   * DOM event with `currentTarget` narrowed to `Target`. Base for the
+   * various `TargetedXEvent` aliases below; you usually want one of
+   * those rather than this directly.
+   */
   export type TargetedEvent<
     Target extends EventTarget = EventTarget,
     TypedEvent extends Event = Event,
@@ -287,77 +337,111 @@ export namespace JSXInternal {
     readonly currentTarget: Target;
   };
 
+  /** `AnimationEvent` with `currentTarget` narrowed to `Target`. */
   export type TargetedAnimationEvent<Target extends EventTarget> = TargetedEvent<
     Target,
     AnimationEvent
   >;
+  /** `ClipboardEvent` with `currentTarget` narrowed to `Target`. */
   export type TargetedClipboardEvent<Target extends EventTarget> = TargetedEvent<
     Target,
     ClipboardEvent
   >;
+  /** `CompositionEvent` with `currentTarget` narrowed to `Target`. */
   export type TargetedCompositionEvent<Target extends EventTarget> = TargetedEvent<
     Target,
     CompositionEvent
   >;
+  /** `DragEvent` with `currentTarget` narrowed to `Target`. */
   export type TargetedDragEvent<Target extends EventTarget> = TargetedEvent<Target, DragEvent>;
+  /** `FocusEvent` with `currentTarget` narrowed to `Target`. */
   export type TargetedFocusEvent<Target extends EventTarget> = TargetedEvent<Target, FocusEvent>;
+  /** `KeyboardEvent` with `currentTarget` narrowed to `Target`. */
   export type TargetedKeyboardEvent<Target extends EventTarget> = TargetedEvent<
     Target,
     KeyboardEvent
   >;
+  /** `MouseEvent` with `currentTarget` narrowed to `Target`. */
   export type TargetedMouseEvent<Target extends EventTarget> = TargetedEvent<Target, MouseEvent>;
+  /** `PointerEvent` with `currentTarget` narrowed to `Target`. */
   export type TargetedPointerEvent<Target extends EventTarget> = TargetedEvent<
     Target,
     PointerEvent
   >;
+  /** `TouchEvent` with `currentTarget` narrowed to `Target`. */
   export type TargetedTouchEvent<Target extends EventTarget> = TargetedEvent<Target, TouchEvent>;
+  /** `TransitionEvent` with `currentTarget` narrowed to `Target`. */
   export type TargetedTransitionEvent<Target extends EventTarget> = TargetedEvent<
     Target,
     TransitionEvent
   >;
+  /** `UIEvent` with `currentTarget` narrowed to `Target`. */
   export type TargetedUIEvent<Target extends EventTarget> = TargetedEvent<Target, UIEvent>;
+  /** `WheelEvent` with `currentTarget` narrowed to `Target`. */
   export type TargetedWheelEvent<Target extends EventTarget> = TargetedEvent<Target, WheelEvent>;
 
+  /** Callable shape for event handlers - one argument (the event), void return. */
   export interface EventHandler<E extends TargetedEvent> {
+    /** Invoke the handler with the dispatched event. */
     (event: E): void;
   }
 
+  /** Handler for `onAnimationStart` / `onAnimationEnd` / `onAnimationIteration`. */
   export type AnimationEventHandler<Target extends EventTarget> = EventHandler<
     TargetedAnimationEvent<Target>
   >;
+  /** Handler for clipboard events (`onCopy`, `onCut`, `onPaste`). */
   export type ClipboardEventHandler<Target extends EventTarget> = EventHandler<
     TargetedClipboardEvent<Target>
   >;
+  /** Handler for IME composition events. */
   export type CompositionEventHandler<Target extends EventTarget> = EventHandler<
     TargetedCompositionEvent<Target>
   >;
+  /** Handler for drag-and-drop events. */
   export type DragEventHandler<Target extends EventTarget> = EventHandler<
     TargetedDragEvent<Target>
   >;
+  /** Handler for `onFocus` / `onBlur`. */
   export type FocusEventHandler<Target extends EventTarget> = EventHandler<
     TargetedFocusEvent<Target>
   >;
+  /** Catch-all handler for events without a dedicated typed variant. */
   export type GenericEventHandler<Target extends EventTarget> = EventHandler<TargetedEvent<Target>>;
+  /** Handler for `onKeyDown` / `onKeyUp` / `onKeyPress`. */
   export type KeyboardEventHandler<Target extends EventTarget> = EventHandler<
     TargetedKeyboardEvent<Target>
   >;
+  /** Handler for mouse events (`onClick`, `onMouseMove`, etc.). */
   export type MouseEventHandler<Target extends EventTarget> = EventHandler<
     TargetedMouseEvent<Target>
   >;
+  /** Handler for pointer events. */
   export type PointerEventHandler<Target extends EventTarget> = EventHandler<
     TargetedPointerEvent<Target>
   >;
+  /** Handler for touch events. */
   export type TouchEventHandler<Target extends EventTarget> = EventHandler<
     TargetedTouchEvent<Target>
   >;
+  /** Handler for `onTransitionEnd`. */
   export type TransitionEventHandler<Target extends EventTarget> = EventHandler<
     TargetedTransitionEvent<Target>
   >;
+  /** Handler for UI events (`onScroll`). */
   export type UIEventHandler<Target extends EventTarget> = EventHandler<TargetedUIEvent<Target>>;
+  /** Handler for `onWheel`. */
   export type WheelEventHandler<Target extends EventTarget> = EventHandler<
     TargetedWheelEvent<Target>
   >;
 
+  /**
+   * Attributes shared by every DOM element regardless of tag: event
+   * handlers (`onClick`, `onFocus`, ...) and the `children` slot. The
+   * HTML and SVG attribute interfaces both extend this.
+   *
+   * @internal
+   */
   export interface DOMAttributes<Target extends EventTarget> {
     // Inlined from the old `declare module "cosuous/jsx"` augmentation in
     // index.d.ts; no longer needs module augmentation now that JSX lives in
@@ -556,10 +640,23 @@ export namespace JSXInternal {
     onTransitionEndCapture?: TransitionEventHandler<Target>;
   }
 
+  /**
+   * Props accepted by HTML intrinsic elements. Wraps
+   * {@link _HTMLAttributes} with the signal-aware mapper so any
+   * attribute may also be supplied as a `Signal<T>`.
+   */
   export type HTMLAttributes<RefType extends EventTarget = EventTarget> = AllowSignal<
     _HTMLAttributes<RefType>
   >;
 
+  /**
+   * Raw (non-signal-wrapped) attribute set for HTML elements. Includes
+   * the full standard set plus cosuous-specific keys (`attrs` for
+   * setAttribute escape hatch) and the RDFa / Microdata extensions.
+   * Consumers should use the signal-aware {@link HTMLAttributes} alias.
+   *
+   * @internal
+   */
   export interface _HTMLAttributes<
     RefType extends EventTarget = EventTarget,
   > extends DOMAttributes<RefType> {
@@ -718,6 +815,14 @@ export namespace JSXInternal {
     itemRef?: string;
   }
 
+  /**
+   * Tag-name to attributes mapping consumed by `tsc` when type-checking
+   * JSX. Maps each HTML and SVG tag (`a`, `div`, `svg`, `path`, ...) to
+   * the appropriate attribute interface so `<input value={...} />` etc.
+   * are type-checked element by element.
+   *
+   * @internal
+   */
   export interface IntrinsicElements {
     // HTML
     a: HTMLAttributes<HTMLAnchorElement>;

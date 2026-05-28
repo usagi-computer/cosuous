@@ -35,13 +35,13 @@ import {
   computed as _computed,
   effect as _effect,
   effectScope as _effectScope,
-  endBatch,
-  isComputed,
-  isSignal,
+  endBatch as _endBatch,
+  isComputed as _isComputed,
+  isSignal as _isSignal,
   setActiveSub,
   signal as _signal,
-  startBatch,
-  trigger,
+  startBatch as _startBatch,
+  trigger as _trigger,
 } from "alien-signals";
 
 /**
@@ -50,7 +50,9 @@ import {
  * calling it with one argument writes a new value.
  */
 export interface Signal<T> {
+  /** Read the current value. Registers a dependency in the surrounding effect. */
   (): T;
+  /** Write a new value. Notifies subscribers if the value actually changed. */
   (nextValue: T): void;
 }
 
@@ -59,6 +61,7 @@ export interface Signal<T> {
  * {@link computed}. Calling it returns the current memoised value.
  */
 export interface Computed<T> {
+  /** Read the current derived value. Registers a dependency in the surrounding effect. */
   (): T;
 }
 
@@ -88,10 +91,33 @@ export const signal: {
 export const computed: <T>(getter: (previousValue?: T) => T) => Computed<T> =
   _computed as unknown as <T>(getter: (previousValue?: T) => T) => Computed<T>;
 
-export { endBatch, isComputed, isSignal, startBatch, trigger };
+/** Lower-level batch primitive. Pairs with {@link endBatch}; usually you want {@link batch} instead. */
+export const startBatch: () => void = _startBatch;
+/** Closes the bracket started by {@link startBatch}; dependent effects re-run once after this returns. */
+export const endBatch: () => void = _endBatch;
+/** Predicate from alien-signals: is `value` a signal? Used by `api.isSignal` to detect reactive props. */
+export const isSignal: (value: unknown) => boolean = _isSignal as unknown as (
+  value: unknown,
+) => boolean;
+/** Predicate from alien-signals: is `value` a computed? Used by `api.isComputed` to detect reactive props. */
+export const isComputed: (value: unknown) => boolean = _isComputed as unknown as (
+  value: unknown,
+) => boolean;
+/** Manually mark a function as a reactive trigger (alien-signals primitive). Rarely needed in user code. */
+export const trigger: (fn: () => void) => void = _trigger as unknown as (fn: () => void) => void;
 
-type CleanupFn = () => void;
-type EffectBody = () => void | CleanupFn;
+/**
+ * Cleanup callback. Returned by {@link effect} / {@link effectScope}
+ * (as a disposer) and also the optional return value of an
+ * {@link effect} body.
+ */
+export type CleanupFn = () => void;
+
+/**
+ * Effect body. May optionally return a {@link CleanupFn} that runs
+ * before the next re-execution and on final disposal.
+ */
+export type EffectBody = () => void | CleanupFn;
 
 let activeCleanups: CleanupFn[] | undefined;
 
