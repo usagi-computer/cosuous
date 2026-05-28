@@ -50,51 +50,30 @@ function copyDtsPlugin() {
   };
 }
 
-// Two build targets:
-//   default            -> library ESM bundles (index, h, htm, hydrate, map, signal, template)
-//   BUILD_TARGET=babel -> babel-plugin-htm.cjs (Node-only, externalizes @babel/*)
-const isBabelBuild = process.env.BUILD_TARGET === "babel";
-
-const libraryBuild = {
-  outDir: "dist",
-  emptyOutDir: true,
-  minify: "oxc",
-  sourcemap: true,
-  target: "es2020",
-  lib: {
-    entry: libraryEntries,
-    formats: ["es"],
-  },
-  rollupOptions: {
-    output: {
-      entryFileNames: "[name].js",
-      chunkFileNames: "chunks/[name]-[hash].js",
-    },
-  },
-};
-
-const babelBuild = {
-  outDir: "dist",
-  emptyOutDir: false,
-  lib: {
-    entry: src("babel-plugin-htm.js"),
-    formats: ["cjs"],
-    fileName: () => "babel-plugin-htm.cjs",
-  },
-  rollupOptions: {
-    external: ["@babel/core", "@babel/types"],
-  },
-};
-
 export default defineConfig({
   resolve: { alias: cosuousAlias },
-  plugins: isBabelBuild ? [] : [copyDtsPlugin()],
-  build: isBabelBuild ? babelBuild : libraryBuild,
+  plugins: [copyDtsPlugin()],
+  build: {
+    outDir: "dist",
+    emptyOutDir: true,
+    minify: "oxc",
+    sourcemap: true,
+    target: "es2020",
+    lib: {
+      entry: libraryEntries,
+      formats: ["es"],
+    },
+    rollupOptions: {
+      output: {
+        entryFileNames: "[name].js",
+        chunkFileNames: "chunks/[name]-[hash].js",
+      },
+    },
+  },
   test: {
     coverage: {
       provider: "v8",
       include: ["src/**/*.js"],
-      exclude: ["src/babel-plugin-htm.js"],
       reporter: ["text", "html", "lcov"],
     },
     projects: [

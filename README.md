@@ -50,9 +50,9 @@ A goal Cosuous strives for is to have good interoperability. Cosuous creates DOM
 **Hyperscript** directly call `h(type: string, props: object, ...children)`.
 
 **Tagged templates** transform the HTML to `h` calls at runtime w/ the ` html`` ` tag or,
-at build time with [`cosuous/babel-plugin-htm`](./src/babel-plugin-htm.js).
+at build time with [`babel-plugin-htm`](https://github.com/developit/htm/tree/master/packages/babel-plugin-htm) (configure its `pragma` to `h`).
 
-**JSX** needs to be transformed at build time first with [`babel-plugin-transform-jsx-to-htm`](https://github.com/developit/htm/tree/master/packages/babel-plugin-transform-jsx-to-htm) and after with [`cosuous/babel-plugin-htm`](./src/babel-plugin-htm.js).
+**JSX** needs to be transformed at build time first with [`babel-plugin-transform-jsx-to-htm`](https://github.com/developit/htm/tree/master/packages/babel-plugin-transform-jsx-to-htm) and after with [`babel-plugin-htm`](https://github.com/developit/htm/tree/master/packages/babel-plugin-htm).
 
 **Counter Example (<!-- size:hello:start -->`~3.7kB`<!-- size:hello:end --> gzip) ([Codesandbox](https://codesandbox.io/s/sinuous-counter-z6k71))**
 

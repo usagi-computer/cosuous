@@ -1,17 +1,11 @@
 {
-  "generatedAt": "2026-05-27T22:04:03.892Z",
+  "generatedAt": "2026-05-28T02:51:01.081Z",
   "totals": {
-    "raw": 29656,
-    "gzip": 11919,
-    "brotli": 10750
+    "raw": 24550,
+    "gzip": 9819,
+    "brotli": 8840
   },
   "files": [
-    {
-      "file": "babel-plugin-htm.cjs",
-      "raw": 5106,
-      "gzip": 2100,
-      "brotli": 1910
-    },
     {
       "file": "chunks/h-DX7lI_rn.js",
       "raw": 3667,

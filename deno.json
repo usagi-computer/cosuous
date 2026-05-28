@@ -5,7 +5,6 @@
   "exports": {
     ".": "./dist/index.js",
     "./h": "./dist/h.js",
-    "./babel-plugin-htm": "./dist/babel-plugin-htm.cjs",
     "./htm": "./dist/htm.js",
     "./hydrate": "./dist/hydrate.js",
     "./map": "./dist/map.js",
@@ -17,7 +16,6 @@
   },
   "nodeModulesDir": "auto",
   "imports": {
-    "@babel/core": "npm:@babel/core@^7.29.7",
     "@vitest/browser": "npm:@vitest/browser@^4.1.7",
     "@vitest/browser-playwright": "npm:@vitest/browser-playwright@^4.1.7",
     "@vitest/coverage-v8": "npm:@vitest/coverage-v8@^4.1.7",
@@ -35,7 +33,7 @@
     "test": "deno run -A npm:vitest run",
     "test:watch": "deno run -A npm:vitest",
     "test:coverage": "deno run -A npm:vitest run --coverage",
-    "build": "deno run -A npm:vite build && BUILD_TARGET=babel deno run -A npm:vite build",
+    "build": "deno run -A npm:vite build",
     "bench": "deno run -A npm:vitest bench --run",
     "bench:size": "deno run -A bench/size.js",
     "bench:size:update": "deno run -A bench/size.js --update",
