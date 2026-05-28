@@ -192,6 +192,6 @@ Cosuous returns a [hyperscript](https://github.com/hyperhype/hyperscript) functi
 
 ## Contributors
 
-Cosuous is a fork of [Sinuous](https://github.com/luwes/sinuous) by Wesley Luyten; thanks to him and everyone who contributed upstream. Contributions to Cosuous are welcome via [issues and pull requests](https://github.com/Kaleidosium/cosuous).
+Cosuous is a fork of [Sinuous](https://github.com/luwes/sinuous) by Wesley Luyten; thanks to him and everyone who contributed upstream. Contributions to Cosuous are welcome via [issues and pull requests](https://github.com/usagi-computer/cosuous).
 
-<a href="https://github.com/Kaleidosium/cosuous/graphs/contributors"><img src="https://contrib.rocks/image?repo=Kaleidosium/cosuous" /></a>
+<a href="https://github.com/usagi-computer/cosuous/graphs/contributors"><img src="https://contrib.rocks/image?repo=usagi-computer/cosuous" /></a>
