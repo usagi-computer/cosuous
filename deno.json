@@ -22,6 +22,7 @@
     "@vitest/browser-playwright": "npm:@vitest/browser-playwright@^4.1.7",
     "@vitest/coverage-v8": "npm:@vitest/coverage-v8@^4.1.7",
     "alien-signals": "npm:alien-signals@^3.2.1",
+    "rolldown": "npm:rolldown@^1.0.2",
     "playwright": "npm:playwright@^1.60.0",
     "typescript": "npm:typescript@^6.0.3",
     "vite": "npm:vite@^8.0.14",
@@ -39,10 +40,11 @@
     "bench:size": "deno run -A bench/size.js",
     "bench:size:update": "deno run -A bench/size.js --update",
     "bench:size:ci": "deno run -A bench/size.js --ci",
+    "bench:size:readme": "deno run -A bench/size.js --readme",
     "bench:krausest": "deno run -A npm:vite build --config bench/krausest/vite.config.js",
     "playwright:install": "deno run -A npm:playwright install --with-deps chromium",
     "smoke:dist": "deno run -A test/_smoke-dist.mjs",
-    "prepublish": "deno task lint && deno task build && deno task smoke:dist",
+    "prepublish": "deno task lint && deno task build && deno task bench:size:readme && deno task smoke:dist",
     "publish:jsr": "deno task prepublish && deno publish"
   },
   "exclude": ["dist", "bench/krausest/dist", "bench/results", "coverage", "node_modules"]

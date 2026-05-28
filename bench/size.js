@@ -9,6 +9,7 @@
  *   node bench/size.js --update     # write the current snapshot as the baseline
  */
 
+import { Buffer } from "node:buffer";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -53,6 +54,84 @@ function measure(buf) {
   };
 }
 
+// Compact gzip figure for prose, e.g. 3922 -> "~3.8kB".
+function kb(bytes) {
+  return `~${(bytes / 1024).toFixed(1)}kB`;
+}
+
+// Add-on rows for the README table. The size shown is the gzip of each module's
+// dist entry, i.e. the marginal bytes added to an app that already imports `cosuous`
+// (Vite/Rolldown code-splits the shared core into chunks, which are reused).
+const ADDONS = [
+  {
+    name: "[`cosuous/signal`](./src/signal.md)",
+    file: "signal.js",
+    desc: "Signals with `alien-signals` _(included by default)_",
+  },
+  { name: "[`cosuous/map`](./src/map.js)", file: "map.js", desc: "Fast list renderer" },
+  { name: "[`cosuous/hydrate`](./src/hydrate.md)", file: "hydrate.js", desc: "Hydrate static HTML" },
+  {
+    name: "[`cosuous/template`](./src/template.md)",
+    file: "template.js",
+    desc: "Pre-rendered Template",
+  },
+];
+
+// Bundle a synthetic ESM entry with Rolldown (Vite's bundler), minify, and measure.
+// Using the project's own bundler keeps the figures in step with real app builds.
+async function bundleGzip(source) {
+  const { rolldown } = await import("rolldown");
+  const entry = "\0cosuous-size-entry";
+  const bundle = await rolldown({
+    input: entry,
+    logLevel: "silent",
+    plugins: [
+      {
+        name: "size-entry",
+        resolveId: (id) => (id === entry ? id : null),
+        load: (id) => (id === entry ? source : null),
+      },
+    ],
+  });
+  const { output } = await bundle.generate({ format: "esm", minify: true });
+  await bundle.close();
+  const code = output
+    .filter((o) => o.type === "chunk")
+    .map((o) => o.code)
+    .join("");
+  return measure(Buffer.from(code));
+}
+
+// The README's hello-world counter: signal core (alien-signals) + `h` core + the
+// `html` tagged-template parser.
+function helloSource() {
+  return [
+    `import { signal, html } from ${JSON.stringify(path.join(distDir, "index.js"))};`,
+    "const counter = signal(0);",
+    "const view = () => html`<div>Counter ${counter}</div>`;",
+    "document.body.append(view());",
+    "setInterval(() => counter(counter() + 1), 1000);",
+  ].join("\n");
+}
+
+function buildAddonsTable(rows) {
+  const byFile = Object.fromEntries(rows.map((r) => [r.file, r]));
+  const lines = ["| Size | Name | Description |", "| --- | --- | --- |"];
+  for (const a of ADDONS) {
+    lines.push(`| ${kb(byFile[a.file].gzip)} | ${a.name} | ${a.desc} |`);
+  }
+  return lines.join("\n");
+}
+
+// Replace the text between every <!-- size:<name>:start --> / :end --> pair.
+function injectMarker(md, name, replacement) {
+  const start = `<!-- size:${name}:start -->`;
+  const end = `<!-- size:${name}:end -->`;
+  const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const re = new RegExp(`${esc(start)}[\\s\\S]*?${esc(end)}`, "g");
+  return md.replace(re, `${start}${replacement}${end}`);
+}
+
 async function main() {
   try {
     await fs.access(distDir);
@@ -85,6 +164,16 @@ async function main() {
   await fs.mkdir(resultsDir, { recursive: true });
   const snapshot = { generatedAt: new Date().toISOString(), totals, files: rows };
   await fs.writeFile(path.join(resultsDir, "size.json"), JSON.stringify(snapshot, null, 2) + "\n");
+
+  if (args.has("--readme")) {
+    const hello = await bundleGzip(helloSource());
+    const readmePath = path.join(repoRoot, "README.md");
+    let md = await fs.readFile(readmePath, "utf8");
+    md = injectMarker(md, "hello", `\`${kb(hello.gzip)}\``);
+    md = injectMarker(md, "addons", `\n${buildAddonsTable(rows)}\n`);
+    await fs.writeFile(readmePath, md);
+    console.log(`\nREADME size markers updated (hello world ${format(hello.gzip)} gzip).`);
+  }
 
   if (args.has("--update")) {
     await fs.writeFile(baselinePath, JSON.stringify(snapshot, null, 2) + "\n");

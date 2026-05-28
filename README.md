@@ -7,28 +7,23 @@ A light, fast, reactive UI library. A fork of [Sinuous](https://github.com/luwes
 **jsr**: `deno add jsr:@usagi-computer/cosuous` (or `npx jsr add @usagi-computer/cosuous` from npm-based projects)  
 **cdn**: `https://esm.sh/jsr/@usagi-computer/cosuous`
 
-- **Small.** hello world at `~1.4kB` gzip.
-- **Fast.** [top ranked](https://rawgit.com/krausest/js-framework-benchmark/master/webdriver-ts-results/table.html) of 80+ UI libs.
+- **Small.** hello world counter at <!-- size:hello:start -->`~3.7kB`<!-- size:hello:end --> gzip.
+- **Fast.** fine-grained reactive DOM updates; ships a [js-framework-benchmark harness](./bench) to measure against.
 - **Truly reactive.** automatically derived from the app state.
 - **DevEx.** no compile step needed, choose your [view syntax](#view-syntax).
 
 ### Add-ons
 
-| Size | Name                                    | Description                                          |
-| ---- | --------------------------------------- | ---------------------------------------------------- |
-| -    | [`cosuous/signal`](./src/signal.md)     | Signals with `alien-signals` _(included by default)_ |
-| -    | [`cosuous/map`](./src/map.js)           | Fast list renderer                                   |
-| -    | [`cosuous/hydrate`](./src/hydrate.md)   | Hydrate static HTML                                  |
-| -    | [`cosuous/template`](./src/template.md) | Pre-rendered Template                                |
+_Sizes are marginal gzip, what each module adds to an app already importing `cosuous`._
 
-### Community
-
-- [**sinuous-context**](https://github.com/theSherwood/sinuous-context) ([@theSherwood](https://github.com/theSherwood)): A light-weight, fast, and easy to use context api for Sinuous.
-- [**memo**](https://github.com/luwes/memo) ([@luwes](https://github.com/luwes)): Memoize components and functions.
-- [**disco**](https://github.com/luwes/disco) ([@luwes](https://github.com/luwes)): Universal `connected` and `disconnected` lifecycle events.
-- [**sinuous-style**](https://github.com/theSherwood/sinuous-style) ([@theSherwood](https://github.com/theSherwood)): Scoped styles for Sinuous à la styled-jsx.
-- [**sinuous-lifecycle**](https://www.npmjs.com/package/sinuous-lifecycle) ([@heyheyhello](https://github.com/heyheyhello)): onAttach/onDetach DOM lifecycles.
-- [**sinuous-trace**](https://www.npmjs.com/package/sinuous-trace) ([@heyheyhello](https://github.com/heyheyhello)): Traces the internal API to record component creation, adoption, and removal.
+<!-- size:addons:start -->
+| Size | Name | Description |
+| --- | --- | --- |
+| ~0.2kB | [`cosuous/signal`](./src/signal.md) | Signals with `alien-signals` _(included by default)_ |
+| ~1.5kB | [`cosuous/map`](./src/map.js) | Fast list renderer |
+| ~1.2kB | [`cosuous/hydrate`](./src/hydrate.md) | Hydrate static HTML |
+| ~0.9kB | [`cosuous/template`](./src/template.md) | Pre-rendered Template |
+<!-- size:addons:end -->
 
 ### Examples
 
@@ -59,7 +54,7 @@ at build time with [`cosuous/babel-plugin-htm`](./src/babel-plugin-htm.js).
 
 **JSX** needs to be transformed at build time first with [`babel-plugin-transform-jsx-to-htm`](https://github.com/developit/htm/tree/master/packages/babel-plugin-transform-jsx-to-htm) and after with [`cosuous/babel-plugin-htm`](./src/babel-plugin-htm.js).
 
-**Counter Example (_1.4kB gzip_) ([Codesandbox](https://codesandbox.io/s/sinuous-counter-z6k71))**
+**Counter Example (<!-- size:hello:start -->`~3.7kB`<!-- size:hello:end --> gzip) ([Codesandbox](https://codesandbox.io/s/sinuous-counter-z6k71))**
 
 #### Tagged template (recommended)
 
@@ -197,30 +192,6 @@ Cosuous returns a [hyperscript](https://github.com/hyperhype/hyperscript) functi
 
 ## Contributors
 
-### Code Contributors
+Cosuous is a fork of [Sinuous](https://github.com/luwes/sinuous) by Wesley Luyten; thanks to him and everyone who contributed upstream. Contributions to Cosuous are welcome via [issues and pull requests](https://github.com/Kaleidosium/cosuous).
 
-This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
-<a href="https://github.com/luwes/sinuous/graphs/contributors"><img src="https://opencollective.com/sinuous/contributors.svg?width=890&button=false" /></a>
-
-### Financial Contributors
-
-Become a financial contributor and help us sustain our community. [[Contribute](https://opencollective.com/sinuous/contribute)]
-
-#### Individuals
-
-<a href="https://opencollective.com/sinuous"><img src="https://opencollective.com/sinuous/individuals.svg?width=890"></a>
-
-#### Organizations
-
-Support this project with your organization. Your logo will show up here with a link to your website. [[Contribute](https://opencollective.com/sinuous/contribute)]
-
-<a href="https://opencollective.com/sinuous/organization/0/website"><img src="https://opencollective.com/sinuous/organization/0/avatar.svg"></a>
-<a href="https://opencollective.com/sinuous/organization/1/website"><img src="https://opencollective.com/sinuous/organization/1/avatar.svg"></a>
-<a href="https://opencollective.com/sinuous/organization/2/website"><img src="https://opencollective.com/sinuous/organization/2/avatar.svg"></a>
-<a href="https://opencollective.com/sinuous/organization/3/website"><img src="https://opencollective.com/sinuous/organization/3/avatar.svg"></a>
-<a href="https://opencollective.com/sinuous/organization/4/website"><img src="https://opencollective.com/sinuous/organization/4/avatar.svg"></a>
-<a href="https://opencollective.com/sinuous/organization/5/website"><img src="https://opencollective.com/sinuous/organization/5/avatar.svg"></a>
-<a href="https://opencollective.com/sinuous/organization/6/website"><img src="https://opencollective.com/sinuous/organization/6/avatar.svg"></a>
-<a href="https://opencollective.com/sinuous/organization/7/website"><img src="https://opencollective.com/sinuous/organization/7/avatar.svg"></a>
-<a href="https://opencollective.com/sinuous/organization/8/website"><img src="https://opencollective.com/sinuous/organization/8/avatar.svg"></a>
-<a href="https://opencollective.com/sinuous/organization/9/website"><img src="https://opencollective.com/sinuous/organization/9/avatar.svg"></a>
+<a href="https://github.com/Kaleidosium/cosuous/graphs/contributors"><img src="https://contrib.rocks/image?repo=Kaleidosium/cosuous" /></a>
